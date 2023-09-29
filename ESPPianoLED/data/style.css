@@ -7,27 +7,27 @@ body, p {
     padding: 0;
 }
 
-.navbar{
-    overflow: hidden;
+.navbar {
     background-color: black;
     top: 0;
     width: 100%;
-    z-index: 50;
     position: sticky;
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    opacity: 0; /* Initially hide the navbar */
+    transition: opacity 0.3s ease-in-out; /* Add a transition effect */
 }
 
-.navbar a{
-    float: left;
+.navbar a {
     display: block;
     color: white;
     text-align: center;
-    padding: 30px 32px;
+    padding: 20px 10px;
     text-decoration: none;
     font-size: 25px;
-    z-index: 51;
 }
 
-.navbar a:hover{
+.navbar a:hover {
     background-color: grey;
 }
 
@@ -139,5 +139,6 @@ footer {
     background-color: #2F4F4F;
     color: #fff;
     text-align: center;
+    font-size: 25px;
     padding: 10px;
 }

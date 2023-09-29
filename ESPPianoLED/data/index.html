@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PianoLED - ESP32</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+      <header>
+        <h1>PianoLED</h1>
+    </header>
+<div class="navbar">
+    <a href="#card-1">Section 1</a>
+    <a href="#card-2">Section 2</a>
+    <a href="#card-3">Section 3</a>
+</div>
+<main>
+    <section class="card" id="card-1">
+        <h2>Section 1</h2>
+        <div class="control">
+            <label for="slider1">Hue</label>
+            <input type="range" id="slider1" name="slider1" min="0" max="255" value="0">
+            <label for="slider2">Brightness</label>
+            <input type="range" id="slider2" name="slider2" min="0" max="255" value="255">
+        </div>
+        <div class="control">
+            <label for="button1">Button 1:</label>
+            <button id="BTN_COLOR">ChangeColor</button> <!-- Changed the button id -->
+        </div>
+        <div class="control">
+            <label for="toggle1">Toggle 1:</label>
+            <label class="switch">
+                <input type="checkbox" id="toggle1">
+                <span class="slider round"></span>
+            </label>
+        </div>
+    </section>
+
+    <section class="card" id="card-2">
+        <h2>Section 2</h2>
+    </section>
+
+    <section class="card" id="card-3">
+        <h2>Section 3</h2>
+    </section>
+</main>
+<footer>
+    <p>&copy; 2023 serifpersia</p>
+</footer>
+<script>
+    
+var navbar = document.querySelector('.navbar');
+var scrolling = false;
+
+function handleScroll() {
+    if (!scrolling) {
+        navbar.style.opacity = '1'; // Show the navbar
+        navbar.style.pointerEvents = 'auto'; // Enable pointer events
+    }
+
+    scrolling = true;
+
+    // Use a timeout to hide the navbar after a delay when scrolling stops
+    clearTimeout(window.scrollTimeout);
+    window.scrollTimeout = setTimeout(function () {
+        scrolling = false;
+        navbar.style.opacity = '0'; // Hide the navbar
+        navbar.style.pointerEvents = 'none'; // Disable pointer events
+    }, 1500); // Adjust the delay time (in milliseconds) as needed
+}
+
+// Add an event listener for the scroll event
+window.addEventListener('scroll', handleScroll);
+ 
+    /*
+var Socket;
+document.getElementById('BTN_COLOR').addEventListener('click', button_changeColor);
+document.getElementById('slider1').addEventListener('input', slider1_changeValue);
+document.getElementById('slider2').addEventListener('input', slider2_changeValue);
+
+function init() {
+    Socket = new WebSocket('ws://' + window.location.hostname + ':81/');
+}
+
+function button_changeColor() {
+    Socket.send('ChangeColor');
+}
+
+function slider1_changeValue() {
+    var value = document.getElementById('SLIDER1').value;
+    Socket.send('SliderAction1:' + value);
+}
+
+function slider2_changeValue() {
+    var value = document.getElementById('SLIDER2').value;
+    Socket.send('SliderAction2:' + value);
+}
+
+window.onload = function(event) {
+    init();
+}
+*/
+
+</script>
+
+   
+</body>
+</html>
