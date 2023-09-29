@@ -12,8 +12,8 @@
 elapsedMillis MIDIOutTimer;
 #endif
 // SSID and password of Wifi connection:
-const char *ssid = "Wifi 2.4Ghz"; //type your router wifi name
-const char *password = "cigani123"; //your password for that wifi
+const char *ssid = ""; //type your router wifi name
+const char *password = ""; //your password for that wifi
 
 String website = "<!DOCTYPE html><html><head><title>Page Title</title></head><body style='background-color: #EEEEEE;'><span style='color: #003366;'><h1>MIDI Messages</h1><p>MIDI Data: <span id='rand'></span></p><button type='button' id='BTN_COLOR'>Change Color</button></span></body><script> var Socket; document.getElementById('BTN_COLOR').addEventListener('click', button_changeColor); function init() { Socket = new WebSocket('ws://' + window.location.hostname + ':81/'); Socket.onmessage = function(event) { processCommand(event); }; } function button_changeColor() { Socket.send('ChangeColor'); } function processCommand(event) { var message = event.data; if (message === 'ChangeColor') { console.log('Changing LED color...'); } else { document.getElementById('rand').innerHTML = message; } } window.onload = function(event) { init(); }</script></html>";
 
