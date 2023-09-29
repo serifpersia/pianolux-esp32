@@ -5,13 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PianoLED - ESP32</title>
     <link rel="stylesheet" type="text/css" href="style.css">
+
 </head>
 <body>
-    <header>
-        <h1>PianoLED</h1>
-    </header>
-   <main>
-    <section class="card">
+<div class="navbar">
+    <a href="#card-1">Section 1</a>
+    <a href="#card-2">Section 2</a>
+    <a href="#card-3">Section 3</a>
+</div>
+<main>
+
+    <section class="card" id="card-1">
         <h2>Section 1</h2>
         <div class="control">
             <label for="slider1">Slider 1:</label>
@@ -29,8 +33,8 @@
             </label>
         </div>
     </section>
-    
-    <section class="card">
+
+    <section class="card" id="card-2">
         <h2>Section 2</h2>
         <div class="control">
             <label for="slider2">Slider 2:</label>
@@ -48,8 +52,8 @@
             </label>
         </div>
     </section>
-    
-    <section class="card">
+
+    <section class="card" id="card-3">
         <h2>Section 3</h2>
         <div class="control">
             <label for="slider3">Slider 3:</label>
@@ -67,10 +71,11 @@
             </label>
         </div>
     </section>
+
 </main>
-    
-    <footer>
-        <p>&copy; 2023 serifpersia</p>
-    </footer>
+
+<footer>
+    <p>&copy; 2023 serifpersia</p>
+</footer>
 </body>
 </html>
