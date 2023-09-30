@@ -7,26 +7,52 @@
     <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-      <header>
-        <h1>PianoLED</h1>
-    </header>
+<header>
+    <h1>PianoLED</h1>
+</header>
 <div class="navbar">
     <a href="#card-1">Section 1</a>
     <a href="#card-2">Section 2</a>
-    <a href="#card-3">Section 3</a>
 </div>
 <main>
     <section class="card" id="card-1">
-        <h2>Section 1</h2>
         <div class="control">
-            <label for="slider1">Hue</label>
-            <input type="range" id="slider1" name="slider1" min="0" max="255" value="0">
-            <label for="slider2">Brightness</label>
-            <input type="range" id="slider2" name="slider2" min="0" max="255" value="255">
+            <label for="custom-dropdown-modes">LED Mode:</label>
+            <div class="custom-dropdown">
+                <div class="selected-item" id="selected-item-modes">Select LED Mode</div>
+                <div class="dropdown-list-modes" id="dropdown-list-modes">
+                    <div class="dropdown-item">Default</div>
+                    <div class="dropdown-item">Splash</div>
+                    <div class="dropdown-item">Random</div>
+                    <div class="dropdown-item">Gradient</div>
+                    <div class="dropdown-item">Velocity</div>
+                    <div class="dropdown-item">Animation</div>
+                    <div class="dropdown-item">MultiColor</div>
+                </div>
+            </div>
         </div>
         <div class="control">
+            <label for="custom-dropdown-animations">Animation:</label>
+            <div class="custom-dropdown">
+                <div class="selected-item" id="selected-item-animations">Select Animation</div>
+                <div class="dropdown-list-animations" id="dropdown-list-animations">
+                    <div class="dropdown-item">RainbowColors</div>
+                    <div class="dropdown-item">RainbowColorsStripeColors</div>
+                    <div class="dropdown-item">OceanColors</div>
+                    <div class="dropdown-item">CloudColors</div>
+                    <div class="dropdown-item">LavaColors</div>
+                    <div class="dropdown-item">ForestColors</div>
+                    <div class="dropdown-item">PartyColors</div>
+                </div>
+            </div>
+        </div>
+        <label for="slider1">Hue</label>
+        <input type="range" id="slider1" name="slider1" min="0" max="255" value="0">
+        <label for="slider2">Brightness</label>
+        <input type="range" id="slider2" name="slider2" min="0" max="255" value="255">
+        <div class="control">
             <label for="button1">Button 1:</label>
-            <button id="BTN_COLOR">ChangeColor</button> <!-- Changed the button id -->
+            <button id="BTN_COLOR">ChangeColor</button>
         </div>
         <div class="control">
             <label for="toggle1">Toggle 1:</label>
@@ -40,70 +66,115 @@
     <section class="card" id="card-2">
         <h2>Section 2</h2>
     </section>
-
-    <section class="card" id="card-3">
-        <h2>Section 3</h2>
-    </section>
 </main>
 <footer>
     <p>&copy; 2023 serifpersia</p>
 </footer>
 <script>
-    
-var navbar = document.querySelector('.navbar');
-var scrolling = false;
+    var navbar = document.querySelector('.navbar');
+    var scrolling = false;
 
-function handleScroll() {
-    if (!scrolling) {
-        navbar.style.opacity = '1'; // Show the navbar
-        navbar.style.pointerEvents = 'auto'; // Enable pointer events
+    function handleScroll() {
+        if (!scrolling) {
+            navbar.style.opacity = '1'; // Show the navbar
+            navbar.style.pointerEvents = 'auto'; // Enable pointer events
+        }
+
+        scrolling = true;
+
+        // Use a timeout to hide the navbar after a delay when scrolling stops
+        clearTimeout(window.scrollTimeout);
+        window.scrollTimeout = setTimeout(function () {
+            scrolling = false;
+            navbar.style.opacity = '0'; // Hide the navbar
+            navbar.style.pointerEvents = 'none'; // Disable pointer events
+        }, 1500); // Adjust the delay time (in milliseconds) as needed
     }
 
-    scrolling = true;
+    // Add an event listener for the scroll event
+    window.addEventListener('scroll', handleScroll);
 
-    // Use a timeout to hide the navbar after a delay when scrolling stops
-    clearTimeout(window.scrollTimeout);
-    window.scrollTimeout = setTimeout(function () {
-        scrolling = false;
-        navbar.style.opacity = '0'; // Hide the navbar
-        navbar.style.pointerEvents = 'none'; // Disable pointer events
-    }, 1500); // Adjust the delay time (in milliseconds) as needed
-}
+    // DropdownList script for LED Modes
+const selectedItemModes = document.querySelector('#selected-item-modes');
+const dropdownListModes = document.querySelector('#dropdown-list-modes');
 
-// Add an event listener for the scroll event
-window.addEventListener('scroll', handleScroll);
- 
+// Initially hide the dropdown list for LED Modes
+dropdownListModes.style.display = 'none';
+
+selectedItemModes.addEventListener('click', () => {
+    // Toggle the visibility of the dropdown list for LED Modes
+    if (dropdownListModes.style.display === 'none' || dropdownListModes.style.display === '') {
+        dropdownListModes.style.display = 'block';
+    } else {
+        dropdownListModes.style.display = 'none';
+    }
+});
+
+// Add click event listeners to each dropdown item for LED Modes
+const dropdownItemsModes = document.querySelectorAll('.dropdown-list-modes .dropdown-item');
+dropdownItemsModes.forEach((item) => {
+    item.addEventListener('click', () => {
+        selectedItemModes.textContent = item.textContent;
+        dropdownListModes.style.display = 'none'; // Compact the dropdown list for LED Modes
+    });
+});
+
+// DropdownList script for Animations
+const selectedItemAnimations = document.querySelector('#selected-item-animations');
+const dropdownListAnimations = document.querySelector('#dropdown-list-animations');
+
+// Initially hide the dropdown list for Animations
+dropdownListAnimations.style.display = 'none';
+
+selectedItemAnimations.addEventListener('click', () => {
+    // Toggle the visibility of the dropdown list for Animations
+    if (dropdownListAnimations.style.display === 'none' || dropdownListAnimations.style.display === '') {
+        dropdownListAnimations.style.display = 'block';
+    } else {
+        dropdownListAnimations.style.display = 'none';
+    }
+});
+
+// Add click event listeners to each dropdown item for Animations
+const dropdownItemsAnimations = document.querySelectorAll('.dropdown-list-animations .dropdown-item');
+dropdownItemsAnimations.forEach((item) => {
+    item.addEventListener('click', () => {
+        selectedItemAnimations.textContent = item.textContent;
+        dropdownListAnimations.style.display = 'none'; // Compact the dropdown list for Animations
+    });
+});
+
+
     /*
-var Socket;
-document.getElementById('BTN_COLOR').addEventListener('click', button_changeColor);
-document.getElementById('slider1').addEventListener('input', slider1_changeValue);
-document.getElementById('slider2').addEventListener('input', slider2_changeValue);
+    var Socket;
+    document.getElementById('BTN_COLOR').addEventListener('click', button_changeColor);
+    document.getElementById('slider1').addEventListener('input', slider1_changeValue);
+    document.getElementById('slider2').addEventListener('input', slider2_changeValue);
 
-function init() {
-    Socket = new WebSocket('ws://' + window.location.hostname + ':81/');
-}
+    function init() {
+        Socket = new WebSocket('ws://' + window.location.hostname + ':81/');
+    }
 
-function button_changeColor() {
-    Socket.send('ChangeColor');
-}
+    function button_changeColor() {
+        Socket.send('ChangeColor');
+    }
 
-function slider1_changeValue() {
-    var value = document.getElementById('SLIDER1').value;
-    Socket.send('SliderAction1:' + value);
-}
+    function slider1_changeValue() {
+        var value = document.getElementById('SLIDER1').value;
+        Socket.send('SliderAction1:' + value);
+    }
 
-function slider2_changeValue() {
-    var value = document.getElementById('SLIDER2').value;
-    Socket.send('SliderAction2:' + value);
-}
+    function slider2_changeValue() {
+        var value = document.getElementById('SLIDER2').value;
+        Socket.send('SliderAction2:' + value);
+    }
 
-window.onload = function(event) {
-    init();
-}
-*/
+    window.onload = function(event) {
+        init();
+    }
+    */
 
 </script>
 
-   
 </body>
 </html>

@@ -8,7 +8,7 @@ body, p {
 }
 
 .navbar {
-    background-color: black;
+    background-color: #191919;
     top: 0;
     width: 100%;
     position: sticky;
@@ -33,37 +33,33 @@ body, p {
 
 body {
     font-family: Arial, sans-serif;
-    background-color: darkslategray;
+    background-color: #191919;
 }
 
 header {
-    background-color: black;
-    color: #fff;
-    text-align: center;
+    background-color: #191919;
+    color: #cccccc;
     padding: 10px;
+}
+
+h2 {
+    color: #fff;
 }
 
 main {
     max-width: auto;
-    margin: 30px auto;
-    padding: 20px;
-    padding-top: 20px;
-    background-color: darkslategray;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-section {
-    margin-bottom: 10px;
+    padding: 35px;
+    padding-top: 10px;
+    background-color: #191919;
 }
 
 /* Add card styling to sections */
 .card {
-    background-color: #f9f9f9;
-    padding: 20px;
-    margin-top: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    height: 800px;
+    background-color: #323232;
+    padding: 30px;
+    margin-top: 15px;
+    border-radius: 40px;
+    height: 700px;
     scroll-margin-block-start: 100px;
 }
 
@@ -75,6 +71,9 @@ section {
 label {
     display: block;
     font-weight: bold;
+    color: #fff;
+    margin-top: 15px;
+    margin-bottom: 15px;
 }
 
 input[type="range"] {
@@ -134,11 +133,48 @@ input:checked + .slider:before {
 }
 
 
+.custom-dropdown {
+    position: relative;
+    width: 100%;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    background-color: #46494b;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.selected-item {
+    padding: 10px;
+    background-color: #46494b;
+    color: white;
+    font-size: 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.dropdown-list-modes {
+    max-height: 180px; /* Maximum height to display 6 items */
+    overflow-y: auto; /* Enable vertical scrollbar if needed */
+  display: none;
+}
+
+.dropdown-list-animations {
+    max-height: 180px; /* Maximum height to display 6 items */
+    overflow-y: auto; /* Enable vertical scrollbar if needed */
+  display: none;
+}
+
+.dropdown-item {
+    padding: 10px;
+    cursor: pointer;
+    color: white;
+    font-size: 20px;
+}
 
 footer {
-    background-color: #2F4F4F;
-    color: #fff;
+    background-color: #191919;
+    color: #cccccc;
     text-align: center;
     font-size: 25px;
-    padding: 10px;
+    padding: 15px;
 }

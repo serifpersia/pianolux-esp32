@@ -10,7 +10,13 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
       String message = (char *)payload;
       if (message == "ChangeColor") {
         changeLEDColor();
-      } 
+      } else if (message.startsWith("SliderAction1:")) {
+        int value = message.substring(14).toInt();
+        sliderAction(1, value);
+      } else if (message.startsWith("SliderAction2:")) {
+        int value = message.substring(14).toInt();
+        sliderAction(2, value);
+      }
       break;
   }
 }
