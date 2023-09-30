@@ -2,6 +2,17 @@
 html{
     scroll-behavior: smooth;
 }
+
+.logo{
+    display: flex;
+    align-items: center;
+    justify-content: left;
+}
+
+.pianoled{
+    font-size: 70px;
+}
+
 body, p {
     margin: 0;
     padding: 0;
@@ -16,6 +27,7 @@ body, p {
     justify-content: center; /* Center horizontally */
     opacity: 0; /* Initially hide the navbar */
     transition: opacity 0.3s ease-in-out; /* Add a transition effect */
+    z-index: 20;
 }
 
 .navbar a {
