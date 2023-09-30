@@ -32,7 +32,7 @@ int NUM_LEDS = 176;              // how many leds do you want to control
 int STRIP_DIRECTION = 0;         //0 - left-to-right
 
 uint8_t hue;
-uint8_t brightness;
+uint8_t brightness = 255;
 uint8_t Slider1Value = 0;
 uint8_t Slider2Value = 255;
 
@@ -86,7 +86,7 @@ void setup() {
   Serial.print("Connected to network with IP address: ");
   Serial.println(WiFi.localIP());
 
-  // Serve static files (HTML and CSS) from ESP32 SPIFFS data directory
+  // Serve HTML from ESP32 SPIFFS data directory
   if (SPIFFS.begin()) {
     server.serveStatic("/", SPIFFS, "/");
     server.onNotFound([](AsyncWebServerRequest *request) {
