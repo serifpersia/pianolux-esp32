@@ -84,31 +84,3 @@ static void midi_transfer_cb(usb_transfer_t *transfer) {
     }
   }
 }
-
-int lowestNote = 21;    // MIDI note A0
-int highestNote = 108;  // MIDI note C8 (adjust as needed)
-
-int mapMidiNoteToLED(int midiNote, int lowestNote, int highestNote, int stripLEDNumber) {
-  int outMin = 0; // Start of LED strip
-  int outMax = outMin + stripLEDNumber - 1; // Highest LED number
-  return map(midiNote, lowestNote, highestNote, outMin, outMax);
-}
-
-
-
-void noteOn(uint8_t note) {
-  int mappedLED = mapMidiNoteToLED(note, lowestNote, highestNote, NUM_LEDS);
-  keysOn[note - 21] = true;
-  controlLeds(mappedLED, Hue, 255, 255); // Pass the mapped LED index
-  digitalWrite(builtInLedPin, HIGH); // Turn on the built-in LED
-  Serial.println("Note On: " + String(note)); // Debug print
-}
-
-void noteOff(uint8_t note) {
-  int mappedLED = mapMidiNoteToLED(note, lowestNote, highestNote, NUM_LEDS);
-  keysOn[note - 21] = false;
-  controlLeds(mappedLED, 0, 0, 0); // Pass the mapped LED index
-  digitalWrite(builtInLedPin, LOW); // Turn off the built-in LED
-  Serial.println("Note Off: " + String(note)); // Debug print
-}
-
