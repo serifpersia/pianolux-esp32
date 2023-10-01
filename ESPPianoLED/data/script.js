@@ -1,0 +1,205 @@
+var Socket;
+document.getElementById('BTN_COLOR').addEventListener('click', button_changeColor);
+document.getElementById('HUE').addEventListener('input', slider1_changeValue);
+document.getElementById('SLIDER2').addEventListener('input', slider2_changeValue);
+function init() {
+    Socket = new WebSocket('ws://' + window.location.hostname + ':81/');
+}
+
+function button_changeColor() {
+    Socket.send('ChangeColor');
+    console.log('ChangeColor');
+}
+
+
+function slider1_changeValue() {
+    var value = document.getElementById('HUE').value;
+    Socket.send('SliderAction1:' + value);
+    console.log(value);
+}
+
+
+function slider2_changeValue() {
+    var value = document.getElementById('SLIDER2').value;
+    Socket.send('SliderAction2:' + value);
+    console.log(value);
+}
+
+
+
+
+window.onload = function(event) {
+    init();
+}
+
+var navbar = document.querySelector('.navbar');
+var scrolling = false;
+
+function handleScroll() {
+    if (!scrolling) {
+        navbar.style.opacity = '1'; // Show the navbar
+        navbar.style.pointerEvents = 'auto'; // Enable pointer events
+    }
+
+    scrolling = true;
+
+    // Use a timeout to hide the navbar after a delay when scrolling stops
+    clearTimeout(window.scrollTimeout);
+    window.scrollTimeout = setTimeout(function () {
+        scrolling = false;
+        navbar.style.opacity = '0'; // Hide the navbar
+        navbar.style.pointerEvents = 'none'; // Disable pointer events
+    }, 1500); // Adjust the delay time (in milliseconds) as needed
+}
+
+// Add an event listener for the scroll event
+window.addEventListener('scroll', handleScroll);
+
+// DropdownList script for LED Modes
+const selectedItemModes = document.querySelector('#selected-item-modes');
+const dropdownListModes = document.querySelector('#dropdown-list-modes');
+
+// Initially hide the dropdown list for LED Modes
+dropdownListModes.style.display = 'none';
+
+selectedItemModes.addEventListener('click', () => {
+    // Toggle the visibility of the dropdown list for LED Modes
+    if (dropdownListModes.style.display === 'none' || dropdownListModes.style.display === '') {
+        dropdownListModes.style.display = 'block';
+    } else {
+        dropdownListModes.style.display = 'none';
+    }
+});
+
+// Add click event listeners to each dropdown item for LED Modes
+const dropdownItemsModes = document.querySelectorAll('.dropdown-list-modes .dropdown-item');
+dropdownItemsModes.forEach((item) => {
+    item.addEventListener('click', () => {
+        selectedItemModes.textContent = item.textContent;
+        dropdownListModes.style.display = 'none'; // Compact the dropdown list for LED Modes
+    });
+});
+
+// DropdownList script for Animations
+const selectedItemAnimations = document.querySelector('#selected-item-animations');
+const dropdownListAnimations = document.querySelector('#dropdown-list-animations');
+
+// Initially hide the dropdown list for Animations
+dropdownListAnimations.style.display = 'none';
+
+selectedItemAnimations.addEventListener('click', () => {
+    // Toggle the visibility of the dropdown list for Animations
+    if (dropdownListAnimations.style.display === 'none' || dropdownListAnimations.style.display === '') {
+        dropdownListAnimations.style.display = 'block';
+    } else {
+        dropdownListAnimations.style.display = 'none';
+    }
+});
+
+// Add click event listeners to each dropdown item for Animations
+const dropdownItemsAnimations = document.querySelectorAll('.dropdown-list-animations .dropdown-item');
+dropdownItemsAnimations.forEach((item) => {
+    item.addEventListener('click', () => {
+        selectedItemAnimations.textContent = item.textContent;
+        dropdownListAnimations.style.display = 'none'; // Compact the dropdown list for Animations
+    });
+});
+
+
+
+// Hue Slider Code
+const thumb = document.querySelector('.thumb');
+const track = document.querySelector('.track');
+const hueValueInput = document.getElementById('HUE');
+let isDragging = false;
+
+// Function to handle mouse and touch move
+function handleMove(xPosition) {
+    const maxPosition = track.offsetWidth - thumb.offsetWidth;
+    
+    if (xPosition >= 0 && xPosition <= maxPosition) {
+        thumb.style.left = xPosition + 'px';
+        
+        // Calculate the hue value based on thumb position
+        const hue = (xPosition / maxPosition) * 360;
+        
+        // Map the hue value to the 0-255 range for the slider
+        const mappedHue = Math.round((hue / 360) * 255);
+        hueValueInput.value = mappedHue; // Store the mapped hue value in the hidden input
+        
+        // Set the thumb's background color based on the hue value
+        thumb.style.backgroundColor = `hsl(${hue}, 100%, 50%)`;
+        
+        // Trigger the input event manually on the hue slider
+        const inputEvent = new Event('input', {
+            bubbles: true,
+            cancelable: true,
+        });
+        hueValueInput.dispatchEvent(inputEvent);
+    }
+}
+
+
+
+
+thumb.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    thumb.style.transition = 'none';
+    const offsetX = e.clientX - thumb.getBoundingClientRect().left;
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+
+    function onMouseMove(e) {
+        if (!isDragging) return;
+
+        const newPosition = e.clientX - track.getBoundingClientRect().left - offsetX;
+        handleMove(newPosition);
+    }
+
+    function onMouseUp() {
+        isDragging = false;
+        thumb.style.transition = 'left 0.3s ease'; // Restore smooth transition
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+    }
+});
+
+// Touch event handling for mobile devices
+thumb.addEventListener('touchstart', (e) => {
+    isDragging = true;
+    thumb.style.transition = 'none';
+    const offsetX = e.touches[0].clientX - thumb.getBoundingClientRect().left;
+
+    document.addEventListener('touchmove', onTouchMove);
+    document.addEventListener('touchend', onTouchEnd);
+
+    function onTouchMove(e) {
+        if (!isDragging) return;
+
+        const newPosition = e.touches[0].clientX - track.getBoundingClientRect().left - offsetX;
+        handleMove(newPosition);
+    }
+
+    function onTouchEnd() {
+        isDragging = false;
+        thumb.style.transition = 'left 0.3s ease'; // Restore smooth transition
+        document.removeEventListener('touchmove', onTouchMove);
+        document.removeEventListener('touchend', onTouchEnd);
+    }
+});
+
+track.addEventListener('click', (e) => {
+    const clickX = e.clientX - track.getBoundingClientRect().left;
+    const thumbPosition = clickX - thumb.offsetWidth / 2;
+    handleMove(thumbPosition);
+
+    // Restore smooth transition for the thumb
+    thumb.style.transition = 'left 0.3s ease';
+});
+
+// Initial setup to set the thumb's color based on the initial hue value
+const initialHue = parseInt(hueValueInput.value); // Get the initial hue value from the hidden input
+const initialThumbPosition = (initialHue / 360) * (track.offsetWidth - thumb.offsetWidth);
+thumb.style.left = initialThumbPosition + 'px';
+thumb.style.backgroundColor = `hsl(${initialHue}, 100%, 50%)`;
