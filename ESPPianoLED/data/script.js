@@ -1,3 +1,37 @@
+var Socket;
+document.getElementById('BTN_COLOR').addEventListener('click', button_changeColor);
+document.getElementById('HUE').addEventListener('input', slider1_changeValue);
+document.getElementById('SLIDER2').addEventListener('input', slider2_changeValue);
+function init() {
+    Socket = new WebSocket('ws://' + window.location.hostname + ':81/');
+}
+
+function button_changeColor() {
+    Socket.send('ChangeColor');
+    console.log('ChangeColor');
+}
+
+
+function slider1_changeValue() {
+    var value = document.getElementById('HUE').value;
+    Socket.send('SliderAction1:' + value);
+    console.log(value);
+}
+
+
+function slider2_changeValue() {
+    var value = document.getElementById('SLIDER2').value;
+    Socket.send('SliderAction2:' + value);
+    console.log(value);
+}
+
+
+
+
+window.onload = function(event) {
+    init();
+}
+
 var navbar = document.querySelector('.navbar');
 var scrolling = false;
 
@@ -71,29 +105,101 @@ dropdownItemsAnimations.forEach((item) => {
     });
 });
 
-var Socket;
-document.getElementById('BTN_COLOR').addEventListener('click', button_changeColor);
-document.getElementById('SLIDER1').addEventListener('input', slider1_changeValue);
-document.getElementById('SLIDER2').addEventListener('input', slider2_changeValue);
 
-function init() {
-    Socket = new WebSocket('ws://' + window.location.hostname + ':81/');
+
+// Hue Slider Code
+const thumb = document.querySelector('.thumb');
+const track = document.querySelector('.track');
+const hueValueInput = document.getElementById('HUE');
+let isDragging = false;
+
+// Function to handle mouse and touch move
+function handleMove(xPosition) {
+    const maxPosition = track.offsetWidth - thumb.offsetWidth;
+    
+    if (xPosition >= 0 && xPosition <= maxPosition) {
+        thumb.style.left = xPosition + 'px';
+        
+        // Calculate the hue value based on thumb position
+        const hue = (xPosition / maxPosition) * 360;
+        
+        // Map the hue value to the 0-255 range for the slider
+        const mappedHue = Math.round((hue / 360) * 255);
+        hueValueInput.value = mappedHue; // Store the mapped hue value in the hidden input
+        
+        // Set the thumb's background color based on the hue value
+        thumb.style.backgroundColor = `hsl(${hue}, 100%, 50%)`;
+        
+        // Trigger the input event manually on the hue slider
+        const inputEvent = new Event('input', {
+            bubbles: true,
+            cancelable: true,
+        });
+        hueValueInput.dispatchEvent(inputEvent);
+    }
 }
 
-function button_changeColor() {
-    Socket.send('ChangeColor');
-}
 
-function slider1_changeValue() {
-    var value = document.getElementById('SLIDER1').value;
-    Socket.send('SliderAction1:' + value);
-}
 
-function slider2_changeValue() {
-    var value = document.getElementById('SLIDER2').value;
-    Socket.send('SliderAction2:' + value);
-}
 
-window.onload = function(event) {
-    init();
-}
+thumb.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    thumb.style.transition = 'none';
+    const offsetX = e.clientX - thumb.getBoundingClientRect().left;
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+
+    function onMouseMove(e) {
+        if (!isDragging) return;
+
+        const newPosition = e.clientX - track.getBoundingClientRect().left - offsetX;
+        handleMove(newPosition);
+    }
+
+    function onMouseUp() {
+        isDragging = false;
+        thumb.style.transition = 'left 0.3s ease'; // Restore smooth transition
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+    }
+});
+
+// Touch event handling for mobile devices
+thumb.addEventListener('touchstart', (e) => {
+    isDragging = true;
+    thumb.style.transition = 'none';
+    const offsetX = e.touches[0].clientX - thumb.getBoundingClientRect().left;
+
+    document.addEventListener('touchmove', onTouchMove);
+    document.addEventListener('touchend', onTouchEnd);
+
+    function onTouchMove(e) {
+        if (!isDragging) return;
+
+        const newPosition = e.touches[0].clientX - track.getBoundingClientRect().left - offsetX;
+        handleMove(newPosition);
+    }
+
+    function onTouchEnd() {
+        isDragging = false;
+        thumb.style.transition = 'left 0.3s ease'; // Restore smooth transition
+        document.removeEventListener('touchmove', onTouchMove);
+        document.removeEventListener('touchend', onTouchEnd);
+    }
+});
+
+track.addEventListener('click', (e) => {
+    const clickX = e.clientX - track.getBoundingClientRect().left;
+    const thumbPosition = clickX - thumb.offsetWidth / 2;
+    handleMove(thumbPosition);
+
+    // Restore smooth transition for the thumb
+    thumb.style.transition = 'left 0.3s ease';
+});
+
+// Initial setup to set the thumb's color based on the initial hue value
+const initialHue = parseInt(hueValueInput.value); // Get the initial hue value from the hidden input
+const initialThumbPosition = (initialHue / 360) * (track.offsetWidth - thumb.offsetWidth);
+thumb.style.left = initialThumbPosition + 'px';
+thumb.style.backgroundColor = `hsl(${initialHue}, 100%, 50%)`;

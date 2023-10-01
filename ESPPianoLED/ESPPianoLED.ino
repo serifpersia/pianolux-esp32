@@ -61,11 +61,10 @@ void StartupAnimation() {
 
 
 void setup() {
-
-  usbh_setup(show_config_desc_full);
-
   Serial.begin(115200);  // init serial port for debugging
-
+  
+  usbh_setup(show_config_desc_full); //init usb host for midi devices
+  
   FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);         // GRB ordering
   FastLED.setMaxPowerInVoltsAndMilliamps(5, MAX_POWER_MILLIAMPS);  // set power limit
   FastLED.setBrightness(DEFAULT_BRIGHTNESS);
@@ -101,7 +100,7 @@ void setup() {
   }
 
   server.begin();
-
+  
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
 }
