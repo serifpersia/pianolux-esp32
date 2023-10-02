@@ -1,7 +1,7 @@
 var Socket;
 document.getElementById('BTN_COLOR').addEventListener('click', button_changeColor);
 document.getElementById('HUE').addEventListener('input', slider1_changeValue);
-document.getElementById('SLIDER2').addEventListener('input', slider2_changeValue);
+document.getElementById('BRIGHTNESS').addEventListener('input', slider2_changeValue);
 function init() {
     Socket = new WebSocket('ws://' + window.location.hostname + ':81/');
 }
@@ -20,7 +20,7 @@ function slider1_changeValue() {
 
 
 function slider2_changeValue() {
-    var value = document.getElementById('SLIDER2').value;
+    var value = document.getElementById('BRIGHTNESS').value;
     Socket.send('SliderAction2:' + value);
     console.log(value);
 }
@@ -203,3 +203,124 @@ const initialHue = parseInt(hueValueInput.value); // Get the initial hue value f
 const initialThumbPosition = (initialHue / 360) * (track.offsetWidth - thumb.offsetWidth);
 thumb.style.left = initialThumbPosition + 'px';
 thumb.style.backgroundColor = `hsl(${initialHue}, 100%, 50%)`;
+
+
+// Brightness Slider Code
+const brightnessThumb = document.querySelector('.brightness-slider .thumb');
+const brightnessTrack = document.querySelector('.brightness-slider .track');
+const brightnessValueInput = document.getElementById('BRIGHTNESS');
+let isBrightnessDragging = false;
+
+// Function to update the brightness slider's track gradient based on the hue value
+function updateBrightnessTrackGradient(hue) {
+  const track = document.querySelector('.brightness-slider .track');
+  // Map the hue value from 0-360 to 0-255
+  const mappedHue = Math.round((hue / 180) * 255);
+  // Update the track gradient CSS with the mapped hue value
+  track.style.background = `linear-gradient(to right, #000, hsl(${mappedHue}, 100%, 50%))`;
+}
+
+
+
+// Function to set the thumb's initial background color
+function setThumbInitialColor(brightness) {
+  const hue = parseInt(hueValueInput.value);
+  brightnessThumb.style.backgroundColor = `hsl(${hue}, 100%, ${brightness}%)`;
+}
+
+// Function to handle brightness changes
+function handleBrightnessMove(xPosition) {
+  const maxPosition = brightnessTrack.offsetWidth - brightnessThumb.offsetWidth;
+
+  if (xPosition >= 0 && xPosition <= maxPosition) {
+    brightnessThumb.style.left = xPosition + 'px';
+
+    // Calculate the brightness value based on thumb position
+    const brightness = Math.round((xPosition / maxPosition) * maxBrightness);
+
+    // Update the brightness value in the hidden input
+    brightnessValueInput.value = brightness;
+    // Trigger the input event manually on the hue slider
+        const inputEvent = new Event('input', {
+            bubbles: true,
+            cancelable: true,
+        });
+        brightnessValueInput.dispatchEvent(inputEvent);
+  }
+}
+
+// Update the brightness slider's track gradient when the hue slider value changes
+hueValueInput.addEventListener('input', () => {
+  const hue = parseInt(hueValueInput.value);
+  updateBrightnessTrackGradient(hue);
+
+  // Call the setThumbInitialColor function to update the thumb's color
+  setThumbInitialColor(parseInt(brightnessValueInput.value));
+});
+
+
+brightnessThumb.addEventListener('mousedown', (e) => {
+  isBrightnessDragging = true;
+  brightnessThumb.style.transition = 'none';
+  const offsetX = e.clientX - brightnessThumb.getBoundingClientRect().left;
+
+  document.addEventListener('mousemove', onBrightnessMouseMove);
+  document.addEventListener('mouseup', onBrightnessMouseUp);
+
+  function onBrightnessMouseMove(e) {
+    if (!isBrightnessDragging) return;
+
+    const newPosition = e.clientX - brightnessTrack.getBoundingClientRect().left - offsetX;
+    handleBrightnessMove(newPosition);
+  }
+
+  function onBrightnessMouseUp() {
+    isBrightnessDragging = false;
+    brightnessThumb.style.transition = 'left 0.3s ease'; // Restore smooth transition
+    document.removeEventListener('mousemove', onBrightnessMouseMove);
+    document.removeEventListener('mouseup', onBrightnessMouseUp);
+  }
+});
+
+brightnessThumb.addEventListener('touchstart', (e) => {
+  isBrightnessDragging = true;
+  brightnessThumb.style.transition = 'none';
+  const offsetX = e.touches[0].clientX - brightnessThumb.getBoundingClientRect().left;
+
+  document.addEventListener('touchmove', onBrightnessTouchMove);
+  document.addEventListener('touchend', onBrightnessTouchEnd);
+
+  function onBrightnessTouchMove(e) {
+    if (!isBrightnessDragging) return;
+
+    const newPosition = e.touches[0].clientX - brightnessTrack.getBoundingClientRect().left - offsetX;
+    handleBrightnessMove(newPosition);
+  }
+
+  function onBrightnessTouchEnd() {
+    isBrightnessDragging = false;
+    brightnessThumb.style.transition = 'left 0.3s ease'; // Restore smooth transition
+    document.removeEventListener('touchmove', onBrightnessTouchMove);
+    document.removeEventListener('touchend', onBrightnessTouchEnd);
+  }
+});
+
+brightnessTrack.addEventListener('click', (e) => {
+  const clickX = e.clientX - brightnessTrack.getBoundingClientRect().left;
+  const thumbPosition = clickX - brightnessThumb.offsetWidth / 2;
+  handleBrightnessMove(thumbPosition);
+
+  // Restore smooth transition for the brightness thumb
+  brightnessThumb.style.transition = 'left 0.3s ease';
+});
+
+// Initial setup for the brightness slider
+const initialBrightness = parseInt(brightnessValueInput.value);
+const maxBrightness = 255; // Maximum brightness value
+const initialBrightnessPosition = (initialBrightness / maxBrightness) * (brightnessTrack.offsetWidth - brightnessThumb.offsetWidth);
+const hue = parseInt(hueValueInput.value);
+brightnessThumb.style.left = initialBrightnessPosition + 'px';
+// Initialize the brightness slider's track gradient based on the initial hue
+updateBrightnessTrackGradient(hue);
+// Set the initial background color for the thumb
+setThumbInitialColor(initialBrightness);
