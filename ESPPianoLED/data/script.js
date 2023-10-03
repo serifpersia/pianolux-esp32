@@ -70,23 +70,33 @@ const dropdownListModes = document.querySelector('#dropdown-list-modes');
 // Initially hide the dropdown list for LED Modes
 dropdownListModes.style.display = 'none';
 
-selectedItemModes.addEventListener('click', () => {
-    // Toggle the visibility of the dropdown list for LED Modes
-    if (dropdownListModes.style.display === 'none' || dropdownListModes.style.display === '') {
-        dropdownListModes.style.display = 'block';
-    } else {
-        dropdownListModes.style.display = 'none';
-    }
-});
-
 // Add click event listeners to each dropdown item for LED Modes
 const dropdownItemsModes = document.querySelectorAll('.dropdown-list-modes .dropdown-item');
 dropdownItemsModes.forEach((item) => {
-    item.addEventListener('click', () => {
-        selectedItemModes.textContent = item.textContent;
-        dropdownListModes.style.display = 'none'; // Compact the dropdown list for LED Modes
-    });
+  item.addEventListener('click', () => {
+    console.log('Item clicked:', item.textContent); // Debugging statement
+    const selectedModeId = parseInt(item.getAttribute('data-mode-id'), 10);
+    console.log('Selected Mode ID:', selectedModeId); // Debugging statement
+    selectedItemModes.textContent = item.textContent;
+    dropdownListModes.style.display = 'none'; // Compact the dropdown list for LED Modes
+    console.log('Sending:', 'ChangeLEDModeAction' + selectedModeId); // Debugging statement
+    Socket.send('ChangeLEDModeAction:' + selectedModeId);
+  });
 });
+
+selectedItemModes.addEventListener('click', () => {
+  console.log('Dropdown clicked'); // Debugging statement
+  // Toggle the visibility of the dropdown list for LED Modes
+  if (dropdownListModes.style.display === 'none' || dropdownListModes.style.display === '') {
+    console.log('Opening dropdown'); // Debugging statement
+    dropdownListModes.style.display = 'block';
+  } else {
+    console.log('Closing dropdown'); // Debugging statement
+    dropdownListModes.style.display = 'none';
+  }
+});
+
+
 
 // DropdownList script for Animations
 const selectedItemAnimations = document.querySelector('#selected-item-animations');

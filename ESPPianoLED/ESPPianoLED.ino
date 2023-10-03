@@ -100,7 +100,7 @@ const int COMMAND_STRIP_DIRECTION = 245;
 const int COMMAND_SET_GUIDE = 244;
 const int COMMAND_SET_LED_VISUALIZER = 243;
 int MODE = COMMAND_SET_COLOR;
-
+int serverMode;
 float distance(CRGB color1, CRGB color2) {
   return sqrt(pow(color1.r - color2.r, 2) + pow(color1.g - color2.g, 2) + pow(color1.b - color2.b, 2));
 }
@@ -231,7 +231,16 @@ int mapMidiNoteToLED(int midiNote, int lowestNote, int highestNote, int stripLED
 void noteOn(int note) {
   int ledIndex = mapMidiNoteToLED(note, 21, 108, 175); // Map MIDI note to LED index
     keysOn[ledIndex] = true;
-    controlLeds(ledIndex, hue, 255, brightness); // Both use the same index
+
+    if(serverMode == 0)
+    {
+        controlLeds(ledIndex, hue, 255, brightness); // Both use the same index
+    }
+    else if(serverMode == 2)
+    {
+      hue = random(256);
+        controlLeds(ledIndex, hue, 255, brightness); // Both use the same index
+    }
     digitalWrite(builtInLedPin, HIGH); // Turn on the built-in LED
     Serial.println("Note On: " + String(note) + " mapped to LED: " + String(ledIndex)); // Debug print  
 }
@@ -251,9 +260,14 @@ void changeLEDColor() {
   Serial.println(hue);
 }
 
+int clientHueVal;
+int clientBrightnessVal;
+int clientFadeVal;
+
 void sliderAction(int sliderNumber, int value) {
   if (sliderNumber == 1) {
-    hue = value;
+    clientHueVal = value;
+    hue = clientHueVal;
   } else if (sliderNumber == 2) {
     FastLED.setBrightness(value);
   }
@@ -267,6 +281,16 @@ void sliderAction(int sliderNumber, int value) {
   Serial.println(value);
 }
 
+//Change LED Mode
+void changeLEDModeAction(int serverMode)
+{
+  //Default Mode
+  if(serverMode == 0)
+  {
+    MODE = COMMAND_SET_COLOR;
+    hue = clientHueVal;
+  }
+}
 // Add a new effect
 void addEffect(FadingRunEffect* effect) {
   if (numEffects < MAX_EFFECTS) {

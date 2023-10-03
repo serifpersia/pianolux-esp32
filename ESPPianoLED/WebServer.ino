@@ -21,6 +21,10 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
         int value = message.substring(14).toInt();
         sliderAction(3, value);
       }
+      else if (message.startsWith("ChangeLEDModeAction:")) {
+        serverMode = message.substring(20).toInt();
+        changeLEDModeAction(serverMode);
+      }
       break;
   }
 }
