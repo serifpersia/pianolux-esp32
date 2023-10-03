@@ -29,9 +29,11 @@ function slider2_changeValue() {
 
 function slider3_changeValue() {
     var value = document.getElementById('FADE').value;
-    Socket.send('SliderAction3:' + value);
-    console.log(value);
+    var invertedValue = 255 - value; // Calculate the inverted value
+    Socket.send('SliderAction3:' + invertedValue); // Send the inverted value
+    console.log(invertedValue);
 }
+
 
 
 window.onload = function(event) {
@@ -211,6 +213,9 @@ thumb.style.left = initialThumbPosition + 'px';
 thumb.style.backgroundColor = `hsl(${initialHue}, 100%, 50%)`;
 
 
+
+
+
 // Brightness Slider Code
 const brightnessThumb = document.querySelector('.brightness-slider .thumb');
 const brightnessTrack = document.querySelector('.brightness-slider .track');
@@ -224,14 +229,6 @@ function updateBrightnessTrackGradient(hue) {
     const mappedHue = Math.round((hue / 180) * 255);
     // Update the track gradient CSS with the mapped hue value
     track.style.background = `linear-gradient(to right, #000, hsl(${mappedHue}, 100%, 50%))`;
-}
-
-
-
-// Function to set the thumb's initial background color
-function setThumbInitialColor(brightness) {
-    const hue = parseInt(hueValueInput.value);
-    brightnessThumb.style.backgroundColor = `hsl(${hue}, 100%, ${brightness}%)`;
 }
 
 // Function to handle brightness changes
@@ -259,9 +256,6 @@ function handleBrightnessMove(xPosition) {
 hueValueInput.addEventListener('input', () => {
     const hue = parseInt(hueValueInput.value);
     updateBrightnessTrackGradient(hue);
-
-    // Call the setThumbInitialColor function to update the thumb's color
-    setThumbInitialColor(parseInt(brightnessValueInput.value));
 });
 
 
@@ -329,26 +323,27 @@ brightnessThumb.style.left = initialBrightnessPosition + 'px';
 // Initialize the brightness slider's track gradient based on the initial hue
 updateBrightnessTrackGradient(hue);
 // Set the initial background color for the thumb
-setThumbInitialColor(initialBrightness);
+
+
 
 
 //Fade slider
-const Fadethumb = document.querySelector('.fade-slider .thumb');
-const Fadetrack = document.querySelector('.fade-slider .track');
+const fadeThumb = document.querySelector('.fade-slider .thumb');
+const fadeTrack = document.querySelector('.fade-slider .track');
 const fadeValueInput = document.getElementById('FADE');
 let isFadeDragging = false;
 
 // Function to handle mouse and touch move
 function handleFadeMove(xPosition) {
-    const maxFadePosition = Fadetrack.offsetWidth - Fadethumb.offsetWidth;
+    const maxPosition = fadeTrack.offsetWidth - fadeThumb.offsetWidth;
 
-    if (xPosition >= 0 && xPosition <= maxFadePosition) {
-        Fadethumb.style.left = xPosition + 'px';
+    if (xPosition >= 0 && xPosition <= maxPosition) {
+        fadeThumb.style.left = xPosition + 'px';
 
         // Calculate the hue value based on thumb position
-        const fade = Math.round((xPosition / maxFadePosition) * 255);
+        const fade =  Math.round((xPosition / maxPosition) * 255);
 
-        fadeValueInput.value = fade; // Store the fade value in the hidden input
+        fadeValueInput.value = fade;
 
         // Trigger the input event manually on the hue slider
         const inputEvent = new Event('input', {
@@ -358,62 +353,59 @@ function handleFadeMove(xPosition) {
         fadeValueInput.dispatchEvent(inputEvent);
     }
 }
-
-
-
-
-Fadethumb.addEventListener('mousedown', (e) => {
+//Mouse drag
+fadeThumb.addEventListener('mousedown', (e) => {
     isFadeDragging = true;
-    Fadethumb.style.transition = 'none';
-    const offsetX = e.clientX - Fadethumb.getBoundingClientRect().left;
+    fadeThumb.style.transition = 'none';
+    const offsetX = e.clientX - fadeThumb.getBoundingClientRect().left;
 
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
 
-    function onFadeMouseMove(e) {
+    function onMouseMove(e) {
         if (!isFadeDragging) return;
 
-        const newFadePosition = e.clientX - Fadetrack.getBoundingClientRect().left - offsetX;
-        handleFadeMove(newFadePosition);
+        const newPosition = e.clientX - fadeTrack.getBoundingClientRect().left - offsetX;
+        handleFadeMove(newPosition);
     }
 
-    function onFadeMouseUp() {
+    function onMouseUp() {
         isFadeDragging = false;
-        Fadethumb.style.transition = 'left 0.3s ease'; // Restore smooth transition
-        document.removeEventListener('mousemove', onFadeMouseMove);
-        document.removeEventListener('mouseup', onFadeMouseUp);
+        fadeThumb.style.transition = 'left 0.3s ease'; // Restore smooth transition
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
     }
 });
-
 // Touch event handling for mobile devices
-Fadethumb.addEventListener('touchstart', (e) => {
+fadeThumb.addEventListener('touchstart', (e) => {
     isFadeDragging = true;
-    Fadethumb.style.transition = 'none';
-    const offsetX = e.touches[0].clientX - Fadethumb.getBoundingClientRect().left;
+    fadeThumb.style.transition = 'none';
+    const offsetX = e.touches[0].clientX - fadeThumb.getBoundingClientRect().left;
 
-    document.addEventListener('touchmove', onFadeTouchMove);
-    document.addEventListener('touchend', onFadeTouchEnd);
+    document.addEventListener('touchmove', onTouchMove);
+    document.addEventListener('touchend', onTouchEnd);
 
-    function onFadeTouchMove(e) {
+    function onTouchMove(e) {
         if (!isFadeDragging) return;
 
-        const newFadePosition = e.touches[0].clientX - Fadetrack.getBoundingClientRect().left - offsetX;
-        handleFadeMove(newFadePosition);
+        const newPosition = e.touches[0].clientX - fadeTrack.getBoundingClientRect().left - offsetX;
+        handleFadeMove(newPosition);
     }
 
-    function onFadeTouchEnd() {
+    function onTouchEnd() {
         isFadeDragging = false;
-        Fadethumb.style.transition = 'left 0.3s ease'; // Restore smooth transition
-        document.removeEventListener('touchmove', onFadeTouchMove);
-        document.removeEventListener('touchend', onFadeTouchEnd);
+        fadeThumb.style.transition = 'left 0.3s ease'; // Restore smooth transition
+        document.removeEventListener('touchmove', onTouchMove);
+        document.removeEventListener('touchend', onTouchEnd);
     }
 });
 
-Fadetrack.addEventListener('click', (e) => {
-    const clickX = e.clientX - Fadetrack.getBoundingClientRect().left;
-    const FadethumbPosition = clickX - Fadethumb.offsetWidth / 2;
-    handleFadeMove(FadethumbPosition);
+fadeTrack.addEventListener('click', (e) => {
+    const clickX = e.clientX - fadeTrack.getBoundingClientRect().left;
+    const thumbPosition = clickX - fadeThumb.offsetWidth / 2;
+    handleFadeMove(thumbPosition);
 
     // Restore smooth transition for the thumb
-    Fadethumb.style.transition = 'left 0.3s ease';
+    fadeThumb.style.transition = 'left 0.3s ease';
 });
+

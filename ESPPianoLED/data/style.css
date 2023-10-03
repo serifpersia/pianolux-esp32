@@ -247,7 +247,7 @@ input:checked + .slider:before {
     position: absolute;
     width: 35px; /* Adjust the thumb width as needed */
     height: 35px; /* Adjust the thumb height as needed */
-    background-color: transparent;
+    background-color: white;
     border-radius: 50%;
     top: 50%;
     transform: translateY(-50%);
@@ -266,7 +266,7 @@ input:checked + .slider:before {
 .fade-slider .track {
     width: 100%;
     height: 100%;
-    background: #46494b;
+    background: linear-gradient(to right, black, white); /* Gradient from black to transparent */
     border-radius: 10px;
 }
 
