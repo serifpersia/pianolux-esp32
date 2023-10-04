@@ -73,29 +73,28 @@ dropdownListModes.style.display = 'none';
 // Add click event listeners to each dropdown item for LED Modes
 const dropdownItemsModes = document.querySelectorAll('.dropdown-list-modes .dropdown-item');
 dropdownItemsModes.forEach((item) => {
-  item.addEventListener('click', () => {
-    console.log('Item clicked:', item.textContent); // Debugging statement
-    const selectedModeId = parseInt(item.getAttribute('data-mode-id'), 10);
-    console.log('Selected Mode ID:', selectedModeId); // Debugging statement
-    selectedItemModes.textContent = item.textContent;
-    dropdownListModes.style.display = 'none'; // Compact the dropdown list for LED Modes
-    console.log('Sending:', 'ChangeLEDModeAction' + selectedModeId); // Debugging statement
-    Socket.send('ChangeLEDModeAction:' + selectedModeId);
-  });
+    item.addEventListener('click', () => {
+        console.log('Item clicked:', item.textContent); // Debugging statement
+        const selectedModeId = parseInt(item.getAttribute('data-mode-id'), 10);
+        console.log('Selected Mode ID:', selectedModeId); // Debugging statement
+        selectedItemModes.textContent = item.textContent;
+        dropdownListModes.style.display = 'none'; // Compact the dropdown list for LED Modes
+        console.log('Sending:', 'ChangeLEDModeAction' + selectedModeId); // Debugging statement
+        Socket.send('ChangeLEDModeAction:' + selectedModeId);
+    });
 });
 
 selectedItemModes.addEventListener('click', () => {
-  console.log('Dropdown clicked'); // Debugging statement
-  // Toggle the visibility of the dropdown list for LED Modes
-  if (dropdownListModes.style.display === 'none' || dropdownListModes.style.display === '') {
-    console.log('Opening dropdown'); // Debugging statement
-    dropdownListModes.style.display = 'block';
-  } else {
-    console.log('Closing dropdown'); // Debugging statement
-    dropdownListModes.style.display = 'none';
-  }
+    console.log('Dropdown clicked'); // Debugging statement
+    // Toggle the visibility of the dropdown list for LED Modes
+    if (dropdownListModes.style.display === 'none' || dropdownListModes.style.display === '') {
+        console.log('Opening dropdown'); // Debugging statement
+        dropdownListModes.style.display = 'block';
+    } else {
+        console.log('Closing dropdown'); // Debugging statement
+        dropdownListModes.style.display = 'none';
+    }
 });
-
 
 
 // DropdownList script for Animations
@@ -124,7 +123,6 @@ dropdownItemsAnimations.forEach((item) => {
 });
 
 
-
 // Hue Slider Code
 const thumb = document.querySelector('.thumb');
 const track = document.querySelector('.track');
@@ -134,32 +132,32 @@ let isDragging = false;
 // Function to handle mouse and touch move
 function handleMove(xPosition) {
     const maxPosition = track.offsetWidth - thumb.offsetWidth;
+    const minPosition = 0;
 
-    if (xPosition >= 0 && xPosition <= maxPosition) {
-        thumb.style.left = xPosition + 'px';
+    // Ensure the thumb stays within the track bounds
+    xPosition = Math.max(minPosition, Math.min(xPosition, maxPosition));
 
-        // Calculate the hue value based on thumb position
-        const hue = (xPosition / maxPosition) * 360;
+    thumb.style.left = xPosition + 'px';
 
-        // Map the hue value to the 0-255 range for the slider
-        const mappedHue = Math.round((hue / 360) * 255);
-        hueValueInput.value = mappedHue; // Store the mapped hue value in the hidden input
+    // Calculate the hue value based on thumb position
+    const hue = (xPosition / maxPosition) * 360;
 
-        // Set the thumb's background color based on the hue value
-        thumb.style.backgroundColor = `hsl(${hue}, 100%, 50%)`;
+    // Map the hue value to the 0-255 range for the slider
+    const mappedHue = Math.round((hue / 360) * 255);
+    hueValueInput.value = mappedHue; // Store the mapped hue value in the hidden input
 
-        // Trigger the input event manually on the hue slider
-        const inputEvent = new Event('input', {
-            bubbles: true,
-            cancelable: true,
-        });
-        hueValueInput.dispatchEvent(inputEvent);
-    }
+    // Set the thumb's background color based on the hue value
+    thumb.style.backgroundColor = `hsl(${hue}, 100%, 50%)`;
+
+    // Trigger the input event manually on the hue slider
+    const inputEvent = new Event('input', {
+        bubbles: true,
+        cancelable: true,
+    });
+    hueValueInput.dispatchEvent(inputEvent);
 }
 
-
-
-
+// Mouse drag
 thumb.addEventListener('mousedown', (e) => {
     isDragging = true;
     thumb.style.transition = 'none';
@@ -207,6 +205,7 @@ thumb.addEventListener('touchstart', (e) => {
     }
 });
 
+// Track click
 track.addEventListener('click', (e) => {
     const clickX = e.clientX - track.getBoundingClientRect().left;
     const thumbPosition = clickX - thumb.offsetWidth / 2;
@@ -221,9 +220,6 @@ const initialHue = parseInt(hueValueInput.value); // Get the initial hue value f
 const initialThumbPosition = (initialHue / 360) * (track.offsetWidth - thumb.offsetWidth);
 thumb.style.left = initialThumbPosition + 'px';
 thumb.style.backgroundColor = `hsl(${initialHue}, 100%, 50%)`;
-
-
-
 
 
 // Brightness Slider Code
@@ -244,22 +240,24 @@ function updateBrightnessTrackGradient(hue) {
 // Function to handle brightness changes
 function handleBrightnessMove(xPosition) {
     const maxPosition = brightnessTrack.offsetWidth - brightnessThumb.offsetWidth;
+    const minPosition = 0;
 
-    if (xPosition >= 0 && xPosition <= maxPosition) {
-        brightnessThumb.style.left = xPosition + 'px';
+    // Ensure the thumb stays within the track bounds
+    xPosition = Math.max(minPosition, Math.min(xPosition, maxPosition));
 
-        // Calculate the brightness value based on thumb position
-        const brightness = Math.round((xPosition / maxPosition) * maxBrightness);
+    brightnessThumb.style.left = xPosition + 'px';
 
-        // Update the brightness value in the hidden input
-        brightnessValueInput.value = brightness;
-        // Trigger the input event manually on the hue slider
-        const inputEvent = new Event('input', {
-            bubbles: true,
-            cancelable: true,
-        });
-        brightnessValueInput.dispatchEvent(inputEvent);
-    }
+    // Calculate the brightness value based on thumb position
+    const brightness = Math.round((xPosition / maxPosition) * maxBrightness);
+
+    // Update the brightness value in the hidden input
+    brightnessValueInput.value = brightness;
+    // Trigger the input event manually on the hue slider
+    const inputEvent = new Event('input', {
+        bubbles: true,
+        cancelable: true,
+    });
+    brightnessValueInput.dispatchEvent(inputEvent);
 }
 
 // Update the brightness slider's track gradient when the hue slider value changes
@@ -267,7 +265,6 @@ hueValueInput.addEventListener('input', () => {
     const hue = parseInt(hueValueInput.value);
     updateBrightnessTrackGradient(hue);
 });
-
 
 brightnessThumb.addEventListener('mousedown', (e) => {
     isBrightnessDragging = true;
@@ -332,12 +329,9 @@ const hue = parseInt(hueValueInput.value);
 brightnessThumb.style.left = initialBrightnessPosition + 'px';
 // Initialize the brightness slider's track gradient based on the initial hue
 updateBrightnessTrackGradient(hue);
-// Set the initial background color for the thumb
 
 
-
-
-//Fade slider
+// Fade slider
 const fadeThumb = document.querySelector('.fade-slider .thumb');
 const fadeTrack = document.querySelector('.fade-slider .track');
 const fadeValueInput = document.getElementById('FADE');
@@ -346,24 +340,27 @@ let isFadeDragging = false;
 // Function to handle mouse and touch move
 function handleFadeMove(xPosition) {
     const maxPosition = fadeTrack.offsetWidth - fadeThumb.offsetWidth;
+    const minPosition = 0;
 
-    if (xPosition >= 0 && xPosition <= maxPosition) {
-        fadeThumb.style.left = xPosition + 'px';
+    // Ensure the thumb stays within the track bounds
+    xPosition = Math.max(minPosition, Math.min(xPosition, maxPosition));
 
-        // Calculate the hue value based on thumb position
-        const fade =  Math.round((xPosition / maxPosition) * 255);
+    fadeThumb.style.left = xPosition + 'px';
 
-        fadeValueInput.value = fade;
+    // Calculate the fade value based on thumb position
+    const fade = Math.round((xPosition / maxPosition) * 255);
 
-        // Trigger the input event manually on the hue slider
-        const inputEvent = new Event('input', {
-            bubbles: true,
-            cancelable: true,
-        });
-        fadeValueInput.dispatchEvent(inputEvent);
-    }
+    fadeValueInput.value = fade;
+
+    // Trigger the input event manually on the fade slider
+    const inputEvent = new Event('input', {
+        bubbles: true,
+        cancelable: true,
+    });
+    fadeValueInput.dispatchEvent(inputEvent);
 }
-//Mouse drag
+
+// Mouse drag
 fadeThumb.addEventListener('mousedown', (e) => {
     isFadeDragging = true;
     fadeThumb.style.transition = 'none';
@@ -386,6 +383,7 @@ fadeThumb.addEventListener('mousedown', (e) => {
         document.removeEventListener('mouseup', onMouseUp);
     }
 });
+
 // Touch event handling for mobile devices
 fadeThumb.addEventListener('touchstart', (e) => {
     isFadeDragging = true;
@@ -410,6 +408,7 @@ fadeThumb.addEventListener('touchstart', (e) => {
     }
 });
 
+// Track click
 fadeTrack.addEventListener('click', (e) => {
     const clickX = e.clientX - fadeTrack.getBoundingClientRect().left;
     const thumbPosition = clickX - fadeThumb.offsetWidth / 2;
@@ -418,4 +417,5 @@ fadeTrack.addEventListener('click', (e) => {
     // Restore smooth transition for the thumb
     fadeThumb.style.transition = 'left 0.3s ease';
 });
+
 

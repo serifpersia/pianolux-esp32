@@ -19,8 +19,6 @@ html{
         width: 100px;
         height: 300px;
     }
-
-
 }
 
 
@@ -41,17 +39,26 @@ body, p {
     z-index: 20;
 }
 
-.navbar a {
-    display: block;
-    color: white;
-    text-align: center;
-    padding: 20px 10px;
-    text-decoration: none;
-    font-size: 25px;
+.controls-icon {
+    display: flex;
+    padding: 15px;
+    height: 55px;
 }
 
-.navbar a:hover {
-    background-color: grey;
+.controls-icon:active {
+    /* Change the background color when the icon is hovered or clicked */
+    background-color: #006AFF;
+}
+
+.mode-settings-icon {
+    display: flex;
+    padding: 15px;
+    height: 55px;
+}
+
+.mode-settings-icon:active {
+    /* Change the background color when the icon is hovered or clicked */
+    background-color: #006AFF;
 }
 
 body {
