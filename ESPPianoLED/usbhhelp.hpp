@@ -1,26 +1,26 @@
 /*
- * MIT License
- *
- * Copyright (c) 2021 touchgadgetdev@gmail.com
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
+   MIT License
+
+   Copyright (c) 2021 touchgadgetdev@gmail.com
+
+   Permission is hereby granted, free of charge, to any person obtaining a copy
+   of this software and associated documentation files (the "Software"), to deal
+   in the Software without restriction, including without limitation the rights
+   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+   copies of the Software, and to permit persons to whom the Software is
+   furnished to do so, subject to the following conditions:
+
+   The above copyright notice and this permission notice shall be included in all
+   copies or substantial portions of the Software.
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+   SOFTWARE.
+*/
 
 const TickType_t HOST_EVENT_TIMEOUT = 1;
 const TickType_t CLIENT_EVENT_TIMEOUT = 1;
@@ -45,8 +45,8 @@ void _client_event_callback(const usb_host_client_event_msg_t *event_msg, void *
       err = usb_host_device_info(Device_Handle, &dev_info);
       if (err != ESP_OK) ESP_LOGI("", "usb_host_device_info: %x", err);
       ESP_LOGI("", "speed: %d dev_addr %d vMaxPacketSize0 %d bConfigurationValue %d",
-          dev_info.speed, dev_info.dev_addr, dev_info.bMaxPacketSize0,
-          dev_info.bConfigurationValue);
+               dev_info.speed, dev_info.dev_addr, dev_info.bMaxPacketSize0,
+               dev_info.bConfigurationValue);
 
       const usb_device_desc_t *dev_desc;
       err = usb_host_get_device_descriptor(Device_Handle, &dev_desc);
@@ -82,8 +82,8 @@ void usbh_setup(usb_host_enum_cb_t enumeration_cb)
     .is_synchronous = false,
     .max_num_event_msg = 5,
     .async = {
-        .client_event_callback = _client_event_callback,
-        .callback_arg = Client_Handle
+      .client_event_callback = _client_event_callback,
+      .callback_arg = Client_Handle
     }
   };
   err = usb_host_client_register(&client_config, &Client_Handle);

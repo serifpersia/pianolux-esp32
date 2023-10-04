@@ -1,29 +1,41 @@
+#include <ArduinoJson.h>
+
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length) {
   switch (type) {
-    case WStype_DISCONNECTED:
-      Serial.println("Client " + String(num) + " disconnected");
-      break;
-    case WStype_CONNECTED:
-      Serial.println("Client " + String(num) + " connected");
-      break;
     case WStype_TEXT:
-      String message = (char *)payload;
-      if (message == "ChangeColor") {
+      // Parse the JSON message
+      StaticJsonDocument<200> doc;
+      DeserializationError error = deserializeJson(doc, payload);
+
+      if (error) {
+        Serial.print("JSON parsing error: ");
+        Serial.println(error.c_str());
+        return;
+      }
+
+      String action = doc["action"];
+      if (action == "ChangeColor") {
         changeLEDColor();
-      } else if (message.startsWith("SliderAction1:")) {
-        int value = message.substring(14).toInt();
+      } else if (action == "SliderAction1") {
+        int value = doc["value"];
         sliderAction(1, value);
-      } else if (message.startsWith("SliderAction2:")) {
-        int value = message.substring(14).toInt();
+      } else if (action == "SliderAction2") {
+        int value = doc["value"];
         sliderAction(2, value);
-      }
-      else if (message.startsWith("SliderAction3:")) {
-        int value = message.substring(14).toInt();
+      } else if (action == "SliderAction3") {
+        int value = doc["value"];
         sliderAction(3, value);
-      }
-      else if (message.startsWith("ChangeLEDModeAction:")) {
-        serverMode = message.substring(20).toInt();
+      } else if (action == "ChangeLEDModeAction") {
+        serverMode = doc["mode"];
         changeLEDModeAction(serverMode);
+        Serial.println("LED ID: ");
+        Serial.print(serverMode);
+      }
+      else if (action == "ChangeAnimationAction")
+      {
+        animationIndex = doc["animation"];
+        Serial.println("Animation ID: ");
+        Serial.print(animationIndex);
       }
       break;
   }

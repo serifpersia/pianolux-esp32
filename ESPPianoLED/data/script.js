@@ -1,44 +1,71 @@
 var Socket;
-document.getElementById('BTN_COLOR').addEventListener('click', button_changeColor);
-document.getElementById('HUE').addEventListener('input', slider1_changeValue);
-document.getElementById('BRIGHTNESS').addEventListener('input', slider2_changeValue);
-document.getElementById('FADE').addEventListener('input', slider3_changeValue);
+
+// Function to initialize WebSocket
 function init() {
     Socket = new WebSocket('ws://' + window.location.hostname + ':81/');
+
+    // Add error event handler
+    Socket.addEventListener('error', function (error) {
+        console.error('WebSocket error:', error);
+        // Handle the error here, e.g., display an error message to the user.
+    });
+
+    // Add close event handler
+    Socket.addEventListener('close', function (event) {
+        if (event.wasClean) {
+            console.log('WebSocket closed cleanly, code=' + event.code + ', reason=' + event.reason);
+        } else {
+            console.error('WebSocket connection died');
+            // You may want to attempt to reconnect here.
+        }
+    });
+
+    // Add open event handler
+    Socket.addEventListener('open', function (event) {
+        console.log('WebSocket connection opened');
+    });
 }
 
-function button_changeColor() {
-    Socket.send('ChangeColor');
+// Function to send data via WebSocket with error handling
+function sendData(action, data) {
+    if (Socket.readyState === WebSocket.OPEN) {
+        try {
+            Socket.send(JSON.stringify({ action: action, ...data }));
+        } catch (error) {
+            console.error('Error sending data:', error);
+            // Handle the error here, e.g., display an error message to the user.
+        }
+    } else {
+        console.error('WebSocket connection not open');
+        // Handle the error here, e.g., display an error message to the user or attempt to reconnect.
+    }
+}
+
+// Event listeners for button and sliders
+document.getElementById('BTN_COLOR').addEventListener('click', function () {
+    sendData('ChangeColor');
     console.log('ChangeColor');
-}
+});
 
-
-function slider1_changeValue() {
-    var value = document.getElementById('HUE').value;
-    Socket.send('SliderAction1:' + value);
+document.getElementById('HUE').addEventListener('input', function () {
+    var value = parseInt(document.getElementById('HUE').value);
+    sendData('SliderAction1', { value: value });
     console.log(value);
-}
+});
 
-
-function slider2_changeValue() {
-    var value = document.getElementById('BRIGHTNESS').value;
-    Socket.send('SliderAction2:' + value);
+document.getElementById('BRIGHTNESS').addEventListener('input', function () {
+    var value = parseInt(document.getElementById('BRIGHTNESS').value);
+    sendData('SliderAction2', { value: value });
     console.log(value);
-}
+});
 
-
-function slider3_changeValue() {
-    var value = document.getElementById('FADE').value;
-    var invertedValue = 255 - value; // Calculate the inverted value
-    Socket.send('SliderAction3:' + invertedValue); // Send the inverted value
+document.getElementById('FADE').addEventListener('input', function () {
+    var value = parseInt(document.getElementById('FADE').value);
+    var invertedValue = 255 - value;
+    sendData('SliderAction3', { value: invertedValue });
     console.log(invertedValue);
-}
+});
 
-
-
-window.onload = function(event) {
-    init();
-}
 
 var navbar = document.querySelector('.navbar');
 var scrolling = false;
@@ -63,6 +90,7 @@ function handleScroll() {
 // Add an event listener for the scroll event
 window.addEventListener('scroll', handleScroll);
 
+
 // DropdownList script for LED Modes
 const selectedItemModes = document.querySelector('#selected-item-modes');
 const dropdownListModes = document.querySelector('#dropdown-list-modes');
@@ -80,7 +108,9 @@ dropdownItemsModes.forEach((item) => {
         selectedItemModes.textContent = item.textContent;
         dropdownListModes.style.display = 'none'; // Compact the dropdown list for LED Modes
         console.log('Sending:', 'ChangeLEDModeAction' + selectedModeId); // Debugging statement
-        Socket.send('ChangeLEDModeAction:' + selectedModeId);
+
+        // Send a WebSocket message for changing the LED mode
+        sendData('ChangeLEDModeAction', { mode: selectedModeId });
     });
 });
 
@@ -96,7 +126,6 @@ selectedItemModes.addEventListener('click', () => {
     }
 });
 
-
 // DropdownList script for Animations
 const selectedItemAnimations = document.querySelector('#selected-item-animations');
 const dropdownListAnimations = document.querySelector('#dropdown-list-animations');
@@ -104,23 +133,39 @@ const dropdownListAnimations = document.querySelector('#dropdown-list-animations
 // Initially hide the dropdown list for Animations
 dropdownListAnimations.style.display = 'none';
 
-selectedItemAnimations.addEventListener('click', () => {
-    // Toggle the visibility of the dropdown list for Animations
-    if (dropdownListAnimations.style.display === 'none' || dropdownListAnimations.style.display === '') {
-        dropdownListAnimations.style.display = 'block';
-    } else {
-        dropdownListAnimations.style.display = 'none';
-    }
-});
-
 // Add click event listeners to each dropdown item for Animations
 const dropdownItemsAnimations = document.querySelectorAll('.dropdown-list-animations .dropdown-item');
 dropdownItemsAnimations.forEach((item) => {
     item.addEventListener('click', () => {
+        console.log('Item clicked:', item.textContent); // Debugging statement
+        const selectedAnimationId = parseInt(item.getAttribute('data-animation-id'), 10);
+        console.log('Selected Animation ID:', selectedAnimationId); // Debugging statement
         selectedItemAnimations.textContent = item.textContent;
         dropdownListAnimations.style.display = 'none'; // Compact the dropdown list for Animations
+        console.log('Sending:', 'ChangeAnimationAction' + selectedAnimationId); // Debugging statement
+
+        // Send a WebSocket message for changing the animation
+        sendData('ChangeAnimationAction', { animation: selectedAnimationId });
     });
 });
+
+selectedItemAnimations.addEventListener('click', () => {
+    console.log('Dropdown clicked'); // Debugging statement
+    // Toggle the visibility of the dropdown list for Animations
+    if (dropdownListAnimations.style.display === 'none' || dropdownListAnimations.style.display === '') {
+        console.log('Opening dropdown'); // Debugging statement
+        dropdownListAnimations.style.display = 'block';
+    } else {
+        console.log('Closing dropdown'); // Debugging statement
+        dropdownListAnimations.style.display = 'none';
+    }
+});
+
+
+// Call the init function when the window loads
+window.onload = function (event) {
+    init();
+};
 
 
 // Hue Slider Code

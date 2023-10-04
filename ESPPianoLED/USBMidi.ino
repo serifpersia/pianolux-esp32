@@ -17,7 +17,7 @@ void check_interface_desc_MIDI(const void *p) {
     isMIDI = true;
     ESP_LOGI("", "Claiming a MIDI device!");
     esp_err_t err = usb_host_interface_claim(Client_Handle, Device_Handle,
-                                             intf->bInterfaceNumber, intf->bAlternateSetting);
+                    intf->bInterfaceNumber, intf->bAlternateSetting);
     if (err != ESP_OK) ESP_LOGI("", "usb_host_interface_claim failed: %x", err);
   }
 }

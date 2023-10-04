@@ -6,9 +6,9 @@
 
 class FadeController {
 
-public:
-  FadeController();
-  void fade(int fadeRate);
+  public:
+    FadeController();
+    void fade(int fadeRate);
 };
 
 #endif

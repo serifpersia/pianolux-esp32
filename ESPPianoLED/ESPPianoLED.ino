@@ -70,7 +70,7 @@ boolean isOnStrip(int pos) {
   return pos >= 0 && pos < NUM_LEDS;
 }
 
-uint8_t hue;
+uint8_t hue = 0;
 uint8_t brightness = 255;
 
 uint8_t Slider1Value = 0;
@@ -101,6 +101,19 @@ const int COMMAND_SET_GUIDE = 244;
 const int COMMAND_SET_LED_VISUALIZER = 243;
 int MODE = COMMAND_SET_COLOR;
 int serverMode;
+int animationIndex;
+int splashMaxLength = 8;
+int SPLASH_HEAD_FADE_RATE = 5;
+
+CRGBPalette16 currentPalette;
+TBlendType currentBlending;
+
+extern CRGBPalette16 myRedWhiteBluePalette;
+extern const TProgmemPalette16 myRedWhiteBluePalette_p PROGMEM;
+
+#define UPDATES_PER_SECOND 120
+
+
 float distance(CRGB color1, CRGB color2) {
   return sqrt(pow(color1.r - color2.r, 2) + pow(color1.g - color2.g, 2) + pow(color1.b - color2.b, 2));
 }
@@ -115,18 +128,16 @@ void StartupAnimation() {
 }
 
 void setup() {
-  
+
   Serial.begin(115200);  // init serial port for debugging
-  
+
   usbh_setup(show_config_desc_full); //init usb host for midi devices
-  
+
   FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);         // GRB ordering
   FastLED.setMaxPowerInVoltsAndMilliamps(5, MAX_POWER_MILLIAMPS);  // set power limit
   FastLED.setBrightness(DEFAULT_BRIGHTNESS);
 
   pinMode(builtInLedPin, OUTPUT);
-
-  StartupAnimation();
 
   WiFi.begin(ssid, password);
   Serial.println("Establishing connection to WiFi with SSID: " + String(ssid));
@@ -142,7 +153,7 @@ void setup() {
   // Serve HTML from ESP32 SPIFFS data directory
   if (SPIFFS.begin()) {
     server.serveStatic("/", SPIFFS, "/");
-    server.onNotFound([](AsyncWebServerRequest *request) {
+    server.onNotFound([](AsyncWebServerRequest * request) {
       if (request->url() == "/") {
         request->send(SPIFFS, "/index.html", "text/html");
       } else {
@@ -154,15 +165,15 @@ void setup() {
   }
 
   server.begin();
-  
+
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
 }
 
 void loop() {
-  
+
   currentTime = millis();
-  
+
   webSocket.loop();  // Update function for the webSockets
   usbh_task();
 
@@ -198,6 +209,15 @@ void loop() {
     }
     previousFadeTime = currentTime;
   }
+
+  //Animation
+  if (MODE == COMMAND_ANIMATION) {
+    Animatons(animationIndex);
+    static uint8_t startIndex = 0;
+    startIndex = startIndex + 1; /* motion speed */
+    FillLEDsFromPaletteColors(startIndex);
+  }
+
   FastLED.show();
 }
 
@@ -215,7 +235,7 @@ void controlLeds(int ledNo, int hueVal, int saturationVal, int brightnessVal) {
   Serial.print(saturationVal);
   Serial.print(", ");
   Serial.println(brightnessVal);
-  
+
   // Convert HSB values to RGB values
   CRGB color = CHSV(hueVal, saturationVal, brightnessVal);
   leds[ledNum(ledNo)] = color;  // Set the LED color
@@ -228,28 +248,39 @@ int mapMidiNoteToLED(int midiNote, int lowestNote, int highestNote, int stripLED
   return map(midiNote, lowestNote, highestNote, outMin, outMax);
 }
 
-void noteOn(int note) {
+void noteOn(uint8_t note, uint8_t velocity) {
   int ledIndex = mapMidiNoteToLED(note, 21, 108, 175); // Map MIDI note to LED index
-    keysOn[ledIndex] = true;
+  keysOn[ledIndex] = true;
 
-    if(serverMode == 0)
-    {
-        controlLeds(ledIndex, hue, 255, brightness); // Both use the same index
-    }
-    else if(serverMode == 2)
-    {
-      hue = random(256);
-        controlLeds(ledIndex, hue, 255, brightness); // Both use the same index
-    }
-    digitalWrite(builtInLedPin, HIGH); // Turn on the built-in LED
-    Serial.println("Note On: " + String(note) + " mapped to LED: " + String(ledIndex)); // Debug print  
+  if (serverMode == 0)
+  {
+    controlLeds(ledIndex, hue, 255, brightness); // Both use the same index
+  }
+  else if (serverMode == 1)
+  {
+    CHSV hsv(hue, 255, 255);
+    addEffect(new FadingRunEffect(splashMaxLength, ledIndex, hsv, SPLASH_HEAD_FADE_RATE, velocity));
+  }
+  else if (serverMode == 2)
+  {
+    hue = random(256);
+    controlLeds(ledIndex, hue, 255, brightness); // Both use the same index
+  }
+  else if (serverMode == 3)
+  {
+    int hue, saturation, brightness;
+    setColorFromVelocity(velocity, hue, saturation, brightness);
+    controlLeds(ledIndex, hue, saturation, brightness);
+  }
+  digitalWrite(builtInLedPin, HIGH); // Turn on the built-in LED
+  Serial.println("Note On: " + String(note) + " mapped to LED: " + String(ledIndex)); // Debug print
 }
 
-void noteOff(int note) {
+void noteOff(uint8_t note, uint8_t velocity) {
   int ledIndex = mapMidiNoteToLED(note, 21, 108, 175); // Map MIDI note to LED index
-    keysOn[ledIndex] = false;
-    digitalWrite(builtInLedPin, LOW); // Turn off the built-in LED
-    Serial.println("Note Off: " + String(note) + " mapped to LED: " + String(ledIndex)); // Debug print
+  keysOn[ledIndex] = false;
+  digitalWrite(builtInLedPin, LOW); // Turn off the built-in LED
+  Serial.println("Note Off: " + String(note) + " mapped to LED: " + String(ledIndex)); // Debug print
 }
 
 
@@ -272,7 +303,7 @@ void sliderAction(int sliderNumber, int value) {
     FastLED.setBrightness(value);
   }
 
-    else if (sliderNumber == 3) {
+  else if (sliderNumber == 3) {
     generalFadeRate = value;
   }
   Serial.print("Slider ");
@@ -284,13 +315,65 @@ void sliderAction(int sliderNumber, int value) {
 //Change LED Mode
 void changeLEDModeAction(int serverMode)
 {
+  blackout();
+  generalFadeRate = 255;
+
   //Default Mode
-  if(serverMode == 0)
+  if (serverMode == 0)
   {
     MODE = COMMAND_SET_COLOR;
     hue = clientHueVal;
   }
+
+  else if (serverMode == 1)
+  {
+    generalFadeRate = 50;
+    MODE = COMMAND_SPLASH;
+
+  }
+
+  else if (serverMode == 3)
+  {
+    MODE = COMMAND_VELOCITY;
+  }
+  else if (serverMode == 4)
+  {
+    MODE = COMMAND_ANIMATION;
+    generalFadeRate = 0;
+    animationIndex = 0;
+  }
 }
+
+void blackout()
+{
+  fill_solid(leds, NUM_LEDS, bgColor);
+  MODE = COMMAND_BLACKOUT;
+}
+
+void setColorFromVelocity(int velocity, int& hue, int& saturation, int& brightness) {
+  static int previousVelocity = 0;
+
+  // Calculate the smoothed velocity as a weighted average
+  int smoothedVelocity = (velocity + previousVelocity * 3) / 4;
+  previousVelocity = smoothedVelocity;
+
+  // Map smoothed velocity to hue value (green is 0° and red is 120° in HSV color space)
+  hue = map(smoothedVelocity, 16, 80, 75, 255);
+
+  // Clamp the hue value within the valid range
+  hue = constrain(hue, 75, 255);
+
+  // Map smoothed velocity to brightness value (higher velocity means higher brightness)
+  brightness = map(smoothedVelocity, 16, 80, 65, 255);
+
+  // Clamp the brightness value within the valid range
+  brightness = constrain(brightness, 65, 255);
+
+  // Set saturation to a fixed value (e.g., 255 for fully saturated color)
+  saturation = 255;
+}
+
+
 // Add a new effect
 void addEffect(FadingRunEffect* effect) {
   if (numEffects < MAX_EFFECTS) {

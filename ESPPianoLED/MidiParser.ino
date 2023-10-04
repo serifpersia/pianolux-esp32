@@ -70,9 +70,9 @@ static void midi_transfer_cb(usb_transfer_t *transfer) {
 
         // Execute noteOn or noteOff based on the MIDI statusByte
         if (statusByte >= 0x80 && statusByte < 0x90) {
-          noteOff(note);
+          noteOff(note,velocity);
         } else if (statusByte >= 0x90 && statusByte < 0xA0) {
-          noteOn(note);
+          noteOn(note,velocity);
         }
       }
       esp_err_t err = usb_host_transfer_submit(transfer);
