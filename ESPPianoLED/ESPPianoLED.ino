@@ -20,20 +20,24 @@ elapsedMillis MIDIOutTimer;
 #define MAX_POWER_MILLIAMPS 450  // Define current limit if you are using 5V pin from Arduino
 #define MAX_EFFECTS 128
 
-// SSID and password of Wifi connection:
-const char *ssid = "";      // Your WiFi SSID
-const char *password = "";  // Your WiFi password
+// SSID and password that are going to be used for the Access Point you will create -> DONT use the SSID/Password of your router:
+const char* ssid = "PianoLED AP";
+const char* password = "pianoled-esp32";
 
+// Configure IP addresses of the local access point
+IPAddress local_IP(192, 168, 1, 22);
+IPAddress gateway(192, 168, 1, 5);
+IPAddress subnet(255, 255, 255, 0);
 // Initialization of webserver and websocket
 AsyncWebServer server(80);
 WebSocketsServer webSocket(81);
 
 int DEFAULT_BRIGHTNESS = 255;
-int NUM_LEDS = 176;             // How many LEDs you want to control
-int STRIP_DIRECTION = 0;        // 0 - left-to-right
+int NUM_LEDS = 176;       // How many LEDs you want to control
+int STRIP_DIRECTION = 0;  // 0 - left-to-right
 
 int NOTES = 12;
-int generalFadeRate = 255;        // General fade rate, bigger value means quicker fade (configurable via App)
+int generalFadeRate = 255;  // General fade rate, bigger value means quicker fade (configurable via App)
 int numEffects = 0;
 int lowestNote = 21;    // MIDI note A0
 int highestNote = 108;  // MIDI note C8 (adjust as needed)
@@ -83,7 +87,7 @@ unsigned long previousFadeTime = 0;
 unsigned long interval = 20;      // General refresh interval in milliseconds
 unsigned long fadeInterval = 20;  // General fade interval in milliseconds
 
-const int builtInLedPin = 2; // Pin for built-in LED
+const int builtInLedPin = 2;  // Pin for built-in LED
 const int MAX_VELOCITY = 128;
 
 const int COMMAND_SET_COLOR = 255;
@@ -130,30 +134,26 @@ void StartupAnimation() {
 void setup() {
 
   Serial.begin(115200);  // init serial port for debugging
+  pinMode(builtInLedPin, OUTPUT);
 
-  usbh_setup(show_config_desc_full); //init usb host for midi devices
-
+  usbh_setup(show_config_desc_full);                               //init usb host for midi devices
   FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);         // GRB ordering
   FastLED.setMaxPowerInVoltsAndMilliamps(5, MAX_POWER_MILLIAMPS);  // set power limit
   FastLED.setBrightness(DEFAULT_BRIGHTNESS);
 
-  pinMode(builtInLedPin, OUTPUT);
+  Serial.print("Setting up Access Point ... ");
+  Serial.println(WiFi.softAPConfig(local_IP, gateway, subnet) ? "Ready" : "Failed!");
 
-  WiFi.begin(ssid, password);
-  Serial.println("Establishing connection to WiFi with SSID: " + String(ssid));
+  Serial.print("Starting Access Point ... ");
+  Serial.println(WiFi.softAP(ssid, password) ? "Ready" : "Failed!");
 
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(1000);
-    Serial.print(".");
-  }
-
-  Serial.print("Connected to network with IP address: ");
-  Serial.println(WiFi.localIP());
+  Serial.print("IP address = ");
+  Serial.println(WiFi.softAPIP());
 
   // Serve HTML from ESP32 SPIFFS data directory
   if (SPIFFS.begin()) {
     server.serveStatic("/", SPIFFS, "/");
-    server.onNotFound([](AsyncWebServerRequest * request) {
+    server.onNotFound([](AsyncWebServerRequest* request) {
       if (request->url() == "/") {
         request->send(SPIFFS, "/index.html", "text/html");
       } else {
@@ -249,38 +249,31 @@ int mapMidiNoteToLED(int midiNote, int lowestNote, int highestNote, int stripLED
 }
 
 void noteOn(uint8_t note, uint8_t velocity) {
-  int ledIndex = mapMidiNoteToLED(note, 21, 108, 175); // Map MIDI note to LED index
+  int ledIndex = mapMidiNoteToLED(note, 21, 108, 175);  // Map MIDI note to LED index
   keysOn[ledIndex] = true;
 
-  if (serverMode == 0)
-  {
-    controlLeds(ledIndex, hue, 255, brightness); // Both use the same index
-  }
-  else if (serverMode == 1)
-  {
+  if (serverMode == 0) {
+    controlLeds(ledIndex, hue, 255, brightness);  // Both use the same index
+  } else if (serverMode == 1) {
     CHSV hsv(hue, 255, 255);
     addEffect(new FadingRunEffect(splashMaxLength, ledIndex, hsv, SPLASH_HEAD_FADE_RATE, velocity));
-  }
-  else if (serverMode == 2)
-  {
+  } else if (serverMode == 2) {
     hue = random(256);
-    controlLeds(ledIndex, hue, 255, brightness); // Both use the same index
-  }
-  else if (serverMode == 3)
-  {
+    controlLeds(ledIndex, hue, 255, brightness);  // Both use the same index
+  } else if (serverMode == 3) {
     int hue, saturation, brightness;
     setColorFromVelocity(velocity, hue, saturation, brightness);
     controlLeds(ledIndex, hue, saturation, brightness);
   }
-  digitalWrite(builtInLedPin, HIGH); // Turn on the built-in LED
-  Serial.println("Note On: " + String(note) + " mapped to LED: " + String(ledIndex)); // Debug print
+  digitalWrite(builtInLedPin, HIGH);                                                   // Turn on the built-in LED
+  Serial.println("Note On: " + String(note) + " mapped to LED: " + String(ledIndex));  // Debug print
 }
 
 void noteOff(uint8_t note, uint8_t velocity) {
-  int ledIndex = mapMidiNoteToLED(note, 21, 108, 175); // Map MIDI note to LED index
+  int ledIndex = mapMidiNoteToLED(note, 21, 108, 175);  // Map MIDI note to LED index
   keysOn[ledIndex] = false;
-  digitalWrite(builtInLedPin, LOW); // Turn off the built-in LED
-  Serial.println("Note Off: " + String(note) + " mapped to LED: " + String(ledIndex)); // Debug print
+  digitalWrite(builtInLedPin, LOW);                                                     // Turn off the built-in LED
+  Serial.println("Note Off: " + String(note) + " mapped to LED: " + String(ledIndex));  // Debug print
 }
 
 
@@ -313,39 +306,32 @@ void sliderAction(int sliderNumber, int value) {
 }
 
 //Change LED Mode
-void changeLEDModeAction(int serverMode)
-{
+void changeLEDModeAction(int serverMode) {
   blackout();
   generalFadeRate = 255;
 
   //Default Mode
-  if (serverMode == 0)
-  {
+  if (serverMode == 0) {
     MODE = COMMAND_SET_COLOR;
     hue = clientHueVal;
   }
 
-  else if (serverMode == 1)
-  {
+  else if (serverMode == 1) {
     generalFadeRate = 50;
     MODE = COMMAND_SPLASH;
 
   }
 
-  else if (serverMode == 3)
-  {
+  else if (serverMode == 3) {
     MODE = COMMAND_VELOCITY;
-  }
-  else if (serverMode == 4)
-  {
+  } else if (serverMode == 4) {
     MODE = COMMAND_ANIMATION;
     generalFadeRate = 0;
     animationIndex = 0;
   }
 }
 
-void blackout()
-{
+void blackout() {
   fill_solid(leds, NUM_LEDS, bgColor);
   MODE = COMMAND_BLACKOUT;
 }
