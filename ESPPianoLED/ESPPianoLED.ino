@@ -20,14 +20,30 @@ elapsedMillis MIDIOutTimer;
 #define MAX_POWER_MILLIAMPS 450  // Define current limit if you are using 5V pin from Arduino
 #define MAX_EFFECTS 128
 
-// SSID and password that are going to be used for the Access Point you will create -> DONT use the SSID/Password of your router:
-const char* ssid = "PianoLED AP";
-const char* password = "pianoled-esp32";
+//In Router Mode ESP32 connects to your Wifi network and you can acces the web
+//server on any device that is connected on that network PC,Laptop,Tablet,Smartphone
+
+//In AP Mode you connect to ESP32's Wifi hotspot
+
+//Default Mode is Router Mode, follow instructions(comment/uncomment and fill correct details below and in setup())
+
+
+//Use this to setup AP MODE uncomment(remove //)
+// SSID and password that are going to be used for the Access Point
+//const char* ssid = "PianoLED AP";
+//const char* password = "pianoled-esp32";
 
 // Configure IP addresses of the local access point
-IPAddress local_IP(192, 168, 1, 22);
-IPAddress gateway(192, 168, 1, 5);
-IPAddress subnet(255, 255, 255, 0);
+//IPAddress local_IP(192, 168, 1, 22);
+//IPAddress gateway(192, 168, 1, 5);
+//IPAddress subnet(255, 255, 255, 0);
+
+//Use This to setup Router MODE
+// SSID and password from your router's Wifi network
+const char* ssid = "your_wifi"; //fill with your router's wifi name
+const char* password = "your_wifi_password"; //fill with your router's wifi passwod
+
+
 // Initialization of webserver and websocket
 AsyncWebServer server(80);
 WebSocketsServer webSocket(81);
@@ -132,28 +148,20 @@ void StartupAnimation() {
 }
 
 void setup() {
-
   Serial.begin(115200);  // init serial port for debugging
   pinMode(builtInLedPin, OUTPUT);
 
-  usbh_setup(show_config_desc_full);                               //init usb host for midi devices
+  //Router MODE //comment line bellow and remove comments from way above to setup as AP MODE!
+  WiFi.begin(ssid, password);
+
   FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);         // GRB ordering
   FastLED.setMaxPowerInVoltsAndMilliamps(5, MAX_POWER_MILLIAMPS);  // set power limit
   FastLED.setBrightness(DEFAULT_BRIGHTNESS);
 
-  Serial.print("Setting up Access Point ... ");
-  Serial.println(WiFi.softAPConfig(local_IP, gateway, subnet) ? "Ready" : "Failed!");
-
-  Serial.print("Starting Access Point ... ");
-  Serial.println(WiFi.softAP(ssid, password) ? "Ready" : "Failed!");
-
-  Serial.print("IP address = ");
-  Serial.println(WiFi.softAPIP());
-
   // Serve HTML from ESP32 SPIFFS data directory
   if (SPIFFS.begin()) {
     server.serveStatic("/", SPIFFS, "/");
-    server.onNotFound([](AsyncWebServerRequest* request) {
+    server.onNotFound([](AsyncWebServerRequest * request) {
       if (request->url() == "/") {
         request->send(SPIFFS, "/index.html", "text/html");
       } else {
@@ -168,6 +176,8 @@ void setup() {
 
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
+
+  usbh_setup(show_config_desc_full);  //init usb host for midi devices
 }
 
 void loop() {
@@ -298,6 +308,10 @@ void sliderAction(int sliderNumber, int value) {
 
   else if (sliderNumber == 3) {
     generalFadeRate = value;
+  }
+
+  else if (sliderNumber == 4) {
+    splashMaxLength = value;
   }
   Serial.print("Slider ");
   Serial.print(sliderNumber);

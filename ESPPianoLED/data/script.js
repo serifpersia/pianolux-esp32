@@ -49,21 +49,27 @@ document.getElementById('BTN_COLOR').addEventListener('click', function () {
 
 document.getElementById('HUE').addEventListener('input', function () {
     var value = parseInt(document.getElementById('HUE').value);
-    sendData('SliderAction1', { value: value });
+    sendData('Hue', { value: value });
     console.log(value);
 });
 
 document.getElementById('BRIGHTNESS').addEventListener('input', function () {
     var value = parseInt(document.getElementById('BRIGHTNESS').value);
-    sendData('SliderAction2', { value: value });
+    sendData('Brightness', { value: value });
     console.log(value);
 });
 
 document.getElementById('FADE').addEventListener('input', function () {
     var value = parseInt(document.getElementById('FADE').value);
     var invertedValue = 255 - value;
-    sendData('SliderAction3', { value: invertedValue });
+    sendData('Fade', { value: invertedValue });
     console.log(invertedValue);
+});
+
+document.getElementById('SPLASH').addEventListener('input', function () {
+    var value = parseInt(document.getElementById('SPLASH').value);
+    sendData('Splash', { value: value });
+    console.log(value);
 });
 
 
@@ -464,3 +470,95 @@ fadeTrack.addEventListener('click', (e) => {
 });
 
 
+
+// Splash slider
+const splashThumb = document.querySelector('.splash-slider .thumb');
+const splashTrack = document.querySelector('.splash-slider .track');
+const splashValueInput = document.getElementById('SPLASH');
+let isSplashDragging = false;
+
+// Function to handle mouse and touch move
+function handleSplashMove(xPosition) {
+    const maxPosition = splashTrack.offsetWidth - splashThumb.offsetWidth;
+    const minPosition = 0;
+
+    // Ensure the thumb stays within the track bounds
+    xPosition = Math.max(minPosition, Math.min(xPosition, maxPosition));
+
+    splashThumb.style.left = xPosition + 'px';
+
+    // Calculate the splash value based on thumb position
+    const splash = Math.round((xPosition / maxPosition) * 16);
+
+    splashValueInput.value = splash;
+
+    // Trigger the input event manually on the splash slider
+    const inputEvent = new Event('input', {
+        bubbles: true,
+        cancelable: true,
+    });
+    splashValueInput.dispatchEvent(inputEvent);
+}
+
+// Mouse drag
+splashThumb.addEventListener('mousedown', (e) => {
+    isSplashDragging = true;
+    splashThumb.style.transition = 'none';
+    const offsetX = e.clientX - splashThumb.getBoundingClientRect().left;
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+
+    function onMouseMove(e) {
+        if (!isSplashDragging) return;
+
+        const newPosition = e.clientX - splashTrack.getBoundingClientRect().left - offsetX;
+        handleSplashMove(newPosition);
+    }
+
+    function onMouseUp() {
+        isSplashDragging = false;
+        splashThumb.style.transition = 'left 0.3s ease'; // Restore smooth transition
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+    }
+});
+
+// Touch event handling for mobile devices
+splashThumb.addEventListener('touchstart', (e) => {
+    isSplashDragging = true;
+    splashThumb.style.transition = 'none';
+    const offsetX = e.touches[0].clientX - splashThumb.getBoundingClientRect().left;
+
+    document.addEventListener('touchmove', onTouchMove);
+    document.addEventListener('touchend', onTouchEnd);
+
+    function onTouchMove(e) {
+        if (!isSplashDragging) return;
+
+        const newPosition = e.touches[0].clientX - splashTrack.getBoundingClientRect().left - offsetX;
+        handleSplashMove(newPosition);
+    }
+
+    function onTouchEnd() {
+        isSplashDragging = false;
+        splashThumb.style.transition = 'left 0.3s ease'; // Restore smooth transition
+        document.removeEventListener('touchmove', onTouchMove);
+        document.removeEventListener('touchend', onTouchEnd);
+    }
+});
+
+// Track click
+splashTrack.addEventListener('click', (e) => {
+    const clickX = e.clientX - splashTrack.getBoundingClientRect().left;
+    const thumbPosition = clickX - splashThumb.offsetWidth / 2;
+    handleSplashMove(thumbPosition);
+
+    // Restore smooth transition for the thumb
+    splashThumb.style.transition = 'left 0.3s ease';
+});
+
+const initialSplash = parseInt(splashValueInput.value);
+const maxSplash = 16;
+const initialSplashPosition = (initialSplash / maxSplash) * (splashTrack.offsetWidth - splashThumb.offsetWidth);
+splashThumb.style.left = initialSplashPosition + 'px';

@@ -16,15 +16,19 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
       String action = doc["action"];
       if (action == "ChangeColor") {
         changeLEDColor();
-      } else if (action == "SliderAction1") {
+      } else if (action == "Hue") {
         int value = doc["value"];
         sliderAction(1, value);
-      } else if (action == "SliderAction2") {
+      } else if (action == "Brightness") {
         int value = doc["value"];
         sliderAction(2, value);
-      } else if (action == "SliderAction3") {
+      } else if (action == "Fade") {
         int value = doc["value"];
         sliderAction(3, value);
+      }
+      else if (action == "Splash") {
+        int value = doc["value"];
+        sliderAction(4, value);
       } else if (action == "ChangeLEDModeAction") {
         serverMode = doc["mode"];
         changeLEDModeAction(serverMode);
