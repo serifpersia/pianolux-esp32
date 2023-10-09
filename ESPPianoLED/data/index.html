@@ -88,60 +88,70 @@
                         </div>
                     </div>
                 </div>
-                <label for="HUE">Hue</label>
-                <div class="hue-slider">
-                    <div class="track"></div>
-                    <div class="thumb"></div>
-                    <input type="hidden" id="HUE" name="hue" min="0" max="255" value="0">
-                </div>
-                <label for="BRIGHTNESS">Brightness</label>
-                <div class="brightness-slider">
-                    <div class="track"></div>
-                    <div class="thumb"></div>
-                    <input type="hidden" id="BRIGHTNESS" name="brighntess" min="0" max="255" value="255">
-                </div>
-                <label for="FADE">Fade</label>
-                <div class="fade-slider">
-                    <div class="track"></div>
-                    <div class="thumb"></div>
-                    <input type="hidden" id="FADE" name="fade" min="0" max="255" value="0">
-                </div>
-                <label for="SPLASH">Splash Length</label>
-                <div class="splash-slider">
-                    <div class="track"></div>
-                    <div class="thumb"></div>
-                    <input type="hidden" id="SPLASH" name="splash" min="0" max="16" value="8">
-                </div>
-                <label for="BG">Background Light</label>
-                <div class="bg-slider">
-                    <div class="track"></div>
-                    <div class="thumb"></div>
-                    <input type="hidden" id="BG" name="bg" min="0" max="100" value="50">
+                <div class="control">
+                    <label for="HUE">Hue</label>
+                    <div class="hue-slider">
+                        <div class="track"></div>
+                        <div class="thumb"></div>
+                        <input type="hidden" id="HUE" name="hue" min="0" max="255" value="0">
+                    </div>
                 </div>
                 <div class="control">
-                    <button id="<" class="rgbbuttons">Left</button>
-                    <button id=">" class="rgbbuttons">Right</button>
-                    <button id="1:1" class="rgbbuttons">1:1</button>
+                    <label for="BRIGHTNESS">Brightness</label>
+                    <div class="brightness-slider">
+                        <div class="track"></div>
+                        <div class="thumb"></div>
+                        <input type="hidden" id="BRIGHTNESS" name="brighntess" min="0" max="255" value="255">
+                    </div>
+                </div> 
+                <div class="control">
+                    <label for="FADE">Fade</label>
+                    <div class="fade-slider">
+                        <div class="track"></div>
+                        <div class="thumb"></div>
+                        <input type="hidden" id="FADE" name="fade" min="0" max="255" value="0">
+                    </div>
                 </div>
-
-                <div class="toggles">
-                <div class="checkbox-wrapper-8">
-                    <input type="checkbox" id="cb1-8" class="tgl tgl-skewed">
-                    <label for="cb1-8" data-tg-on="ON" data-tg-off="OFF" class="tgl-btn"></label>
-                    <p class="toggleLabel">test</p>
+                <div class="control">
+                    <label for="SPLASH">Splash Length</label>
+                    <div class="splash-slider">
+                        <div class="track"></div>
+                        <div class="thumb"></div>
+                        <input type="hidden" id="SPLASH" name="splash" min="0" max="16" value="8">
+                    </div>
                 </div>
-
-                <div class="checkbox-wrapper-8">
-                    <input type="checkbox" id="cb2-8" class="tgl tgl-skewed">
-                    <label for="cb2-8" data-tg-on="ON" data-tg-off="OFF" class="tgl-btn"></label>
-                    <p class="toggleLabel">test</p>
+                <div class="control">
+                    <label for="BG">Background Light</label>
+                    <div class="bg-slider">
+                        <div class="track"></div>
+                        <div class="thumb"></div>
+                        <input type="hidden" id="BG" name="bg" min="0" max="100" value="50">
+                    </div>
                 </div>
-
-                <div class="checkbox-wrapper-8">
-                    <input type="checkbox" id="cb3-8" class="tgl tgl-skewed">
-                    <label for="cb3-8" data-tg-on="ON" data-tg-off="OFF" class="tgl-btn"></label>
-                    <p class="toggleLabel">test</p>
-                </div>
+                    <div class="buttons">
+                        <button id="PianoSize">88 Key</button>
+                        <button id="1:1">1:1</button>
+                    </div>
+                    <div class="toggle-labels">
+                        <label>FX LED</label>
+                        <label>BG LED</label>
+                        <label>RV LED</label>
+                    </div>
+                <div class="control">
+                    <div class="toggles">
+                        <div class="checkbox-wrapper-8">
+                            <input type="checkbox" id="cb1-8" class="tgl tgl-skewed">
+                            <label for="cb1-8" data-tg-on="ON" data-tg-off="OFF" class="tgl-btn"></label>
+                        </div>
+                        <div class="checkbox-wrapper-8">
+                            <input type="checkbox" id="cb2-8" class="tgl tgl-skewed">
+                            <label for="cb2-8" data-tg-on="ON" data-tg-off="OFF" class="tgl-btn"></label>
+                        </div>
+                        <div class="checkbox-wrapper-8">
+                            <input type="checkbox" id="cb3-8" class="tgl tgl-skewed">
+                            <label for="cb3-8" data-tg-on="ON" data-tg-off="OFF" class="tgl-btn"></label>
+                        </div>
+                    </div>
                 </div>
             </section>
             <section class="card" id="card-2">
