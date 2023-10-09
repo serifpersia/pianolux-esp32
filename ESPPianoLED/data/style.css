@@ -103,14 +103,16 @@ main {
     padding: 30px;
     margin-top: 80px;
     border-radius: 40px;
-    height: 1050px;
+    height: auto;
     scroll-margin-block-start: 100px;
 }
 
 /* Style control labels and inputs */
 .control {
+    display: flex;
     margin-top: 25px;
     margin-bottom: 15px;
+    width: 100%;
 }
 
 label {
@@ -612,6 +614,30 @@ footer {
     padding: 15px;
 }
 
+.rgbbuttons{
+    margin-right: 20px;
+    width: 100%;
+}
+
+.toggles{
+    display: block;
+    align-items: center;
+    justify-content: center;
+    padding-left: 5px;
+}
+
+.toggleLabel{
+    display: flex;
+    color: white;
+    font-weight: bolder;
+    padding-left: 10px;
+}
+
+.checkbox-wrapper-8{
+    flex-direction: column;
+    padding-bottom: 5px;
+    padding-top: 5px;
+}
 
 .checkbox-wrapper-8 .tgl {
     display: none;
