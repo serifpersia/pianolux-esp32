@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>PianoLED - ESP32</title>
+        <link rel="stylesheet" type="text/css" href="style.css">
+    </head>
+    <body>
+        <header>
+            <div class="logo">
+                <svg viewBox="0 0 350 350" class="piano-svg">
+                    <!-- C Key (White) -->
+                    <rect x="4" y="4" width="100" height="300" rx="20" ry="20" fill="white" stroke="red" stroke-width="8" />
+
+                    <!-- D Key (White) -->
+                    <rect x="121" y="4" width="100" height="300" rx="20" ry="20" fill="white" stroke="green" stroke-width="8" />
+
+                    <!-- E Key (White) -->
+                    <rect x="239" y="4" width="100" height="300" rx="20" ry="20" fill="white" stroke="blue" stroke-width="8" />
+
+                    <!-- C# Key (Black) -->
+                    <rect x="80" y="-4" width="65" height="200" rx="20" ry="20" fill="black" />
+
+                    <!-- D# Key (Black) -->
+                    <rect x="196" y="-4" width="65" height="200" rx="20" ry="20" fill="black" />
+                </svg>
+
+                <h1 class="pianoled">PianoLED</h1>
+            </div>
+        </header>
+        <div class="navbar">
+            <a href="#card-1">
+                <span class="controls-icon">
+                    <svg width="55" height="55" viewBox="0 0 500 500">
+                        <!-- Your SVG code here -->
+                        <!-- Top Slider-->
+                        <rect x="50" y="50" width="400" height="50" rx="25" ry="25" fill="white" />
+                        <circle cx="300" cy="75" r="45" fill="#006AFF" />
+                        <!-- Middle Slider-->
+                        <rect x="50" y="200" width="400" height="50" rx="25" ry="25" fill="white" />
+                        <circle cx="150" cy="225" r="45" fill="#006AFF" />
+                        <!-- Bottom Slider-->
+                        <rect x="50" y="350" width="400" height="50" rx="25" ry="25" fill="white" />
+                        <circle cx="300" cy="375" r="45" fill="#006AFF" />
+                    </svg>
+                </span>
+            </a>
+            <a href="#card-2">
+                <span class="mode-settings-icon">
+                    <svg fill="white" width="55" height="55" viewBox="0 0 50 50">
+                        <path d="M43.454,18.443h-2.437c-0.453-1.766-1.16-3.42-2.082-4.933l1.752-1.756c0.473-0.473,0.733-1.104,0.733-1.774c0-0.669-0.262-1.301-0.733-1.773l-2.92-2.917c-0.947-0.948-2.602-0.947-3.545-0.001l-1.826,1.815C30.9,6.232,29.296,5.56,27.529,5.128V2.52c0-1.383-1.105-2.52-2.488-2.52h-4.128c-1.383,0-2.471,1.137-2.471,2.52v2.607c-1.766,0.431-3.38,1.104-4.878,1.977l-1.825-1.815c-0.946-0.948-2.602-0.947-3.551-0.001L5.27,8.205C4.802,8.672,4.535,9.318,4.535,9.978c0,0.669,0.259,1.299,0.733,1.772l1.752,1.76c-0.921,1.513-1.629,3.167-2.081,4.933H2.501C1.117,18.443,0,19.555,0,20.935v4.125c0,1.384,1.117,2.471,2.501,2.471h2.438c0.452,1.766,1.159,3.43,2.079,4.943l-1.752,1.763c-0.474,0.473-0.734,1.106-0.734,1.776s0.261,1.303,0.734,1.776l2.92,2.919c0.474,0.473,1.103,0.733,1.772,0.733s1.299-0.261,1.773-0.733l1.833-1.816c1.498,0.873,3.112,1.545,4.878,1.978v2.604c0,1.383,1.088,2.498,2.471,2.498h4.128c1.383,0,2.488-1.115,2.488-2.498v-2.605c1.767-0.432,3.371-1.104,4.869-1.977l1.817,1.812c0.474,0.475,1.104,0.735,1.775,0.735c0.67,0,1.301-0.261,1.774-0.733l2.92-2.917c0.473-0.472,0.732-1.103,0.734-1.772c0-0.67-0.262-1.299-0.734-1.773l-1.75-1.77c0.92-1.514,1.627-3.179,2.08-4.943h2.438c1.383,0,2.52-1.087,2.52-2.471v-4.125C45.973,19.555,44.837,18.443,43.454,18.443z M22.976,30.85c-4.378,0-7.928-3.517-7.928-7.852c0-4.338,3.55-7.85,7.928-7.85c4.379,0,7.931,3.512,7.931,7.85C30.906,27.334,27.355,30.85,22.976,30.85z"></path>
+                    </svg>
+
+                </span>
+            </a>
+        </div>
+        <main>
+            <section class="card" id="card-1">
+                <div class="control">
+                    <label for="custom-dropdown-modes">LED Mode:</label>
+                    <div class="custom-dropdown">
+                        <div class="selected-item" id="selected-item-modes">Select LED Mode</div>
+                        <div class="dropdown-list-modes" id="dropdown-list-modes">
+                            <div class="dropdown-item" data-mode-id="0">Default</div>
+                            <div class="dropdown-item" data-mode-id="1">Splash</div>
+                            <div class="dropdown-item" data-mode-id="2">Random</div>
+                            <div class="dropdown-item" data-mode-id="3">Velocity</div>
+                            <div class="dropdown-item" data-mode-id="4">Animation</div>
+                            <div class="dropdown-item" data-mode-id="5">Gradient</div>
+                            <div class="dropdown-item" data-mode-id="6">MultiColor</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control">
+                    <label for="custom-dropdown-animations">Animation:</label>
+                    <div class="custom-dropdown">
+                        <div class="selected-item" id="selected-item-animations">Select Animation</div>
+                        <div class="dropdown-list-animations" id="dropdown-list-animations">
+                            <div class="dropdown-item" data-animation-id="0">RainbowColors</div>
+                            <div class="dropdown-item" data-animation-id="1">RainbowColorsStripeColors</div>
+                            <div class="dropdown-item" data-animation-id="2">OceanColors</div>
+                            <div class="dropdown-item" data-animation-id="3">CloudColors</div>
+                            <div class="dropdown-item" data-animation-id="4">LavaColors</div>
+                            <div class="dropdown-item" data-animation-id="5">ForestColors</div>
+                            <div class="dropdown-item" data-animation-id="6">PartyColors</div>
+                        </div>
+                    </div>
+                </div>
+                <label for="hueLabel">Hue</label>
+                <label for="hue-slider">Hue</label>
+                <div class="hue-slider">
+                    <div class="track"></div>
+                    <div class="thumb"></div>
+                    <input type="hidden" id="HUE" name="hue" min="0" max="255" value="0">
+                </div>
+                <label for="slider2">Brightness</label>
+                <label for="brightness-slider">Brightness</label>
+                <div class="brightness-slider">
+                    <div class="track"></div>
+                    <div class="thumb"></div>
+                    <input type="hidden" id="BRIGHTNESS" name="brighntess" min="0" max="255" value="255">
+                </div>
+                <label for="slider2">Fade</label>
+                <label for="fade-slider">Fade</label>
+                <div class="fade-slider">
+                    <div class="track"></div>
+                    <div class="thumb"></div>
+                    <input type="hidden" id="FADE" name="fade" min="0" max="255" value="0">
+                </div>
+                <div class="control">
+                    <label for="BTN_COLOR">Button 1:</label>
+                    <button id="BTN_COLOR">ChangeColor</button>
+                </div>
+                <br>
+                <div class="checkbox-wrapper-8">
+                    <input type="checkbox" id="cb3-8" class="tgl tgl-skewed">
+                    <label for="cb3-8" data-tg-on="ON" data-tg-off="OFF" class="tgl-btn"></label>
+                </div>
+            </section>
+            <label for="splash-slider">Splash Length</label>
+            <div class="splash-slider">
+                <div class="track"></div>
+                <div class="thumb"></div>
+                <input type="hidden" id="SPLASH" name="splash" min="0" max="16" value="8">
+            </div>
+            <label for="bg-slider">Background Light</label>
+            <div class="bg-slider">
+                <div class="track"></div>
+                <div class="thumb"></div>
+                <input type="hidden" id="BG" name="bg" min="0" max="100" value="50">
+            </div>
+            <div class="control">
+                <button id="<"><</button>
+                    <button id="<">></button>
+                    <button id="1:1">1:1</button>
+                    </div>
+                <br>
+                <div class="checkbox-wrapper-8">
+                    <input type="checkbox" id="cb3-8" class="tgl tgl-skewed">
+                    <label for="cb3-8" data-tg-on="ON" data-tg-off="OFF" class="tgl-btn"></label>
+                </div>
+                <div class="checkbox-wrapper-8">
+                    <input type="checkbox" id="cb3-8" class="tgl tgl-skewed">
+                    <label for="cb3-8" data-tg-on="ON" data-tg-off="OFF" class="tgl-btn"></label>
+                </div>
+                <div class="checkbox-wrapper-8">
+                    <input type="checkbox" id="cb3-8" class="tgl tgl-skewed">
+                    <label for="cb3-8" data-tg-on="ON" data-tg-off="OFF" class="tgl-btn"></label>
+                </div>
+                <div class="checkbox-wrapper-8">
+                    <input type="checkbox" id="cb3-8" class="tgl tgl-skewed">
+                    <label for="cb3-8" data-tg-on="ON" data-tg-off="OFF" class="tgl-btn"></label>
+                </div>
+                </section>
+            <section class="card" id="card-2">
+                <h2>Section 2</h2>
+            </section>
+        </main>
+        <footer>
+            <p>&copy; 2023 serifpersia</p>
+        </footer>
+        <script src="script.js"></script>
+    </body>
+</html>
