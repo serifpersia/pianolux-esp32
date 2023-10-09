@@ -25,15 +25,17 @@ h1
 }
 
 @media (min-width: 768px) {
-    .logo{
-        justify-content: center;
-    }
     .piano-svg {
         width: 300px;
         height: 300px;
     }
     h1{
         font-size: 100px;
+    }
+
+    .buttons button{
+        height: 100px;
+        font-size: 50px;
     }
 }
 
@@ -93,31 +95,28 @@ h2 {
 main {
     max-width: auto;
     padding: 35px;
-    padding-top: 10px;
     background-color: #191919;
 }
 
 /* Add card styling to sections */
 .card {
-    background-color: #323232;
-    padding: 30px;
-    margin-top: 15px;
-    border-radius: 40px;
-    height: 700px;
+    //  background-color: #323232;
+    //  border-radius: 35px;
     scroll-margin-block-start: 100px;
 }
 
-/* Style control labels and inputs */
+
 .control {
-    margin-bottom: 15px;
+    padding-bottom: 30px;
 }
 
 label {
-    display: block;
     font-weight: bold;
     color: #fff;
-    margin-top: 20px;
-    margin-bottom: 20px;
+    display: flex;
+    padding-top: 15px;
+    padding-bottom: 15px;
+
 }
 
 input[type="range"] {
@@ -197,13 +196,13 @@ input:checked + .slider:before {
 }
 
 .dropdown-list-modes {
-    max-height: 180px; /* Maximum height to display 6 items */
+    max-height: 210px; /* Maximum height to display 6 items */
     overflow-y: auto; /* Enable vertical scrollbar if needed */
     display: none;
 }
 
 .dropdown-list-animations {
-    max-height: 180px; /* Maximum height to display 6 items */
+    max-height: 210px; /* Maximum height to display 6 items */
     overflow-y: auto; /* Enable vertical scrollbar if needed */
     display: none;
 }
@@ -332,6 +331,238 @@ input:checked + .slider:before {
     box-shadow: 0 0 0 6px white; /* Add a white edge (bezel) with a specified width */
 }
 
+/* Updated CSS for the brightness slider */
+.brightness-slider {
+    position: relative;
+    width: 100%;
+    height: 40px; /* Adjust the height as needed */
+}
+
+.brightness-slider .track {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, #000, transparent); /* Gradient from black to transparent */
+    border-radius: 10px;
+}
+
+.brightness-slider .thumb {
+    position: absolute;
+    width:  45px; /* Adjust the thumb width as needed */
+    height: 45px; /* Adjust the thumb height as needed */
+    background-color: white;
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 0;
+    cursor: pointer;
+    box-shadow: 0 0 0 6px white; /* Add a white edge (bezel) with a specified width */
+}
+
+/* Updated CSS for the fade slider */
+.fade-slider {
+    position: relative;
+    width: 100%;
+    height: 40px; /* Adjust the height as needed */
+}
+
+.fade-slider .track {
+    width: 100%;
+    height: 100%;
+    background: #46494b;
+    border-radius: 10px;
+}
+
+.fade-slider .thumb {
+    position: absolute;
+    width: 45px; /* Adjust the thumb width as needed */
+    height: 45px; /* Adjust the thumb height as needed */
+    background-color: white;
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 0;
+    cursor: pointer;
+    box-shadow: 0 0 0 6px white; /* Add a white edge (bezel) with a specified width */
+}
+
+
+/* Updated CSS for the Background Light slider */
+.bg-slider {
+    position: relative;
+    width: 100%;
+    height: 40px; /* Adjust the height as needed */
+}
+
+.bg-slider .track {
+    width: 100%;
+    height: 100%;
+    background: #46494b;
+    border-radius: 10px;
+}
+
+.bg-slider .thumb {
+    position: absolute;
+    width:  45px; /* Adjust the thumb width as needed */
+    height: 45px; /* Adjust the thumb height as needed */
+    background-color: white;
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 0;
+    cursor: pointer;
+    box-shadow: 0 0 0 6px white; /* Add a white edge (bezel) with a specified width */
+}
+
+.buttons{
+    display: flex;
+}
+button {
+    --border-radius: 15px;
+    --border-width: 4px;
+    appearance: none;
+    position: relative;
+    border: 0;
+    background-color: #191919;
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff;
+    z-index: 2;
+    animation-play-state: running;
+    width: 100%;
+    height: 55px;
+    margin-right: 5px;
+    outline: none; /* Add this line to hide the focus outline */
+}
+
+button::after {
+    --m-i: linear-gradient(#000, #000);
+    --m-o: content-box, padding-box;
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    padding: var(--border-width);
+    border-radius: var(--border-radius);
+    background-image: conic-gradient(
+        red,red
+    );
+    -webkit-mask-image: var(--m-i), var(--m-i);
+    mask-image: var(--m-i), var(--m-i);
+    -webkit-mask-origin: var(--m-o);
+    mask-origin: var(--m-o);
+    -webkit-mask-clip: var(--m-o);
+    mask-composite: exclude;
+    -webkit-mask-composite: destination-out;
+    filter: hue-rotate(0);
+    animation: rotate-hue linear 2000ms infinite;
+}
+
+@keyframes rotate-hue {
+    to {
+        filter: hue-rotate(1turn);
+    }
+}
+
+button,
+button::after {
+    box-sizing: border-box;
+}
+
+button:active {
+    --border-width: 5px;
+}
+
+@keyframes rotate-hue {
+    to {
+        filter: hue-rotate(1turn);
+    }
+}
+
+button,
+button::after {
+    box-sizing: border-box;
+}
+
+button:active {
+    --border-width: 8px;
+}
+
+.checkbox-wrapper-8 .tgl {
+    display: none;
+}
+.checkbox-wrapper-8 .tgl + .tgl-btn {
+    width: 6em;
+    height: 2em;
+}
+.checkbox-wrapper-8 .tgl-skewed + .tgl-btn {
+    overflow: hidden;
+    transform: skew(0);
+    background: #888;
+}
+.checkbox-wrapper-8 .tgl-skewed + .tgl-btn:after,
+.checkbox-wrapper-8 .tgl-skewed + .tgl-btn:before {
+    transition: all 0.2s ease;
+    width: 100%;
+    text-align: center;
+    position: absolute;
+    line-height: 3em;
+    color: #fff;
+}
+.checkbox-wrapper-8 .tgl-skewed + .tgl-btn:after {
+    left: 100%;
+    content: attr(data-tg-on);
+}
+.checkbox-wrapper-8 .tgl-skewed + .tgl-btn:before {
+    left: 0;
+    content: attr(data-tg-off);
+}
+.checkbox-wrapper-8 .tgl-skewed + .tgl-btn:active:before {
+    left: -10%;
+}
+.checkbox-wrapper-8 .tgl-skewed:checked + .tgl-btn {
+    background: #006AFF;
+}
+.checkbox-wrapper-8 .tgl-skewed:checked + .tgl-btn:before {
+    left: -100%;
+}
+.checkbox-wrapper-8 .tgl-skewed:checked + .tgl-btn:after {
+    left: 0;
+}
+
+
+.toggle-labels
+{
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+/* Default styles for larger screens */
+.toggle-labels label {
+    font-size: 50px; /* Adjust this size as needed for desktop */
+    padding-top: 20px;
+    padding-left: 25px;
+    padding-right: 25xp;
+}
+
+/* Media query for smaller screens */
+@media (max-width: 700px) {
+    .toggle-labels label {
+        font-size: 18px; /* Smaller font size for mobile */
+        padding-top: 10px; /* Smaller padding on top for mobile */
+        padding-left: 10px;
+        padding-right: 10px; /* Smaller padding on right for mobile */
+    }
+}
+
+.toggles
+{
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
 
 footer {
     background-color: #191919;

@@ -42,10 +42,10 @@ function sendData(action, data) {
 }
 
 // Event listeners for button and sliders
-document.getElementById('BTN_COLOR').addEventListener('click', function () {
-    sendData('ChangeColor');
-    console.log('ChangeColor');
-});
+//document.getElementById('BTN_COLOR').addEventListener('click', function () {
+ //   sendData('ChangeColor');
+  //  console.log('ChangeColor');
+//});
 
 document.getElementById('HUE').addEventListener('input', function () {
     var value = parseInt(document.getElementById('HUE').value);
