@@ -3,24 +3,39 @@ html{
     scroll-behavior: smooth;
 }
 
-.logo{
+
+
+.logo
+{
     display: flex;
-    align-items: center;
-    justify-content: left;
     padding: 25px;
+    justify-content: left;
+    align-items: center; /* Add this line to center vertically */
 }
 
-.pianoled{
-    font-size: 60px;
+h1
+{
+    padding-left: 15px;
+    font-size: 50px;
+}
+.piano-svg
+{
+    height: 100px;
+    width: 100px;
 }
 
 @media (min-width: 768px) {
+    .logo{
+        justify-content: center;
+    }
     .piano-svg {
-        width: 100px;
+        width: 300px;
         height: 300px;
     }
+    h1{
+        font-size: 100px;
+    }
 }
-
 
 body, p {
     margin: 0;
@@ -69,7 +84,6 @@ body {
 header {
     background-color: #191919;
     color: #cccccc;
-    padding: 10px;
 }
 
 h2 {
@@ -103,8 +117,8 @@ label {
     display: block;
     font-weight: bold;
     color: #fff;
-    margin-top: 15px;
-    margin-bottom: 15px;
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 input[type="range"] {
@@ -170,17 +184,17 @@ input:checked + .slider:before {
     margin-top: 15px;
     margin-bottom: 15px;
     background-color: #46494b;
-    border-radius: 5px;
+    border-radius: 20px;
     overflow: hidden;
 }
 
 .selected-item {
-    padding: 10px;
+    padding: 15px;
     background-color: #46494b;
     color: white;
     font-size: 20px;
-    border-radius: 5px;
     cursor: pointer;
+    border-radius: 20px;
 }
 
 .dropdown-list-modes {
@@ -196,7 +210,7 @@ input:checked + .slider:before {
 }
 
 .dropdown-item {
-    padding: 10px;
+    padding: 15px;
     cursor: pointer;
     color: white;
     font-size: 20px;
@@ -206,7 +220,7 @@ input:checked + .slider:before {
 .hue-slider {
     position: relative;
     width: 100%;
-    height: 30px; /* Adjust the height as needed */
+    height: 40px; /* Adjust the height as needed */
 }
 
 .track {
@@ -226,22 +240,22 @@ input:checked + .slider:before {
 
 .thumb {
     position: absolute;
-    width: 35px; /* Adjust the thumb width as needed */
-    height: 35px; /* Adjust the thumb height as needed */
+    width: 45px; /* Adjust the thumb width as needed */
+    height: 45px; /* Adjust the thumb height as needed */
     background-color: transparent;
     border-radius: 50%;
     top: 50%;
     transform: translateY(-50%);
     left: 0;
     cursor: pointer;
-    box-shadow: 0 0 0 4px white; /* Add a white edge (bezel) with a specified width */
+    box-shadow: 0 0 0 6px white; /* Add a white edge (bezel) with a specified width */
 }
 
 /* Updated CSS for the brightness slider */
 .brightness-slider {
     position: relative;
     width: 100%;
-    height: 30px; /* Adjust the height as needed */
+    height: 40px; /* Adjust the height as needed */
 }
 
 .brightness-slider .track {
@@ -253,42 +267,70 @@ input:checked + .slider:before {
 
 .brightness-slider .thumb {
     position: absolute;
-    width: 35px; /* Adjust the thumb width as needed */
-    height: 35px; /* Adjust the thumb height as needed */
+    width:  45px; /* Adjust the thumb width as needed */
+    height: 45px; /* Adjust the thumb height as needed */
     background-color: white;
     border-radius: 50%;
     top: 50%;
     transform: translateY(-50%);
     left: 0;
     cursor: pointer;
-    box-shadow: 0 0 0 4px white; /* Add a white edge (bezel) with a specified width */
+    box-shadow: 0 0 0 6px white; /* Add a white edge (bezel) with a specified width */
 }
 
 /* Updated CSS for the fade slider */
 .fade-slider {
     position: relative;
     width: 100%;
-    height: 30px; /* Adjust the height as needed */
+    height: 40px; /* Adjust the height as needed */
 }
 
 .fade-slider .track {
     width: 100%;
     height: 100%;
-    background: linear-gradient(to right, black, white); /* Gradient from black to transparent */
+    background: #46494b;
     border-radius: 10px;
 }
 
 .fade-slider .thumb {
     position: absolute;
-    width: 35px; /* Adjust the thumb width as needed */
-    height: 35px; /* Adjust the thumb height as needed */
+    width: 45px; /* Adjust the thumb width as needed */
+    height: 45px; /* Adjust the thumb height as needed */
     background-color: white;
     border-radius: 50%;
     top: 50%;
     transform: translateY(-50%);
     left: 0;
     cursor: pointer;
-    box-shadow: 0 0 0 4px white; /* Add a white edge (bezel) with a specified width */
+    box-shadow: 0 0 0 6px white; /* Add a white edge (bezel) with a specified width */
+}
+
+
+/* Updated CSS for the Splash slider */
+.splash-slider {
+    position: relative;
+    width: 100%;
+    height: 40px; /* Adjust the height as needed */
+}
+
+.splash-slider .track {
+    width: 100%;
+    height: 100%;
+    background: #46494b;
+    border-radius: 10px;
+}
+
+.splash-slider .thumb {
+    position: absolute;
+    width:  45px; /* Adjust the thumb width as needed */
+    height: 45px; /* Adjust the thumb height as needed */
+    background-color: white;
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 0;
+    cursor: pointer;
+    box-shadow: 0 0 0 6px white; /* Add a white edge (bezel) with a specified width */
 }
 
 /* Updated CSS for the brightness slider */
