@@ -750,6 +750,7 @@ button {
     font-weight: 500;
     color: #fff;
     z-index: 2;
+    animation-play-state: running;
 }
 
 button::after {
@@ -781,11 +782,6 @@ button::after {
     -webkit-mask-composite: destination-out;
     filter: hue-rotate(0);
     animation: rotate-hue linear 500ms infinite;
-    animation-play-state: paused;
-}
-
-button:hover::after {
-    animation-play-state: running;
 }
 
 @keyframes rotate-hue {
