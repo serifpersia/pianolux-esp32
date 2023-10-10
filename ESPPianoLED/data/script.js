@@ -592,9 +592,6 @@ function handleBgMove(xPosition) {
 
     bgValueInput.value = brightness;
 
-    // Apply the background brightness to the body background
-    document.body.style.backgroundColor = `hsl(0, 0%, ${brightness}%)`;
-
     // Trigger the input event manually on the background slider
     const inputEvent = new Event('input', {
         bubbles: true,
@@ -667,11 +664,6 @@ const initialBgBrightness = parseInt(bgValueInput.value);
 // Calculate the initial thumb position based on the initial value
 const initialBGBrightnessThumbPosition = (initialBgBrightness / 255) * (bgTrack.offsetWidth - bgThumb.offsetWidth);
 bgThumb.style.left = initialBGBrightnessThumbPosition + 'px';
-
-
-document.body.style.backgroundColor = `hsl(0, 0%, ${initialBgBrightness}%)`;
-
-
 
 const sizes = ["88", "76", "73", "61", "49"];
 let sizeIndex = 0;
