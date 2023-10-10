@@ -41,6 +41,33 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
         Serial.println("Animation ID: ");
         Serial.print(animationIndex);
       }
+      else if (action == "Background")
+      {
+        int value = doc["value"];
+        bgBrightness = value;
+      }
+      else if (action == "PianoSizeAction")
+      {
+        int value = doc["value"];
+        pianoSizeIndex = value;
+      }
+      else if (action == "LedScaleRatioAction")
+      {
+        int value = doc["value"];
+        pianoScaleRatio = value;
+      }
+      else if (action == "BGAction")
+      {
+        int value = doc["value"];
+        if (value == 1)
+        {
+          setBG(CHSV(hue, saturation, bgBrightness));
+        }
+        else if (value == 0)
+        {
+          setBG(CHSV(0, 0, 0));
+        }
+      }
       break;
   }
 }

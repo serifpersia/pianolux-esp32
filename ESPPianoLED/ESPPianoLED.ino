@@ -20,28 +20,11 @@ elapsedMillis MIDIOutTimer;
 #define MAX_POWER_MILLIAMPS 450  // Define current limit if you are using 5V pin from Arduino
 #define MAX_EFFECTS 128
 
-//In Router Mode ESP32 connects to your Wifi network and you can acces the web
-//server on any device that is connected on that network PC,Laptop,Tablet,Smartphone
-
-//In AP Mode you connect to ESP32's Wifi hotspot
-
-//Default Mode is Router Mode, follow instructions(comment/uncomment and fill correct details below and in setup())
-
-
-//Use this to setup AP MODE uncomment(remove //)
-// SSID and password that are going to be used for the Access Point
-//const char* ssid = "PianoLED AP";
-//const char* password = "pianoled-esp32";
-
-// Configure IP addresses of the local access point
-//IPAddress local_IP(192, 168, 1, 22);
-//IPAddress gateway(192, 168, 1, 5);
-//IPAddress subnet(255, 255, 255, 0);
 
 //Use This to setup Router MODE
 // SSID and password from your router's Wifi network
-const char* ssid = "your_wifi"; //fill with your router's wifi name
-const char* password = "your_wifi_password"; //fill with your router's wifi passwod
+const char *ssid = "your_wifi";      // Your WiFi SSID
+const char *password = "your_pass";  // Your WiFi password
 
 
 // Initialization of webserver and websocket
@@ -57,6 +40,8 @@ int generalFadeRate = 255;  // General fade rate, bigger value means quicker fad
 int numEffects = 0;
 int lowestNote = 21;    // MIDI note A0
 int highestNote = 108;  // MIDI note C8 (adjust as needed)
+int pianoSizeIndex;
+int pianoScaleRatio;
 
 int getHueForPos(int pos) {
   return pos * 255 / NUM_LEDS;
@@ -64,7 +49,6 @@ int getHueForPos(int pos) {
 int getNote(int key) {
   return key % NOTES;
 }
-
 
 
 int ledNum(int i) {
@@ -92,6 +76,8 @@ boolean isOnStrip(int pos) {
 
 uint8_t hue = 0;
 uint8_t brightness = 255;
+uint8_t bgBrightness = 128;
+uint8_t saturation = 255;
 
 uint8_t Slider1Value = 0;
 uint8_t Slider2Value = 255;
@@ -125,6 +111,13 @@ int animationIndex;
 int splashMaxLength = 8;
 int SPLASH_HEAD_FADE_RATE = 5;
 
+int clientHueVal;
+int clientSaturationVal = 255;
+int clientBrightnessVal = 255;
+int clientFadeVal;
+
+
+
 CRGBPalette16 currentPalette;
 TBlendType currentBlending;
 
@@ -151,8 +144,17 @@ void setup() {
   Serial.begin(115200);  // init serial port for debugging
   pinMode(builtInLedPin, OUTPUT);
 
-  //Router MODE //comment line bellow and remove comments from way above to setup as AP MODE!
   WiFi.begin(ssid, password);
+  Serial.println("Establishing connection to WiFi with SSID: " + String(ssid));
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.print(".");
+  }
+
+  Serial.print("Connected to network with IP address: ");
+  Serial.println(WiFi.localIP());
+
 
   FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);         // GRB ordering
   FastLED.setMaxPowerInVoltsAndMilliamps(5, MAX_POWER_MILLIAMPS);  // set power limit
@@ -181,9 +183,7 @@ void setup() {
 }
 
 void loop() {
-
   currentTime = millis();
-
   webSocket.loop();  // Update function for the webSockets
   usbh_task();
 
@@ -220,16 +220,25 @@ void loop() {
     previousFadeTime = currentTime;
   }
 
-  //Animation
-  if (MODE == COMMAND_ANIMATION) {
-    Animatons(animationIndex);
-    static uint8_t startIndex = 0;
-    startIndex = startIndex + 1; /* motion speed */
-    FillLEDsFromPaletteColors(startIndex);
+  switch (MODE) {
+    case COMMAND_ANIMATION:
+      Animatons(animationIndex);
+      static uint8_t startIndex = 0;
+      startIndex = startIndex + 1; /* motion speed */
+      FillLEDsFromPaletteColors(startIndex);
+      break;
+
+
+    // Add more cases for additional modes or functionality here
+
+    default:
+      // Handle unknown mode or do nothing
+      break;
   }
 
   FastLED.show();
 }
+
 
 void controlLeds(int ledNo, int hueVal, int saturationVal, int brightnessVal) {
   if (ledNo < 0 || ledNo >= NUM_LEDS) {
@@ -254,22 +263,31 @@ void controlLeds(int ledNo, int hueVal, int saturationVal, int brightnessVal) {
 
 int mapMidiNoteToLED(int midiNote, int lowestNote, int highestNote, int stripLEDNumber) {
   int outMin = 0;                            // Start of LED strip
-  int outMax = outMin + stripLEDNumber - 1;  // Highest LED number
-  return map(midiNote, lowestNote, highestNote, outMin, outMax);
+  int outMax = stripLEDNumber - 1;           // Highest LED number
+
+  if (pianoScaleRatio == 0) {
+    // Every other LED mapping
+    return outMin + 2 * (midiNote - lowestNote);
+  } else if (pianoScaleRatio == 1) {
+    // 1:1 scale mapping
+    return outMin + (midiNote - lowestNote);
+  } 
 }
+
+
 
 void noteOn(uint8_t note, uint8_t velocity) {
   int ledIndex = mapMidiNoteToLED(note, 21, 108, 175);  // Map MIDI note to LED index
   keysOn[ledIndex] = true;
 
   if (serverMode == 0) {
-    controlLeds(ledIndex, hue, 255, brightness);  // Both use the same index
+    controlLeds(ledIndex, hue, saturation, brightness);  // Both use the same index
   } else if (serverMode == 1) {
     CHSV hsv(hue, 255, 255);
     addEffect(new FadingRunEffect(splashMaxLength, ledIndex, hsv, SPLASH_HEAD_FADE_RATE, velocity));
   } else if (serverMode == 2) {
     hue = random(256);
-    controlLeds(ledIndex, hue, 255, brightness);  // Both use the same index
+    controlLeds(ledIndex, hue, saturation, brightness);  // Both use the same index
   } else if (serverMode == 3) {
     int hue, saturation, brightness;
     setColorFromVelocity(velocity, hue, saturation, brightness);
@@ -294,9 +312,7 @@ void changeLEDColor() {
   Serial.println(hue);
 }
 
-int clientHueVal;
-int clientBrightnessVal;
-int clientFadeVal;
+
 
 void sliderAction(int sliderNumber, int value) {
   if (sliderNumber == 1) {
@@ -328,23 +344,27 @@ void changeLEDModeAction(int serverMode) {
   if (serverMode == 0) {
     MODE = COMMAND_SET_COLOR;
     hue = clientHueVal;
+    saturation = clientSaturationVal;
+    brightness = clientBrightnessVal;
   }
-
+  //Splash Mode
   else if (serverMode == 1) {
     generalFadeRate = 50;
     MODE = COMMAND_SPLASH;
 
   }
 
+  //Velocity Mode
   else if (serverMode == 3) {
     MODE = COMMAND_VELOCITY;
-  } else if (serverMode == 4) {
+  }
+  //Animation Mode
+  else if (serverMode == 4) {
     MODE = COMMAND_ANIMATION;
     generalFadeRate = 0;
     animationIndex = 0;
   }
 }
-
 void blackout() {
   fill_solid(leds, NUM_LEDS, bgColor);
   MODE = COMMAND_BLACKOUT;
@@ -375,7 +395,7 @@ void setColorFromVelocity(int velocity, int& hue, int& saturation, int& brightne
 
 
 // Add a new effect
-void addEffect(FadingRunEffect* effect) {
+void addEffect(FadingRunEffect * effect) {
   if (numEffects < MAX_EFFECTS) {
     effects[numEffects] = effect;
     numEffects++;
@@ -383,7 +403,7 @@ void addEffect(FadingRunEffect* effect) {
 }
 
 // Remove an effect
-void removeEffect(FadingRunEffect* effect) {
+void removeEffect(FadingRunEffect * effect) {
   for (int i = 0; i < numEffects; i++) {
     if (effects[i] == effect) {
       // Shift the remaining effects down
@@ -394,4 +414,13 @@ void removeEffect(FadingRunEffect* effect) {
       break;
     }
   }
+}
+
+void setBG(CRGB colorToSet) {
+
+  for (int i = 0; i < NUM_LEDS; i++) {
+    leds[i] = colorToSet;
+  }
+  bgColor = colorToSet;
+  FastLED.show();
 }

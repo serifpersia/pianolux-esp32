@@ -507,7 +507,7 @@ button:active {
     width: 100%;
     text-align: center;
     position: absolute;
-    line-height: 3em;
+    line-height: 2em;
     color: #fff;
 }
 .checkbox-wrapper-8 .tgl-skewed + .tgl-btn:after {

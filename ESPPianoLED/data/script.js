@@ -43,8 +43,8 @@ function sendData(action, data) {
 
 // Event listeners for button and sliders
 //document.getElementById('BTN_COLOR').addEventListener('click', function () {
- //   sendData('ChangeColor');
-  //  console.log('ChangeColor');
+//   sendData('ChangeColor');
+//  console.log('ChangeColor');
 //});
 
 document.getElementById('HUE').addEventListener('input', function () {
@@ -69,6 +69,12 @@ document.getElementById('FADE').addEventListener('input', function () {
 document.getElementById('SPLASH').addEventListener('input', function () {
     var value = parseInt(document.getElementById('SPLASH').value);
     sendData('Splash', { value: value });
+    console.log(value);
+});
+
+document.getElementById('BG').addEventListener('input', function () {
+    var value = parseInt(document.getElementById('BG').value);
+    sendData('Background', { value: value });
     console.log(value);
 });
 
@@ -562,3 +568,145 @@ const initialSplash = parseInt(splashValueInput.value);
 const maxSplash = 16;
 const initialSplashPosition = (initialSplash / maxSplash) * (splashTrack.offsetWidth - splashThumb.offsetWidth);
 splashThumb.style.left = initialSplashPosition + 'px';
+
+
+
+// Background slider
+const bgThumb = document.querySelector('.bg-slider .thumb');
+const bgTrack = document.querySelector('.bg-slider .track');
+const bgValueInput = document.getElementById('BG');
+let isBgDragging = false;
+
+// Function to handle mouse and touch move for background slider
+function handleBgMove(xPosition) {
+    const maxPosition = bgTrack.offsetWidth - bgThumb.offsetWidth;
+    const minPosition = 0;
+
+    // Ensure the thumb stays within the track bounds
+    xPosition = Math.max(minPosition, Math.min(xPosition, maxPosition));
+
+    bgThumb.style.left = xPosition + 'px';
+
+    // Calculate the background brightness value based on thumb position
+    const brightness = Math.round((xPosition / maxPosition) * 255);
+
+    bgValueInput.value = brightness;
+
+    // Apply the background brightness to the body background
+    document.body.style.backgroundColor = `hsl(0, 0%, ${brightness}%)`;
+
+    // Trigger the input event manually on the background slider
+    const inputEvent = new Event('input', {
+        bubbles: true,
+        cancelable: true,
+    });
+    bgValueInput.dispatchEvent(inputEvent);
+}
+
+// Mouse drag for background slider
+bgThumb.addEventListener('mousedown', (e) => {
+    isBgDragging = true;
+    bgThumb.style.transition = 'none';
+    const offsetX = e.clientX - bgThumb.getBoundingClientRect().left;
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+
+    function onMouseMove(e) {
+        if (!isBgDragging) return;
+
+        const newPosition = e.clientX - bgTrack.getBoundingClientRect().left - offsetX;
+        handleBgMove(newPosition);
+    }
+
+    function onMouseUp() {
+        isBgDragging = false;
+        bgThumb.style.transition = 'left 0.3s ease'; // Restore smooth transition
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+    }
+});
+
+// Touch event handling for mobile devices for background slider
+bgThumb.addEventListener('touchstart', (e) => {
+    isBgDragging = true;
+    bgThumb.style.transition = 'none';
+    const offsetX = e.touches[0].clientX - bgThumb.getBoundingClientRect().left;
+
+    document.addEventListener('touchmove', onTouchMove);
+    document.addEventListener('touchend', onTouchEnd);
+
+    function onTouchMove(e) {
+        if (!isBgDragging) return;
+
+        const newPosition = e.touches[0].clientX - bgTrack.getBoundingClientRect().left - offsetX;
+        handleBgMove(newPosition);
+    }
+
+    function onTouchEnd() {
+        isBgDragging = false;
+        bgThumb.style.transition = 'left 0.3s ease'; // Restore smooth transition
+        document.removeEventListener('touchmove', onTouchMove);
+        document.removeEventListener('touchend', onTouchEnd);
+    }
+});
+
+// Track click for background slider
+bgTrack.addEventListener('click', (e) => {
+    const clickX = e.clientX - bgTrack.getBoundingClientRect().left;
+    const thumbPosition = clickX - bgThumb.offsetWidth / 2;
+    handleBgMove(thumbPosition);
+
+    // Restore smooth transition for the thumb
+    bgThumb.style.transition = 'left 0.3s ease';
+});
+
+// Set the initial background brightness
+const initialBgBrightness = parseInt(bgValueInput.value);
+
+// Calculate the initial thumb position based on the initial value
+const initialBGBrightnessThumbPosition = (initialBgBrightness / 255) * (bgTrack.offsetWidth - bgThumb.offsetWidth);
+bgThumb.style.left = initialBGBrightnessThumbPosition + 'px';
+
+
+document.body.style.backgroundColor = `hsl(0, 0%, ${initialBgBrightness}%)`;
+
+
+
+const sizes = ["88", "76", "73", "61", "49"];
+let sizeIndex = 0;
+
+const ratios = ["1:2", "1:1"];
+let ratioIndex = 0;
+
+const pianoSizeButton = document.getElementById("PianoSize");
+const ledScaleRatioButton = document.getElementById("LEDScaleRatio");
+
+pianoSizeButton.addEventListener("click", function () {
+    sizeIndex = (sizeIndex + 1) % sizes.length;
+    pianoSizeButton.textContent = sizes[sizeIndex] + " Key";
+    sendData('PianoSizeAction', { value: sizeIndex });
+    console.log('Sending:', 'PianoSizeAction' + sizeIndex); // Debugging 
+});
+
+ledScaleRatioButton.addEventListener("click", function () {
+    ratioIndex = (ratioIndex + 1) % ratios.length;
+    ledScaleRatioButton.textContent = ratios[ratioIndex];
+    sendData('LedScaleRatioAction', { value: ratioIndex });
+    console.log('Sending:', 'LedScaleRatioAction' + ratioIndex); // Debugging 
+});
+
+const cb2Checkbox = document.getElementById('cb2-8');
+
+cb2Checkbox.addEventListener('change', function() {
+    // Check if it's toggle id 2
+    if (this.checked) {
+        // Send data to the socket with action BGAction and value 1
+        sendData('BGAction', { value: 1 });
+        console.log('Sending:', 'BGAction' + 1); // Debugging 
+    } else {
+        // Send data to the socket with action BGAction and value 0
+        sendData('BGAction', { value: 0 });
+        console.log('Sending:', 'BGAction' + 0); // Debugging 
+    }
+});
