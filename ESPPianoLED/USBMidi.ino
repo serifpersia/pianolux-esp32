@@ -75,43 +75,20 @@ void show_config_desc_full(const usb_config_desc_t *config_desc) {
     if ((i + bLength) <= config_desc->wTotalLength) {
       const uint8_t bDescriptorType = *(p + 1);
       switch (bDescriptorType) {
-        case USB_B_DESCRIPTOR_TYPE_DEVICE:
-          ESP_LOGI("", "USB Device Descriptor should not appear in config");
-          break;
         case USB_B_DESCRIPTOR_TYPE_CONFIGURATION:
-          show_config_desc(p);
-          break;
-        case USB_B_DESCRIPTOR_TYPE_STRING:
-          ESP_LOGI("", "USB string desc TBD");
           break;
         case USB_B_DESCRIPTOR_TYPE_INTERFACE:
-          show_interface_desc(p);
           if (!isMIDI) check_interface_desc_MIDI(p);
           break;
         case USB_B_DESCRIPTOR_TYPE_ENDPOINT:
-          show_endpoint_desc(p);
           if (isMIDI && !isMIDIReady) {
             prepare_endpoints(p);
           }
           break;
-        case USB_B_DESCRIPTOR_TYPE_DEVICE_QUALIFIER:
-          // Should not be in config?
-          ESP_LOGI("", "USB device qual desc TBD");
-          break;
-        case USB_B_DESCRIPTOR_TYPE_OTHER_SPEED_CONFIGURATION:
-          // Should not be in config?
-          ESP_LOGI("", "USB Other Speed TBD");
-          break;
-        case USB_B_DESCRIPTOR_TYPE_INTERFACE_POWER:
-          // Should not be in config?
-          ESP_LOGI("", "USB Interface Power TBD");
-          break;
         default:
-          ESP_LOGI("", "Unknown USB Descriptor Type: 0x%x", *p);
           break;
       }
     } else {
-      ESP_LOGI("", "USB Descriptor invalid");
       return;
     }
   }

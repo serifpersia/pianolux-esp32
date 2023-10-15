@@ -272,11 +272,6 @@ track.addEventListener('click', (e) => {
     thumb.style.transition = 'left 0.3s ease';
 });
 
-// Initial setup to set the thumb's color based on the initial hue value
-const initialHue = parseInt(hueValueInput.value); // Get the initial hue value from the hidden input
-const initialThumbPosition = (initialHue / 360) * (track.offsetWidth - thumb.offsetWidth);
-thumb.style.left = initialThumbPosition + 'px';
-thumb.style.backgroundColor = `hsl(${initialHue}, 100%, 50%)`;
 
 
 // Brightness Slider Code
@@ -665,6 +660,48 @@ const initialBgBrightness = parseInt(bgValueInput.value);
 const initialBGBrightnessThumbPosition = (initialBgBrightness / 255) * (bgTrack.offsetWidth - bgThumb.offsetWidth);
 bgThumb.style.left = initialBGBrightnessThumbPosition + 'px';
 
+function handleWindowResize() {
+    const maxHuePosition = track.offsetWidth - thumb.offsetWidth;
+    const maxBrightnessPosition =  brightnessTrack.offsetWidth - brightnessThumb.offsetWidth;
+    const maxFadePosition = fadeTrack.offsetWidth - fadeThumb.offsetWidth;
+    const maxSplashPosition = splashTrack.offsetWidth - splashThumb.offsetWidth;
+    const maxBGPosition = bgTrack.offsetWidth - bgThumb.offsetWidth;
+
+    const mappedHue = (parseInt(hueValueInput.value) / 255) * 360;
+    const mappedBrightness = (parseInt(brightnessValueInput.value));
+    const mappedFade = (parseInt(fadeValueInput.value));
+    const mappedSplash = (parseInt(splashValueInput.value));
+    const mappedBG = (parseInt(bgValueInput.value)); 
+
+    // Calculate the new position based on the mapped hue value
+    const newPosition = (mappedHue / 360) * maxHuePosition;
+    const newBrightnessPosition = (mappedBrightness / 255) * maxBrightnessPosition;
+    const newFadePosition = (mappedFade / 255) * maxFadePosition;
+    const newSplashPosition = (mappedSplash / 16) * maxSplashPosition;
+    const newBGPosition = (mappedBG / 255) * maxBGPosition;
+
+    // Update the thumb's position
+    thumb.style.left = newPosition + 'px';
+    brightnessThumb.style.left = newBrightnessPosition + 'px';
+    fadeThumb.style.left = newFadePosition + 'px';
+    splashThumb.style.left = newSplashPosition + 'px';
+    bgThumb.style.left = newBGPosition + 'px';
+
+    // Calculate the background color based on the hue value
+    const backgroundColor = `hsl(${mappedHue}, 100%, 50%)`;
+
+    // Update the thumb's background color
+    thumb.style.backgroundColor = backgroundColor;
+    thumb.style.transition = 'left 0s ease';
+    brightnessThumb.style.transition = 'left 0s ease';
+    fadeThumb.style.transition = 'left 0s ease';
+    splashThumb.style.transition = 'left 0s ease';
+    bgThumb.style.transition = 'left 0s ease';
+}
+// Add the event listener for window resize
+window.addEventListener('resize', handleWindowResize);
+
+
 const sizes = ["88", "76", "73", "61", "49"];
 let sizeIndex = 0;
 
@@ -702,3 +739,4 @@ cb2Checkbox.addEventListener('change', function() {
         console.log('Sending:', 'BGAction' + 0); // Debugging 
     }
 });
+
