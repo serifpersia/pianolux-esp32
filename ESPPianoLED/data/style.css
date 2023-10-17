@@ -78,6 +78,23 @@ body, p {
     background-color: #006AFF;
 }
 
+.upload-icon {
+    display: flex;
+    padding: 15px;
+    height: 55px;
+}
+
+.upload-icon:active {
+    /* Change the background color when the icon is hovered or clicked */
+    background-color: #006AFF;
+}
+
+
+#prg{
+    opacity: 0%;
+    color: white;
+}
+
 body {
     font-family: Arial, sans-serif;
     background-color: #191919;
@@ -562,6 +579,18 @@ button:active {
     display: flex;
     justify-content: center;
     width: 100%;
+}
+
+/* Style for the custom dialog */
+.custom-dialog {
+    display: none;
+    position: relative;
+    z-index: 1000;
+}
+
+/* Style for the custom dialog buttons */
+.custom-dialog button {
+
 }
 
 footer {

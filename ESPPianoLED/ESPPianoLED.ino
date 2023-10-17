@@ -2,6 +2,7 @@
 #include <ESPmDNS.h>
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
+#include <Update.h>
 #include <ESPAsyncWebServer.h>
 #include <WebSocketsServer.h>
 #include <SPIFFS.h>
@@ -140,7 +141,11 @@ void StartupAnimation() {
 }
 
 void setup() {
+
+  Serial.begin(115200);
+
   pinMode(builtInLedPin, OUTPUT);
+
   Serial.println("Booting");
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
@@ -201,6 +206,36 @@ void setup() {
   } else {
     Serial.println("Failed to mount SPIFFS file system");
   }
+
+
+  // Define a route for handling firmware updates
+  server.on("/update", HTTP_POST, [](AsyncWebServerRequest * request) {
+    // Handle the firmware update
+    AsyncWebServerResponse *response = request->beginResponse(200, "text/plain", (Update.hasError()) ? "Update failed" : "Update successful");
+    response->addHeader("Connection", "close");
+    response->addHeader("Access-Control-Allow-Origin", "*");
+    request->send(response);
+  }, [](AsyncWebServerRequest * request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
+    // Handle the firmware upload
+    if (!index) {
+      Serial.println("Firmware update started...");
+      if (Update.begin(UPDATE_SIZE_UNKNOWN)) {
+        Update.write(data, len);
+      }
+    } else {
+      if (Update.write(data, len) != len) {
+        // Handle error
+      }
+    }
+    if (final) {
+      if (Update.end(true)) {
+        Serial.println("Firmware update successful.");
+        ESP.restart();
+      } else {
+        // Handle error
+      }
+    }
+  });
 
   server.begin();
 
