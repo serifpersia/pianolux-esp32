@@ -1,6 +1,7 @@
-#include <WiFi.h>
+#include <WiFiManager.h>
 #include <FastLED.h>
 #include <AsyncElegantOTA.h>
+#include <ESPmDNS.h>
 
 #include <ESPAsyncWebServer.h>
 #include <WebSocketsServer.h>
@@ -8,6 +9,10 @@
 #include <SPIFFS.h>
 #include <usb/usb_host.h>
 #include "usbhhelp.hpp"
+
+#include <Arduino.h>
+#include <ArduinoJson.h>
+
 
 //#define MIDIOUTTEST 1
 #if MIDIOUTTEST
@@ -24,8 +29,8 @@ elapsedMillis MIDIOutTimer;
 #define MAX_EFFECTS 128
 
 //WIFI CONFIG
-const char* ssid = "";//your local 2.4Ghz wifi network name
-const char* password = "";//your local 2.4Ghz wifi network password
+const char* ssid = "Wifi 2.4Ghz";//your local 2.4Ghz wifi network name
+const char* password = "cigani123";//your local 2.4Ghz wifi network password
 
 // Initialization of webserver and websocket
 AsyncWebServer server(80);
@@ -144,20 +149,25 @@ void setup() {
 
   Serial.begin(115200);
 
-  pinMode(builtInLedPin, OUTPUT);
+  WiFiManager wm;
+  bool res = wm.autoConnect("PianoLED AP", "pianoled99");
 
-  Serial.println("Booting");
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-  while (WiFi.waitForConnectResult() != WL_CONNECTED) {
-    Serial.println("Connection Failed! Rebooting...");
-    delay(5000);
-    ESP.restart();
+  if (!res) {
+    Serial.println("Failed to connect");
+    // Take action if the connection fails, e.g., restart the ESP
+    // ESP.restart();
+  }
+  else
+  {
+    Serial.println("Connected...yeey :)");
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
   }
 
-  Serial.println("Ready");
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
+  // Initialize and start mDNS
+  if (MDNS.begin("pianoled")) {
+    Serial.println("MDNS Responder Started!");
+  }
 
   FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);         // GRB ordering
   FastLED.setMaxPowerInVoltsAndMilliamps(5, MAX_POWER_MILLIAMPS);  // set power limit
@@ -179,12 +189,15 @@ void setup() {
     Serial.println("Failed to mount SPIFFS file system");
   }
 
-
   AsyncElegantOTA.begin(&server);
+
   server.begin();
 
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
+
+  // Add service to mDNS for HTTP
+  MDNS.addService("http", "tcp", 80);
 
   usbh_setup(show_config_desc_full);  //init usb host for midi devices
 
@@ -192,10 +205,9 @@ void setup() {
 
 void loop() {
   AsyncElegantOTA.loop();
-
-  currentTime = millis();
   webSocket.loop();  // Update function for the webSockets
   usbh_task();
+  currentTime = millis();
 
 #ifdef MIDIOUTTEST
   if (isMIDIReady && (MIDIOutTimer > 1000)) {

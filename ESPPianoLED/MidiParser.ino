@@ -1,5 +1,3 @@
-#include <Arduino.h>
-
 void parseMIDI(uint8_t *data, size_t length) {
   if (length != 4) {
     Serial.println("Invalid MIDI message length");
