@@ -1,19 +1,19 @@
 #include <WiFi.h>
-#include <ESPmDNS.h>
-#include <WiFiUdp.h>
-#include <ArduinoOTA.h>
-#include <Update.h>
+#include <FastLED.h>
+#include <AsyncElegantOTA.h>
+
 #include <ESPAsyncWebServer.h>
 #include <WebSocketsServer.h>
+
 #include <SPIFFS.h>
 #include <usb/usb_host.h>
 #include "usbhhelp.hpp"
+
 //#define MIDIOUTTEST 1
 #if MIDIOUTTEST
 #include <elapsedMillis.h>
 elapsedMillis MIDIOutTimer;
 #endif
-#include <FastLED.h>
 #include "FadingRunEffect.h"
 #include "FadeController.h"
 
@@ -155,34 +155,6 @@ void setup() {
     ESP.restart();
   }
 
-  ArduinoOTA
-  .onStart([]() {
-    String type;
-    if (ArduinoOTA.getCommand() == U_FLASH)
-      type = "sketch";
-    else // U_SPIFFS
-      type = "filesystem";
-
-    // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
-    Serial.println("Start updating " + type);
-  })
-  .onEnd([]() {
-    Serial.println("\nEnd");
-  })
-  .onProgress([](unsigned int progress, unsigned int total) {
-    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
-  })
-  .onError([](ota_error_t error) {
-    Serial.printf("Error[%u]: ", error);
-    if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-    else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-    else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-    else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-    else if (error == OTA_END_ERROR) Serial.println("End Failed");
-  });
-
-  ArduinoOTA.begin();
-
   Serial.println("Ready");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
@@ -208,35 +180,7 @@ void setup() {
   }
 
 
-  // Define a route for handling firmware updates
-  server.on("/update", HTTP_POST, [](AsyncWebServerRequest * request) {
-    // Handle the firmware update
-    AsyncWebServerResponse *response = request->beginResponse(200, "text/plain", (Update.hasError()) ? "Update failed" : "Update successful");
-    response->addHeader("Connection", "close");
-    response->addHeader("Access-Control-Allow-Origin", "*");
-    request->send(response);
-  }, [](AsyncWebServerRequest * request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
-    // Handle the firmware upload
-    if (!index) {
-      Serial.println("Firmware update started...");
-      if (Update.begin(UPDATE_SIZE_UNKNOWN)) {
-        Update.write(data, len);
-      }
-    } else {
-      if (Update.write(data, len) != len) {
-        // Handle error
-      }
-    }
-    if (final) {
-      if (Update.end(true)) {
-        Serial.println("Firmware update successful.");
-        ESP.restart();
-      } else {
-        // Handle error
-      }
-    }
-  });
-
+  AsyncElegantOTA.begin(&server);
   server.begin();
 
   webSocket.begin();
@@ -247,7 +191,7 @@ void setup() {
 }
 
 void loop() {
-  ArduinoOTA.handle();
+  AsyncElegantOTA.loop();
 
   currentTime = millis();
   webSocket.loop();  // Update function for the webSockets
@@ -303,6 +247,11 @@ void loop() {
   }
 
   FastLED.show();
+
+  digitalWrite(builtInLedPin, HIGH);
+  delay(1000);
+  digitalWrite(builtInLedPin, LOW);
+  delay(1000);
 }
 
 

@@ -741,39 +741,41 @@ cb2Checkbox.addEventListener('change', function() {
 });
 
 const fileLink = document.getElementById('fileLink');
-const fileInput = document.getElementById('fileInput');
-const progressElement = document.getElementById('prg');
 const confirmationDialog = document.getElementById('confirmationDialog');
-const LocalButton = document.getElementById('Upload');
-const OnlineButton = document.getElementById('Download');
+const DownloadOTAUpdatesButton = document.getElementById('Update');
+const UploadOTAButton = document.getElementById('Download');
 const CancelButton = document.getElementById('Cancel');
 const boardSelect = document.getElementById('boardSelect');
+const binarySelect = document.getElementById('binarySelect');
 
 let isDialogOpen = false;
-let selectedFile = null;
 
 // Add event listeners for the "Local," "Online," and "Cancel" buttons outside the fileLink event listener.
-LocalButton.addEventListener('click', () => {
+DownloadOTAUpdatesButton.addEventListener('click', () => {
     // If the custom "Local" button is clicked, proceed with the code for local upload.
     confirmationDialog.style.display = 'none';
     isDialogOpen = false;
 
-    fileInput.click();
+    doOTA();
 });
 
-OnlineButton.addEventListener('click', () => {
+UploadOTAButton.addEventListener('click', () => {
     // If the custom "Online" button is clicked, fetch and handle the binary file.
-    const selectedOption = boardSelect.value;
+    const selectedBoard = boardSelect.value;
+    const selectedBinary = binarySelect.value;
 
-    if (selectedOption === 'esp32s2') {
-        fetchAssetsList('esp32s2');
-    } else if (selectedOption === 'esp32s3') {
-        fetchAssetsList('esp32s3');
+    if (selectedBoard && selectedBinary) {
+        // Now you have both the selected board and binary type.
+        // You can call the fetchAssetsList function with these values.
+        fetchAssetsList(selectedBoard, selectedBinary);
+    } else {
+        console.error('Please select both board and binary type.');
     }
 
     confirmationDialog.style.display = 'none';
     isDialogOpen = false;
 });
+
 
 CancelButton.addEventListener('click', () => {
     // If the custom "Cancel" button is clicked, close the dialog without proceeding.
@@ -789,19 +791,6 @@ fileLink.addEventListener('click', () => {
     }
 });
 
-fileInput.addEventListener('change', () => {
-    // Handle the selected file for local upload.
-    selectedFile = fileInput.files[0];
-
-    if (selectedFile) {
-        console.log(`Selected file: ${selectedFile.name}`);
-
-        // You can now perform the file upload with 'selectedFile'.
-        // Add your upload code here.
-        uploadBinary(selectedFile);
-    }
-});
-
 function downloadFile(url, fileName) {
     // Create an anchor element for triggering the download
     const anchor = document.createElement('a');
@@ -812,7 +801,7 @@ function downloadFile(url, fileName) {
     anchor.click();
 }
 
-function fetchAssetsList(board) {
+function fetchAssetsList(board, fileType) {
     const githubApiUrl = `https://api.github.com/repos/serifpersia/pianoled-esp32/releases/latest`;
 
     fetch(githubApiUrl)
@@ -826,13 +815,18 @@ function fetchAssetsList(board) {
                 console.log(asset.name);
             });
 
-            const binaryFile = assets.find(asset => asset.name === `${board}.bin`);
+            // Construct the binary file name based on the board and fileType
+            const binaryFileName = `${board}_${fileType}.bin`;
+            const binaryFile = assets.find(asset => asset.name === binaryFileName);
+
             if (binaryFile) {
                 console.log(`Fetched binary file: ${binaryFile.name}`);
 
                 // Use the downloadFile function to download the binary file
                 downloadFile(binaryFile.browser_download_url, binaryFile.name);
-            } 
+            } else {
+                console.error(`Binary file ${binaryFileName} not found.`);
+            }
         } else {
             console.error('No assets found in the latest release.');
         }
@@ -843,38 +837,7 @@ function fetchAssetsList(board) {
 }
 
 
-function uploadBinary(binaryFile) {
-    progressElement.style.opacity = '0'; // Set initial opacity to 0.
+function doOTA() {
+    window.location.href = '/update'; // This will change the URL to '/update'
 
-    const formData = new FormData();
-    formData.append('firmware', binaryFile);
-
-    const xhr = new XMLHttpRequest();
-
-    xhr.upload.addEventListener('progress', (e) => {
-        if (e.lengthComputable) {
-            const percentComplete = (e.loaded / e.total) * 100;
-            progressElement.innerText = `${Math.round(percentComplete)}%`;
-            // Set the opacity to 100% while the upload is in progress.
-            progressElement.style.opacity = '1';
-        }
-    });
-
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-            if (xhr.status === 200) {
-                console.log(xhr.responseText);
-                // Handle the response from the ESP device (e.g., "Update failed" or "Update successful").
-            } else {
-                console.error(xhr.statusText);
-                // Handle any errors that occur during the upload.
-            }
-
-            // Set the opacity back to 0% when the upload is complete.
-            progressElement.style.opacity = '0';
-        }
-    };
-
-    xhr.open('POST', '/update', true);
-    xhr.send(formData);
 }

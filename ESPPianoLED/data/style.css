@@ -588,10 +588,16 @@ button:active {
     z-index: 1000;
 }
 
-/* Style for the custom dialog buttons */
-.custom-dialog button {
-
+select {
+    padding: 15px;
+    border-radius: 15px; /* Round the corners */
+    width: 100%;
+    background: #46494b;
+    color: white;
+    font-weight: bold;
+    text-align: center; /* Center-align the text */
 }
+
 
 footer {
     background-color: #191919;
