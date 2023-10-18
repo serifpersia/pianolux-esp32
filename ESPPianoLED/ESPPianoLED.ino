@@ -247,11 +247,6 @@ void loop() {
   }
 
   FastLED.show();
-
-  digitalWrite(builtInLedPin, HIGH);
-  delay(1000);
-  digitalWrite(builtInLedPin, LOW);
-  delay(1000);
 }
 
 
