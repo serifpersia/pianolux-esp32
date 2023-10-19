@@ -745,12 +745,11 @@ const confirmationDialog = document.getElementById('confirmationDialog');
 const DownloadOTAUpdatesButton = document.getElementById('Update');
 const UploadOTAButton = document.getElementById('Download');
 const CancelButton = document.getElementById('Cancel');
-const boardSelect = document.getElementById('boardSelect');
 const binarySelect = document.getElementById('binarySelect');
 
 let isDialogOpen = false;
 
-// Add event listeners for the "Local," "Online," and "Cancel" buttons outside the fileLink event listener.
+
 DownloadOTAUpdatesButton.addEventListener('click', () => {
     // If the custom "Local" button is clicked, proceed with the code for local upload.
     confirmationDialog.style.display = 'none';
@@ -761,21 +760,19 @@ DownloadOTAUpdatesButton.addEventListener('click', () => {
 
 UploadOTAButton.addEventListener('click', () => {
     // If the custom "Online" button is clicked, fetch and handle the binary file.
-    const selectedBoard = boardSelect.value;
     const selectedBinary = binarySelect.value;
 
-    if (selectedBoard && selectedBinary) {
-        // Now you have both the selected board and binary type.
-        // You can call the fetchAssetsList function with these values.
-        fetchAssetsList(selectedBoard, selectedBinary);
+    if (selectedBinary) {
+        // Now you have the selected binary type.
+        // You can call the fetchAssetsList function with this value.
+        fetchAssetsList(selectedBinary);
     } else {
-        console.error('Please select both board and binary type.');
+        console.error('Please select a binary type.');
     }
 
     confirmationDialog.style.display = 'none';
     isDialogOpen = false;
 });
-
 
 CancelButton.addEventListener('click', () => {
     // If the custom "Cancel" button is clicked, close the dialog without proceeding.
@@ -801,39 +798,39 @@ function downloadFile(url, fileName) {
     anchor.click();
 }
 
-function fetchAssetsList(board, fileType) {
+function fetchAssetsList(fileType) {
     const githubApiUrl = `https://api.github.com/repos/serifpersia/pianoled-esp32/releases/latest`;
 
     fetch(githubApiUrl)
         .then(response => response.json())
         .then(data => {
-        const assets = data.assets;
+            const assets = data.assets;
 
-        if (assets.length > 0) {
-            console.log('Available assets in the latest release:');
-            assets.forEach(asset => {
-                console.log(asset.name);
-            });
+            if (assets.length > 0) {
+                console.log('Available assets in the latest release:');
+                assets.forEach(asset => {
+                    console.log(asset.name);
+                });
 
-            // Construct the binary file name based on the board and fileType
-            const binaryFileName = `${board}_${fileType}.bin`;
-            const binaryFile = assets.find(asset => asset.name === binaryFileName);
+                // Construct the binary file name based on the fileType
+                const binaryFileName = `${fileType}.bin`;
+                const binaryFile = assets.find(asset => asset.name === binaryFileName);
 
-            if (binaryFile) {
-                console.log(`Fetched binary file: ${binaryFile.name}`);
+                if (binaryFile) {
+                    console.log(`Fetched binary file: ${binaryFile.name}`);
 
-                // Use the downloadFile function to download the binary file
-                downloadFile(binaryFile.browser_download_url, binaryFile.name);
+                    // Use the downloadFile function to download the binary file
+                    downloadFile(binaryFile.browser_download_url, binaryFile.name);
+                } else {
+                    console.error(`Binary file ${binaryFileName} not found.`);
+                }
             } else {
-                console.error(`Binary file ${binaryFileName} not found.`);
+                console.error('No assets found in the latest release.');
             }
-        } else {
-            console.error('No assets found in the latest release.');
-        }
-    })
+        })
         .catch(error => {
-        console.error('Error fetching release assets:', error);
-    });
+            console.error('Error fetching release assets:', error);
+        });
 }
 
 
