@@ -802,7 +802,12 @@ function fetchAssetsList(fileType) {
     const githubApiUrl = `https://api.github.com/repos/serifpersia/pianoled-esp32/releases/latest`;
 
     fetch(githubApiUrl)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Failed to fetch data from GitHub API: ${response.status} ${response.statusText}`);
+            }
+            return response.json();
+        })
         .then(data => {
             const assets = data.assets;
 
@@ -830,6 +835,8 @@ function fetchAssetsList(fileType) {
         })
         .catch(error => {
             console.error('Error fetching release assets:', error);
+            // Display an alert if there was an error fetching data
+            alert('No files found on Github Repository!');
         });
 }
 
