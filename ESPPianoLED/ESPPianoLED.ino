@@ -28,10 +28,6 @@ elapsedMillis MIDIOutTimer;
 #define MAX_POWER_MILLIAMPS 450  // Define current limit if you are using 5V pin from Arduino
 #define MAX_EFFECTS 128
 
-//WIFI CONFIG
-const char* ssid = "Wifi 2.4Ghz";//your local 2.4Ghz wifi network name
-const char* password = "cigani123";//your local 2.4Ghz wifi network password
-
 // Initialization of webserver and websocket
 AsyncWebServer server(80);
 WebSocketsServer webSocket(81);
