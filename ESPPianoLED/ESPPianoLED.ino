@@ -1,44 +1,71 @@
+/*
+  PianoLED on ESP32S2/S3 boards is an open-source project that aims to provide MIDI-based LED control to the masses.
+  It is developed by a one-person team, yours truly, known as serifpersia, or Scarlett.
+
+  If you modify this code and redistribute the PianoLED project, please ensure that you
+  don't remove this disclaimer or appropriately credit the original author of the project
+  by linking to the project's source on GitHub: github.com/serifpersia/pianoled-esp32/
+  Failure to comply with these terms would constitute a violation of the project's
+  MIT license under which PianoLED is released.
+
+  Copyright © 2023 Serif Rami, also known as serifpersia.
+
+*/
+
+//PianoLED
+
+//WIFI Libs
 #include <WiFiManager.h>
-#include <FastLED.h>
 #include <AsyncElegantOTA.h>
 #include <ESPmDNS.h>
 
+#include <ArduinoJson.h>
 #include <ESPAsyncWebServer.h>
 #include <WebSocketsServer.h>
 
-#include <SPIFFS.h>
+//FastLED Lib
+#include <FastLED.h>
+#include "FadingRunEffect.h"
+#include "FadeController.h"
+
+//USB Lib
 #include <usb/usb_host.h>
 #include "usbhhelp.hpp"
 
-#include <Arduino.h>
-#include <ArduinoJson.h>
+//ESP Storage Lib
+#include <SPIFFS.h>
 
-
+//MIDI
 //#define MIDIOUTTEST 1
 #if MIDIOUTTEST
 #include <elapsedMillis.h>
 elapsedMillis MIDIOutTimer;
 #endif
-#include "FadingRunEffect.h"
-#include "FadeController.h"
 
-// Constants for LED strip
-#define MAX_NUM_LEDS 176         // How many LEDs do you want to control
-#define DATA_PIN 18              // Your LED strip data pin
-#define MAX_POWER_MILLIAMPS 450  // Define current limit if you are using 5V pin from Arduino
-#define MAX_EFFECTS 128
 
 // Initialization of webserver and websocket
 AsyncWebServer server(80);
 WebSocketsServer webSocket(81);
+
+// Constants for LED strip
+#define UPDATES_PER_SECOND 60
+#define MAX_NUM_LEDS 176         // How many LEDs do you want to control
+#define DATA_PIN 18              // Your LED strip data pin
+#define MAX_POWER_MILLIAMPS 450  // Define current limit
+#define MAX_EFFECTS 128
+
+FadingRunEffect* effects[MAX_EFFECTS];
+FadeController* fadeCtrl = new FadeController();
+
 
 int DEFAULT_BRIGHTNESS = 255;
 int NUM_LEDS = 176;       // How many LEDs you want to control
 int STRIP_DIRECTION = 0;  // 0 - left-to-right
 
 int NOTES = 12;
-int generalFadeRate = 255;  // General fade rate, bigger value means quicker fade (configurable via App)
+int generalFadeRate = 255;
 int numEffects = 0;
+
 int lowestNote = 21;    // MIDI note A0
 int highestNote = 108;  // MIDI note C8 (adjust as needed)
 int pianoSizeIndex;
@@ -51,18 +78,13 @@ int getNote(int key) {
   return key % NOTES;
 }
 
-
 int ledNum(int i) {
   return STRIP_DIRECTION == 0 ? i : (NUM_LEDS - 1) - i;
 }
 
-
 int getRandomHue() {
   return random(256);
 }
-
-FadingRunEffect* effects[MAX_EFFECTS];
-FadeController* fadeCtrl = new FadeController();
 
 CRGB leds[MAX_NUM_LEDS];
 CRGB bgColor = CRGB::Black;
@@ -90,7 +112,6 @@ unsigned long previousFadeTime = 0;
 unsigned long interval = 20;      // General refresh interval in milliseconds
 unsigned long fadeInterval = 20;  // General fade interval in milliseconds
 
-const int builtInLedPin = 2;  // Pin for built-in LED
 const int MAX_VELOCITY = 128;
 
 const int COMMAND_SET_COLOR = 255;
@@ -106,9 +127,13 @@ const int COMMAND_VELOCITY = 246;
 const int COMMAND_STRIP_DIRECTION = 245;
 const int COMMAND_SET_GUIDE = 244;
 const int COMMAND_SET_LED_VISUALIZER = 243;
+
 int MODE = COMMAND_SET_COLOR;
+
 int serverMode;
+
 int animationIndex;
+
 int splashMaxLength = 8;
 int SPLASH_HEAD_FADE_RATE = 5;
 
@@ -124,9 +149,6 @@ TBlendType currentBlending;
 
 extern CRGBPalette16 myRedWhiteBluePalette;
 extern const TProgmemPalette16 myRedWhiteBluePalette_p PROGMEM;
-
-#define UPDATES_PER_SECOND 120
-
 
 float distance(CRGB color1, CRGB color2) {
   return sqrt(pow(color1.r - color2.r, 2) + pow(color1.g - color2.g, 2) + pow(color1.b - color2.b, 2));
@@ -144,6 +166,12 @@ void StartupAnimation() {
 void setup() {
 
   Serial.begin(115200);
+
+  FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);         // GRB ordering
+  FastLED.setMaxPowerInVoltsAndMilliamps(5, MAX_POWER_MILLIAMPS);  // set power limit
+  FastLED.setBrightness(DEFAULT_BRIGHTNESS);
+
+  StartupAnimation();
 
   WiFiManager wm;
   bool res = wm.autoConnect("PianoLED AP", "pianoled99");
@@ -165,12 +193,6 @@ void setup() {
     Serial.println("MDNS Responder Started!");
   }
 
-  FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);         // GRB ordering
-  FastLED.setMaxPowerInVoltsAndMilliamps(5, MAX_POWER_MILLIAMPS);  // set power limit
-  FastLED.setBrightness(DEFAULT_BRIGHTNESS);
-
-  StartupAnimation();
-
   // Serve HTML from ESP32 SPIFFS data directory
   if (SPIFFS.begin()) {
     server.serveStatic("/", SPIFFS, "/");
@@ -189,20 +211,23 @@ void setup() {
 
   server.begin();
 
-  webSocket.begin();
-  webSocket.onEvent(webSocketEvent);
-
   // Add service to mDNS for HTTP
   MDNS.addService("http", "tcp", 80);
 
-  usbh_setup(show_config_desc_full);  //init usb host for midi devices
+  webSocket.begin();
+  webSocket.onEvent(webSocketEvent);
 
+  usbh_setup(show_config_desc_full);  //init usb host for midi devices
 }
 
 void loop() {
+
   AsyncElegantOTA.loop();
+
   webSocket.loop();  // Update function for the webSockets
+
   usbh_task();
+
   currentTime = millis();
 
 #ifdef MIDIOUTTEST
@@ -292,8 +317,6 @@ int mapMidiNoteToLED(int midiNote, int lowestNote, int highestNote, int stripLED
   }
 }
 
-
-
 void noteOn(uint8_t note, uint8_t velocity) {
   int ledIndex = mapMidiNoteToLED(note, 21, 108, 175);  // Map MIDI note to LED index
   keysOn[ledIndex] = true;
@@ -310,18 +333,15 @@ void noteOn(uint8_t note, uint8_t velocity) {
     int hue, saturation, brightness;
     setColorFromVelocity(velocity, hue, saturation, brightness);
     controlLeds(ledIndex, hue, saturation, brightness);
-  }
-  digitalWrite(builtInLedPin, HIGH);                                                   // Turn on the built-in LED
+  }                                                // Turn on the built-in LED
   Serial.println("Note On: " + String(note) + " mapped to LED: " + String(ledIndex));  // Debug print
 }
 
 void noteOff(uint8_t note, uint8_t velocity) {
   int ledIndex = mapMidiNoteToLED(note, 21, 108, 175);  // Map MIDI note to LED index
-  keysOn[ledIndex] = false;
-  digitalWrite(builtInLedPin, LOW);                                                     // Turn off the built-in LED
+  keysOn[ledIndex] = false;                                                  // Turn off the built-in LED
   Serial.println("Note Off: " + String(note) + " mapped to LED: " + String(ledIndex));  // Debug print
 }
-
 
 void changeLEDColor() {
   hue = random(256);
@@ -329,8 +349,6 @@ void changeLEDColor() {
   Serial.print("Color Changed! ");
   Serial.println(hue);
 }
-
-
 
 void sliderAction(int sliderNumber, int value) {
   if (sliderNumber == 1) {
