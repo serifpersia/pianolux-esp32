@@ -516,7 +516,9 @@ button:active {
 .checkbox-wrapper-8 .tgl-skewed + .tgl-btn {
     overflow: hidden;
     transform: skew(0);
-    background: #888;
+    background: #46494b;
+    border-radius: 25px;
+    margin-right: 10px;
 }
 .checkbox-wrapper-8 .tgl-skewed + .tgl-btn:after,
 .checkbox-wrapper-8 .tgl-skewed + .tgl-btn:before {

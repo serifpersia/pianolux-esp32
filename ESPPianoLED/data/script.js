@@ -725,9 +725,24 @@ ledScaleRatioButton.addEventListener("click", function () {
     console.log('Sending:', 'LedScaleRatioAction' + ratioIndex); // Debugging 
 });
 
-const cb2Checkbox = document.getElementById('cb2-8');
+const cb2Checkbox1 = document.getElementById('cb1-8');
+const cb2Checkbox2 = document.getElementById('cb2-8');
+const cb2Checkbox3 = document.getElementById('cb3-8');
 
-cb2Checkbox.addEventListener('change', function() {
+cb2Checkbox1.addEventListener('change', function() {
+    // Check if it's toggle id 1
+    if (this.checked) {
+        // Send data to the socket with action FixAction and value 1
+        sendData('FixAction', { value: 1 });
+        console.log('Sending:', 'FixAction' + 1); // Debugging 
+    } else {
+        // Send data to the socket with action FixAction and value 0
+        sendData('FixAction', { value: 0 });
+        console.log('Sending:', 'FixAction' + 0); // Debugging 
+    }
+});
+
+cb2Checkbox2.addEventListener('change', function() {
     // Check if it's toggle id 2
     if (this.checked) {
         // Send data to the socket with action BGAction and value 1
@@ -737,6 +752,19 @@ cb2Checkbox.addEventListener('change', function() {
         // Send data to the socket with action BGAction and value 0
         sendData('BGAction', { value: 0 });
         console.log('Sending:', 'BGAction' + 0); // Debugging 
+    }
+});
+
+cb2Checkbox3.addEventListener('change', function() {
+    // Check if it's toggle id 3
+    if (this.checked) {
+        // Send data to the socket with action DirectionAction and value 1
+        sendData('DirectionAction', { value: 1 });
+        console.log('Sending:', 'DirectionAction' + 1); // Debugging 
+    } else {
+        // Send data to the socket with action DirectionAction and value 0
+        sendData('DirectionAction', { value: 0 });
+        console.log('Sending:', 'DirectionAction' + 0); // Debugging 
     }
 });
 

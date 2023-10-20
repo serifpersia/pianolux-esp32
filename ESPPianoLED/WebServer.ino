@@ -44,15 +44,69 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
         int value = doc["value"];
         bgBrightness = value;
       }
-      else if (action == "PianoSizeAction")
+
+      else if (action == "FixAction")
       {
         int value = doc["value"];
-        pianoSizeIndex = value;
+        if (value == 1)
+        {
+          useFix = 1;
+        }
+        else if (value == 0)
+        {
+          useFix = 0;
+        }
       }
+
       else if (action == "LedScaleRatioAction")
       {
         int value = doc["value"];
         pianoScaleRatio = value;
+      }
+
+      else if (action == "PianoSizeAction")
+      {
+        int value = doc["value"];
+
+        switch (value) {
+          case 0:
+            NUM_LEDS = 176;
+            lowestNote = 21;
+            highestNote = 108;
+            break;
+          case 1:
+            NUM_LEDS = 152;
+            lowestNote = 28;
+            highestNote = 103;
+            break;
+          case 2:
+            NUM_LEDS = 146;
+            lowestNote = 28;
+            highestNote = 100;
+            break;
+          case 3:
+            NUM_LEDS = 122;
+            lowestNote = 36;
+            highestNote = 96;
+            break;
+          case 4:
+            NUM_LEDS = 98;
+            lowestNote = 36;
+            highestNote = 84;
+            break;
+        }
+      }
+      else if (action == "DirectionAction")
+      {
+        int value = doc["value"];
+        if (value == 1)
+        {
+          STRIP_DIRECTION = 1;
+        }
+        else if (value == 0)
+        {
+          STRIP_DIRECTION = 0;
+        }
       }
       else if (action == "BGAction")
       {

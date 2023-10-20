@@ -68,7 +68,7 @@ int numEffects = 0;
 
 int lowestNote = 21;    // MIDI note A0
 int highestNote = 108;  // MIDI note C8 (adjust as needed)
-int pianoSizeIndex;
+int useFix;
 int pianoScaleRatio;
 
 int getHueForPos(int pos) {
@@ -79,7 +79,7 @@ int getNote(int key) {
 }
 
 int ledNum(int i) {
-  return STRIP_DIRECTION == 0 ? i : (NUM_LEDS - 1) - i;
+  return STRIP_DIRECTION == 0 ? i : NUM_LEDS - i;
 }
 
 int getRandomHue() {
@@ -304,21 +304,47 @@ void controlLeds(int ledNo, int hueVal, int saturationVal, int brightnessVal) {
   FastLED.show();               // Update the LEDs with the new color
 }
 
-int mapMidiNoteToLED(int midiNote, int lowestNote, int highestNote, int stripLEDNumber) {
-  int outMin = 0;                            // Start of LED strip
-  int outMax = stripLEDNumber - 1;           // Highest LED number
+int mapMidiNoteToLED(int midiNote, int lowestMidiNote, int highestMidiNote, int endIndex) {
 
-  if (pianoScaleRatio == 0) {
-    // Every other LED mapping
-    return outMin + 2 * (midiNote - lowestNote);
-  } else if (pianoScaleRatio == 1) {
-    // 1:1 scale mapping
-    return outMin + (midiNote - lowestNote);
+  // Calculate the LED index using linear mapping
+  int startIndex = 0;
+
+  // Define the threshold notes where the shifts will occur
+  int shiftThreshold1 = 57; // MIDI note for A3
+  int shiftThreshold2 = 93; // MIDI note for C7
+
+  // Calculate the LED index using linear mapping
+  int ledIndex = map(midiNote, lowestMidiNote, highestMidiNote, startIndex, endIndex - 1);
+
+  // Check if the useFix is equal to 1
+  if (useFix == 1) {
+    // Check if the MIDI note is beyond the first threshold for shifting
+    if (midiNote >= shiftThreshold1) {
+      // Shift all LEDs, including the A3 LED, to the left by 1 LED
+      ledIndex -= 1;
+    }
+
+    // Check if the MIDI note is beyond the second threshold for shifting
+    if (midiNote >= shiftThreshold2) {
+      // Shift all LEDs, including the 93 MIDI note LED, to the left by 1 LED
+      ledIndex -= 1;
+    }
   }
+
+  if (pianoScaleRatio == 1) {
+    return startIndex + (midiNote - lowestNote);
+  }
+  else
+  {
+    return ledIndex;
+  }
+
 }
 
+
+
 void noteOn(uint8_t note, uint8_t velocity) {
-  int ledIndex = mapMidiNoteToLED(note, 21, 108, 175);  // Map MIDI note to LED index
+  int ledIndex = mapMidiNoteToLED(note, lowestNote, highestNote, NUM_LEDS); // Map MIDI note to LED index
   keysOn[ledIndex] = true;
 
   if (serverMode == 0) {
@@ -333,13 +359,13 @@ void noteOn(uint8_t note, uint8_t velocity) {
     int hue, saturation, brightness;
     setColorFromVelocity(velocity, hue, saturation, brightness);
     controlLeds(ledIndex, hue, saturation, brightness);
-  }                                                // Turn on the built-in LED
+  }
   Serial.println("Note On: " + String(note) + " mapped to LED: " + String(ledIndex));  // Debug print
 }
 
 void noteOff(uint8_t note, uint8_t velocity) {
-  int ledIndex = mapMidiNoteToLED(note, 21, 108, 175);  // Map MIDI note to LED index
-  keysOn[ledIndex] = false;                                                  // Turn off the built-in LED
+  int ledIndex = mapMidiNoteToLED(note, lowestNote, highestNote, NUM_LEDS); // Map MIDI note to LED index
+  keysOn[ledIndex] = false;
   Serial.println("Note Off: " + String(note) + " mapped to LED: " + String(ledIndex));  // Debug print
 }
 
