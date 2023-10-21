@@ -876,7 +876,7 @@ function doOTA() {
 
 const maxCurrentInput = document.getElementById("maxCurrent");
 let typingTimer;
-const typingTimeout = 500; // Adjust the timeout value as needed
+const typingTimeout = 3500; // Adjust the timeout value as needed
 let alertShown = false;
 
 // Function to display a warning when the input field is focused
