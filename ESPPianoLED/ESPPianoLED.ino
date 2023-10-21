@@ -218,6 +218,8 @@ void setup() {
   webSocket.onEvent(webSocketEvent);
 
   usbh_setup(show_config_desc_full);  //init usb host for midi devices
+
+  setIPLeds();
 }
 
 void loop() {
@@ -484,5 +486,53 @@ void setBG(CRGB colorToSet) {
     leds[i] = colorToSet;
   }
   bgColor = colorToSet;
+  FastLED.show();
+}
+
+void setIPLeds()
+{
+  IPAddress localIP = WiFi.localIP();
+  String ipStr = localIP.toString();
+
+  // Define colors
+  CRGB redColor = CRGB(255, 0, 0);   // Red
+  CRGB blueColor = CRGB(0, 0, 255);  // Blue
+  CRGB blackColor = CRGB(0, 0, 0);   // Black (off)
+
+  // Define LED index and spacing
+  int ledIndex = 0;
+  int spacing = 1;
+
+  // Loop through each character in the IP address
+  for (int i = 0; i < ipStr.length(); i++) {
+    char c = ipStr.charAt(i);
+
+    if (c == '.') {
+      // Display a blue LED for the dot
+      leds[ledIndex] = blueColor;
+      ledIndex++;
+    } else if (c >= '0' && c <= '9') {
+      // Convert character to an integer
+      int number = c - '0';
+
+      // Treat 0 as 1
+      if (number == 0) {
+        number = 1;
+      }
+
+      // Display red LEDs based on the number
+      for (int j = 0; j < number; j++) {
+        leds[ledIndex] = redColor;
+        ledIndex++;
+      }
+    }
+
+    // Display black LED for spacing
+    leds[ledIndex] = blackColor;
+    ledIndex++;
+  }
+
+  // Show the entire IP address
+  generalFadeRate = 0;
   FastLED.show();
 }

@@ -1,5 +1,18 @@
+int numConnectedClients = 0;
+
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length) {
   switch (type) {
+
+    case WStype_CONNECTED:
+      // Increment the count of connected clients
+      numConnectedClients++;
+      if (numConnectedClients == 0) {
+        setIPLeds();
+      } else {
+        changeLEDModeAction(0);
+      }
+      break;
+
     case WStype_TEXT:
       // Parse the JSON message
       StaticJsonDocument<200> doc;
@@ -120,6 +133,12 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
           setBG(CHSV(0, 0, 0));
         }
       }
+      else if (action == "CurrentAction")
+      {
+        int value = doc["value"];
+        FastLED.setMaxPowerInVoltsAndMilliamps(5, value);
+      }
+
       break;
   }
 }

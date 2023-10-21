@@ -831,41 +831,41 @@ function fetchAssetsList(fileType) {
 
     fetch(githubApiUrl)
         .then(response => {
-            if (!response.ok) {
-                throw new Error(`Failed to fetch data from GitHub API: ${response.status} ${response.statusText}`);
-            }
-            return response.json();
-        })
+        if (!response.ok) {
+            throw new Error(`Failed to fetch data from GitHub API: ${response.status} ${response.statusText}`);
+        }
+        return response.json();
+    })
         .then(data => {
-            const assets = data.assets;
+        const assets = data.assets;
 
-            if (assets.length > 0) {
-                console.log('Available assets in the latest release:');
-                assets.forEach(asset => {
-                    console.log(asset.name);
-                });
+        if (assets.length > 0) {
+            console.log('Available assets in the latest release:');
+            assets.forEach(asset => {
+                console.log(asset.name);
+            });
 
-                // Construct the binary file name based on the fileType
-                const binaryFileName = `${fileType}.bin`;
-                const binaryFile = assets.find(asset => asset.name === binaryFileName);
+            // Construct the binary file name based on the fileType
+            const binaryFileName = `${fileType}.bin`;
+            const binaryFile = assets.find(asset => asset.name === binaryFileName);
 
-                if (binaryFile) {
-                    console.log(`Fetched binary file: ${binaryFile.name}`);
+            if (binaryFile) {
+                console.log(`Fetched binary file: ${binaryFile.name}`);
 
-                    // Use the downloadFile function to download the binary file
-                    downloadFile(binaryFile.browser_download_url, binaryFile.name);
-                } else {
-                    console.error(`Binary file ${binaryFileName} not found.`);
-                }
+                // Use the downloadFile function to download the binary file
+                downloadFile(binaryFile.browser_download_url, binaryFile.name);
             } else {
-                console.error('No assets found in the latest release.');
+                console.error(`Binary file ${binaryFileName} not found.`);
             }
-        })
+        } else {
+            console.error('No assets found in the latest release.');
+        }
+    })
         .catch(error => {
-            console.error('Error fetching release assets:', error);
-            // Display an alert if there was an error fetching data
-            alert('No files found on Github Repository!');
-        });
+        console.error('Error fetching release assets:', error);
+        // Display an alert if there was an error fetching data
+        alert('No files found on Github Repository!');
+    });
 }
 
 
@@ -873,3 +873,39 @@ function doOTA() {
     window.location.href = '/update'; // This will change the URL to '/update'
 
 }
+
+const maxCurrentInput = document.getElementById("maxCurrent");
+let typingTimer;
+const typingTimeout = 500; // Adjust the timeout value as needed
+let alertShown = false;
+
+// Function to display a warning when the input field is focused
+maxCurrentInput.addEventListener("focus", function() {
+    if (!alertShown) {
+        alert("Make sure your power supply can handle the current you enter.");
+        alertShown = true;
+    }
+});
+
+maxCurrentInput.addEventListener("input", function() {
+    clearTimeout(typingTimer);
+    typingTimer = setTimeout(function() {
+        const minValue = parseFloat(maxCurrentInput.min);
+        const maxValue = parseFloat(maxCurrentInput.max);
+        let enteredValue = parseFloat(maxCurrentInput.value);
+
+        if (isNaN(enteredValue)) {
+            // If the entered value is not a number, set it to the minimum value
+            maxCurrentInput.value = minValue;
+            enteredValue = minValue;
+        } else {
+            // Ensure the entered value is within the specified range
+            enteredValue = Math.min(maxValue, Math.max(minValue, enteredValue));
+            maxCurrentInput.value = enteredValue;
+        }
+
+        // Send the entered value to the socket
+        sendData('CurrentAction', { value: enteredValue });
+        console.log('Sending:', 'CurrentAction', enteredValue);
+    }, typingTimeout);
+});
