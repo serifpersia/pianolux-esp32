@@ -42,6 +42,8 @@
 elapsedMillis MIDIOutTimer;
 #endif
 
+//rtpMIDI
+#include <AppleMIDI.h>
 
 // Initialization of webserver and websocket
 AsyncWebServer server(80);
@@ -163,6 +165,12 @@ void StartupAnimation() {
   FastLED.show();
 }
 
+
+int8_t isConnected = 0;
+
+APPLEMIDI_CREATE_DEFAULTSESSION_INSTANCE();
+
+
 void setup() {
 
   Serial.begin(115200);
@@ -186,6 +194,29 @@ void setup() {
     Serial.println("Connected...yeey :)");
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
+
+    MIDI.begin();
+
+    AppleMIDI.setHandleConnected([](const APPLEMIDI_NAMESPACE::ssrc_t & ssrc, const char* name) {
+      isConnected++;
+      Serial.print("Connected to session ");
+      Serial.print(ssrc);
+      Serial.print(" Name ");
+      Serial.println(name);
+    });
+    AppleMIDI.setHandleDisconnected([](const APPLEMIDI_NAMESPACE::ssrc_t & ssrc) {
+      isConnected--;
+      Serial.print("Disconnected ");
+      Serial.println(ssrc);
+    });
+
+    MIDI.setHandleNoteOn([](byte channel, byte note, byte velocity) {
+      noteOn(note, velocity);
+    });
+    MIDI.setHandleNoteOff([](byte channel, byte note, byte velocity) {
+      noteOff(note, velocity);
+    });
+
   }
 
   // Initialize and start mDNS
@@ -223,6 +254,9 @@ void setup() {
 }
 
 void loop() {
+
+  // Listen to incoming notes
+  MIDI.read();
 
   AsyncElegantOTA.loop();
 
@@ -494,7 +528,7 @@ void setIPLeds()
   IPAddress localIP = WiFi.localIP();
   String ipStr = localIP.toString();
 
-   // Define colors
+  // Define colors
   CRGB redColor = CRGB(255, 0, 0);   // Red
   CRGB blueColor = CRGB(0, 0, 255);  // Blue
   CRGB blackColor = CRGB(0, 0, 0);   // Black (off)
