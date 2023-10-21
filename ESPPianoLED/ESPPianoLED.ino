@@ -494,10 +494,11 @@ void setIPLeds()
   IPAddress localIP = WiFi.localIP();
   String ipStr = localIP.toString();
 
-  // Define colors
+   // Define colors
   CRGB redColor = CRGB(255, 0, 0);   // Red
   CRGB blueColor = CRGB(0, 0, 255);  // Blue
   CRGB blackColor = CRGB(0, 0, 0);   // Black (off)
+  CRGB whiteColor = CRGB(255, 255, 255); // White
 
   // Define LED index and spacing
   int ledIndex = 0;
@@ -511,16 +512,15 @@ void setIPLeds()
       // Display a blue LED for the dot
       leds[ledIndex] = blueColor;
       ledIndex++;
-    } else if (c >= '0' && c <= '9') {
+    } else if (c == '0') {
+      // Display white LED for 0
+      leds[ledIndex] = whiteColor;
+      ledIndex++;
+    } else if (c >= '1' && c <= '9') {
       // Convert character to an integer
       int number = c - '0';
 
-      // Treat 0 as 1
-      if (number == 0) {
-        number = 1;
-      }
-
-      // Display red LEDs based on the number
+      // Display red LEDs for other numbers
       for (int j = 0; j < number; j++) {
         leds[ledIndex] = redColor;
         ledIndex++;
