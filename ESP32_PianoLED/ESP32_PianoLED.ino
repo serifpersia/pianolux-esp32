@@ -117,12 +117,19 @@ unsigned long fadeInterval = 20;  // General fade interval in milliseconds
 
 const int MAX_VELOCITY = 128;
 
-const int COMMAND_SET_COLOR;
-const int COMMAND_ANIMATION;
-const int COMMAND_BLACKOUT;
-const int COMMAND_SPLASH;
-const int COMMAND_VELOCITY;
-const int COMMAND_STRIP_DIRECTION;
+const int COMMAND_SET_COLOR = 255;
+const int COMMAND_FADE_RATE = 254;
+const int COMMAND_ANIMATION = 253;
+const int COMMAND_BLACKOUT = 252;
+const int COMMAND_SPLASH = 251;
+const int COMMAND_SET_BRIGHTNESS = 250;
+const int COMMAND_KEY_OFF = 249;
+const int COMMAND_SPLASH_MAX_LENGTH = 248;
+const int COMMAND_SET_BG = 247;
+const int COMMAND_VELOCITY = 246;
+const int COMMAND_STRIP_DIRECTION = 245;
+const int COMMAND_SET_GUIDE = 244;
+const int COMMAND_SET_LED_VISUALIZER = 243;
 
 
 int MODE = COMMAND_SET_COLOR;
