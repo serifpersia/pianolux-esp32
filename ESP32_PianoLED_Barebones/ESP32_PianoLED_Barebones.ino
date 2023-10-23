@@ -17,7 +17,6 @@
 #include <AsyncElegantOTA.h>
 #include <ESPmDNS.h>
 
-#include <ArduinoJson.h>
 #include <ESPAsyncWebServer.h>
 
 //ESP Storage Lib
@@ -27,7 +26,6 @@
 #include <FastLED.h>
 
 // Constants for LED strip
-#define UPDATES_PER_SECOND 60
 #define MAX_NUM_LEDS 176         // How many LEDs do you want to control
 #define DATA_PIN 18              // Your LED strip data pin
 #define MAX_POWER_MILLIAMPS 450  // Define current limit
