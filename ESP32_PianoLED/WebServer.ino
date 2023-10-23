@@ -58,25 +58,18 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
         bgBrightness = value;
       }
 
-      else if (action == "FixAction")
+      else if (action == "CurrentAction")
       {
         int value = doc["value"];
-        if (value == 1)
-        {
-          useFix = 1;
-        }
-        else if (value == 0)
-        {
-          useFix = 0;
-        }
+        FastLED.setMaxPowerInVoltsAndMilliamps(5, value);
       }
-
-      else if (action == "LedScaleRatioAction")
+      else if (action == "LedDataPinAction")
       {
         int value = doc["value"];
-        pianoScaleRatio = value;
+        updateGPIOConfig(value);
+        delay(3000); // Debounce the button
+        ESP.restart(); // Restart the ESP32
       }
-
       else if (action == "PianoSizeAction")
       {
         int value = doc["value"];
@@ -109,16 +102,21 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
             break;
         }
       }
-      else if (action == "DirectionAction")
+      else if (action == "LedScaleRatioAction")
+      {
+        int value = doc["value"];
+        pianoScaleRatio = value;
+      }
+      else if (action == "FixAction")
       {
         int value = doc["value"];
         if (value == 1)
         {
-          STRIP_DIRECTION = 1;
+          useFix = 1;
         }
         else if (value == 0)
         {
-          STRIP_DIRECTION = 0;
+          useFix = 0;
         }
       }
       else if (action == "BGAction")
@@ -133,12 +131,18 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
           setBG(CHSV(0, 0, 0));
         }
       }
-      else if (action == "CurrentAction")
+      else if (action == "DirectionAction")
       {
         int value = doc["value"];
-        FastLED.setMaxPowerInVoltsAndMilliamps(5, value);
+        if (value == 1)
+        {
+          STRIP_DIRECTION = 1;
+        }
+        else if (value == 0)
+        {
+          STRIP_DIRECTION = 0;
+        }
       }
-
       break;
   }
 }

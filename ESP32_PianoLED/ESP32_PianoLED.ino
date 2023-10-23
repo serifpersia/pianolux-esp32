@@ -53,9 +53,46 @@ WebSocketsServer webSocket(81);
 // Constants for LED strip
 #define UPDATES_PER_SECOND 60
 #define MAX_NUM_LEDS 176         // How many LEDs do you want to control
-#define DATA_PIN 18              // Your LED strip data pin
 #define MAX_POWER_MILLIAMPS 450  // Define current limit
 #define MAX_EFFECTS 128
+
+#include "w2812-rmt.hpp"  // Include the custom ESP32RMT_WS2812B class
+ESP32RMT_WS2812B<GRB> *wsstrip;
+
+
+int readGPIOConfig() {
+  File configFile = SPIFFS.open("/led_gpio_config.txt", "r");
+  if (!configFile) {
+    Serial.println("Failed to open config file.");
+    return -1; // Return an error value or a default GPIO pin.
+  }
+
+  // Read the GPIO pin number from the file
+  String gpioValue = configFile.readStringUntil('\n');
+  configFile.close();
+
+  // Print the contents of the file to the serial monitor
+  Serial.print("Read GPIO config: ");
+  Serial.println(gpioValue);
+
+  // Convert the string to an integer
+  int mygpio = gpioValue.toInt();
+  return mygpio;
+}
+
+
+
+void updateGPIOConfig(int newGpio) {
+  File configFile = SPIFFS.open("/led_gpio_config.txt", "w");
+  if (!configFile) {
+    Serial.println("Failed to open config file for writing.");
+    return;
+  }
+
+  // Write the new GPIO pin number to the file
+  configFile.println(newGpio);
+  configFile.close();
+}
 
 FadingRunEffect* effects[MAX_EFFECTS];
 FadeController* fadeCtrl = new FadeController();
@@ -177,12 +214,6 @@ void setup() {
 
   Serial.begin(115200);
 
-  FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);         // GRB ordering
-  FastLED.setMaxPowerInVoltsAndMilliamps(5, MAX_POWER_MILLIAMPS);  // set power limit
-  FastLED.setBrightness(DEFAULT_BRIGHTNESS);
-
-  StartupAnimation();
-
   WiFiManager wm;
   bool res = wm.autoConnect("PianoLED AP", "pianoled99");
 
@@ -252,6 +283,22 @@ void setup() {
 
   usbh_setup(show_config_desc_full);  //init usb host for midi devices
 
+ if (!SPIFFS.begin(true)) {
+    Serial.println("An error occurred while mounting SPIFFS.");
+    return;
+  }
+
+  // Read the initial GPIO pin configuration from the file
+  int mygpio = readGPIOConfig();
+
+  wsstrip = new ESP32RMT_WS2812B<GRB>(mygpio);
+  FastLED.addLeds(wsstrip, leds, NUM_LEDS);  // define or create your buffer somewehere
+
+  FastLED.setMaxPowerInVoltsAndMilliamps(5, MAX_POWER_MILLIAMPS);  // set power limit
+  FastLED.setBrightness(DEFAULT_BRIGHTNESS);
+
+  StartupAnimation();
+  
   setIPLeds();
 }
 

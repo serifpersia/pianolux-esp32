@@ -25,12 +25,12 @@
             </div>
         </header>
         <div class="navbar">
-            <a href="#card-1">
+            <a href="#customize">
                 <span class="controls-icon">
                     <svg width="55" height="55" viewBox="0 0 500 500"><rect x="50" y="50" width="400" height="50" rx="25" ry="25" fill="#fff"/><circle cx="300" cy="75" r="45" fill="#006AFF"/><rect x="50" y="200" width="400" height="50" rx="25" ry="25" fill="#fff"/><circle cx="150" cy="225" r="45" fill="#006AFF"/><rect x="50" y="350" width="400" height="50" rx="25" ry="25" fill="#fff"/><circle cx="300" cy="375" r="45" fill="#006AFF"/></svg> 
                 </span>
             </a>
-            <a href="#card-2">
+            <a href="#custom-settings">
                 <span class="mode-settings-icon">
                     <svg fill="#fff" width="55" height="55" viewBox="0 0 50 50"><path d="M43.454 18.443h-2.437a18.114 18.114 0 0 0-2.082-4.933l1.752-1.756a2.493 2.493 0 0 0 .733-1.774c0-.669-.262-1.301-.733-1.773l-2.92-2.917c-.947-.948-2.602-.947-3.545-.001l-1.826 1.815a18.14 18.14 0 0 0-4.867-1.976V2.52c0-1.383-1.105-2.52-2.488-2.52h-4.128c-1.383 0-2.471 1.137-2.471 2.52v2.607a18.19 18.19 0 0 0-4.878 1.977l-1.825-1.815c-.946-.948-2.602-.947-3.551-.001L5.27 8.205a2.52 2.52 0 0 0-.735 1.773c0 .669.259 1.299.733 1.772l1.752 1.76a18.111 18.111 0 0 0-2.081 4.933H2.501A2.492 2.492 0 0 0 0 20.935v4.125c0 1.384 1.117 2.471 2.501 2.471h2.438a18.201 18.201 0 0 0 2.079 4.943l-1.752 1.763c-.474.473-.734 1.106-.734 1.776s.261 1.303.734 1.776l2.92 2.919c.474.473 1.103.733 1.772.733s1.299-.261 1.773-.733l1.833-1.816a18.257 18.257 0 0 0 4.878 1.978v2.604c0 1.383 1.088 2.498 2.471 2.498h4.128a2.485 2.485 0 0 0 2.488-2.498v-2.605a18.15 18.15 0 0 0 4.869-1.977l1.817 1.812a2.489 2.489 0 0 0 1.775.735c.67 0 1.301-.261 1.774-.733l2.92-2.917a2.498 2.498 0 0 0 .734-1.772c0-.67-.262-1.299-.734-1.773l-1.75-1.77a18.275 18.275 0 0 0 2.08-4.943h2.438c1.383 0 2.52-1.087 2.52-2.471v-4.125c.001-1.38-1.135-2.492-2.518-2.492zM22.976 30.85c-4.378 0-7.928-3.517-7.928-7.852 0-4.338 3.55-7.85 7.928-7.85 4.379 0 7.931 3.512 7.931 7.85-.001 4.336-3.552 7.852-7.931 7.852z"/></svg>
                 </span>
@@ -43,7 +43,7 @@
             </a>
         </div>
         <main>
-            <section class="card" id="card-1">
+            <section class="card" id="customize">
                 <div class="control">
                     <label for="selected-item-modes">LED Mode:</label>
                     <div class="custom-dropdown">
@@ -54,12 +54,9 @@
                             <div class="dropdown-item" data-mode-id="2">Random</div>
                             <div class="dropdown-item" data-mode-id="3">Velocity</div>
                             <div class="dropdown-item" data-mode-id="4">Animation</div>
-                            <div class="dropdown-item" data-mode-id="5">Gradient</div>
-                            <div class="dropdown-item" data-mode-id="6">MultiColor</div>
                         </div>
                     </div>
                 </div>
-
                 <div class="control">
                     <label for="selected-item-animations">Animation:</label>
                     <div class="custom-dropdown">
@@ -115,10 +112,15 @@
                         <input type="hidden" id="BG" name="bg" min="0" max="255" value="128">
                     </div>
                 </div>
+            </section>
+            <section class="card" id="custom-settings">
                 <div class="control">
                     <label for="maxCurrent">Max Current in mA:</label>
                     <input type="number" id="maxCurrent" name="maxCurrent" min="450" max="10000" value="450">
-
+                </div>
+                <div class="control">
+                    <label for="ledDataPin">LED Strip Data Pin:</label>
+                    <input type="number" id="ledDataPin" name="ledDataPin" min="0" max="100" value="18">
                 </div>
                 <div class="buttons">
                     <button id="PianoSize">88 Keys</button>
@@ -145,9 +147,6 @@
                         </div>
                     </div>
                 </div>
-            </section>
-            <section class="card" id="card-2">
-                <h2>Section 2</h2>
             </section>
         </main>
         <footer>

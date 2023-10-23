@@ -876,8 +876,9 @@ function doOTA() {
 
 const maxCurrentInput = document.getElementById("maxCurrent");
 let typingTimer;
-const typingTimeout = 1500; // Adjust the timeout value as needed
+const typingTimeout = 2000; // Adjust the timeout value as needed
 let alertShown = false;
+let stripLEDalertShown = false;
 
 // Function to display a warning when the input field is focused
 maxCurrentInput.addEventListener("focus", function() {
@@ -907,5 +908,40 @@ maxCurrentInput.addEventListener("input", function() {
         // Send the entered value to the socket
         sendData('CurrentAction', { value: enteredValue });
         console.log('Sending:', 'CurrentAction', enteredValue);
+    }, typingTimeout);
+});
+
+const ledDataPinInput = document.getElementById("ledDataPin");
+
+
+// Function to display a warning when the input field is focused
+ledDataPinInput.addEventListener("focus", function() {
+    if (!stripLEDalertShown) {
+        alert("Enter valid GPIO pin number on your ESP32 S2/S3 you want to use for W2812 LED Strip Data");
+        stripLEDalertShown = true;
+    }
+});
+
+ledDataPinInput.addEventListener("input", function() {
+    clearTimeout(typingTimer);
+    typingTimer = setTimeout(function() {
+        const minValue = parseFloat(ledDataPinInput.min);
+        const maxValue = parseFloat(ledDataPinInput.max);
+        let enteredValue = parseFloat(ledDataPinInput.value);
+
+        if (isNaN(enteredValue)) {
+            // If the entered value is not a number, set it to the minimum value
+            ledDataPinInput.value = minValue;
+            enteredValue = minValue;
+        } else {
+            // Ensure the entered value is within the specified range
+            enteredValue = Math.min(maxValue, Math.max(minValue, enteredValue));
+            ledDataPinInput.value = enteredValue;
+        }
+
+        alert("ESP will now restart. Reload the webpage after few seconds!");
+        // Send the action and entered value to the socket
+        sendData('LedDataPinAction', { value: enteredValue });
+        console.log('Sending:', 'LedDataPinAction', enteredValue);
     }, typingTimeout);
 });
