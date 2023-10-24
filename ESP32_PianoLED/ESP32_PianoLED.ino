@@ -255,11 +255,11 @@ void setup() {
 
   // Check the state of the jumper wire
   if (digitalRead(jumperPin) == LOW) {
-    // Jumper wire is connected, use WiFi Manager in STA mode
-    startSTA();
-  } else {
     // Jumper wire is not connected, use WiFi Manager in AP mode
     startAP();
+  } else {
+    // Jumper wire is connected, use WiFi Manager in STA mode
+    startSTA();
   }
 
   if (apMode)
