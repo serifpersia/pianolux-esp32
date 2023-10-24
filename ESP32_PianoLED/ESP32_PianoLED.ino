@@ -80,8 +80,6 @@ int readGPIOConfig() {
   return mygpio;
 }
 
-
-
 void updateGPIOConfig(int newGpio) {
   File configFile = SPIFFS.open("/led_gpio_config.txt", "w");
   if (!configFile) {
@@ -102,7 +100,6 @@ int DEFAULT_BRIGHTNESS = 255;
 int NUM_LEDS = 176;       // How many LEDs you want to control
 int STRIP_DIRECTION = 0;  // 0 - left-to-right
 
-int NOTES = 12;
 int generalFadeRate = 255;
 int numEffects = 0;
 
@@ -114,16 +111,9 @@ int pianoScaleRatio;
 int getHueForPos(int pos) {
   return pos * 255 / NUM_LEDS;
 }
-int getNote(int key) {
-  return key % NOTES;
-}
 
 int ledNum(int i) {
   return STRIP_DIRECTION == 0 ? i : NUM_LEDS - i;
-}
-
-int getRandomHue() {
-  return random(256);
 }
 
 CRGB leds[MAX_NUM_LEDS];
@@ -210,47 +200,98 @@ int8_t isConnected = 0;
 APPLEMIDI_CREATE_DEFAULTSESSION_INSTANCE();
 
 
+const char* ssid = "PianoLED AP";
+const char* password = "pianoled99";
+const char* hostname = "PianoLED AP";
+
+const IPAddress staticIP(192, 168, 1, 1);
+const IPAddress gateway(192, 168, 1, 1);
+const IPAddress subnet(255, 255, 255, 0);
+
+bool apMode = true; // Start in AP mode
+
+const int jumperPin = 10;
+
+WiFiManager wifiManager;
+
+void startAP() {
+  // Connect to the WiFi network
+  WiFi.softAP(ssid, password);
+  WiFi.setHostname(hostname);
+  WiFi.softAPConfig(staticIP, gateway, subnet);
+
+  apMode = true;
+  Serial.println("Switched to AP mode");
+}
+
+void startSTA() {
+
+  WiFi.mode(WIFI_STA);
+  apMode = false;
+  Serial.println("Switched to STA mode");
+
+  // Start WiFi Manager for configuring STA mode
+  wifiManager.autoConnect("PianoLED Setup AP", "pianoled99");
+}
+
+
+// Task handles
+TaskHandle_t midiTaskHandle = NULL;
+
+void midiTask(void *pvParameters) {
+  while (1) {
+    MIDI.read(); // Handle MIDI messages
+    vTaskDelay(pdMS_TO_TICKS(1)); // Adjust the delay as needed
+  }
+}
+
 void setup() {
 
   Serial.begin(115200);
 
-  WiFiManager wm;
-  bool res = wm.autoConnect("PianoLED AP", "pianoled99");
+  pinMode(jumperPin, INPUT_PULLUP);
 
-  if (!res) {
-    Serial.println("Failed to connect");
-    // Take action if the connection fails, e.g., restart the ESP
-    // ESP.restart();
+  usbh_setup(show_config_desc_full);  //init usb host for midi devices
+
+  // Check the state of the jumper wire
+  if (digitalRead(jumperPin) == LOW) {
+    // Jumper wire is connected, use WiFi Manager in STA mode
+    startSTA();
+  } else {
+    // Jumper wire is not connected, use WiFi Manager in AP mode
+    startAP();
   }
-  else
+
+  if (apMode)
   {
-    Serial.println("Connected...yeey :)");
-    Serial.print("IP address: ");
-    Serial.println(WiFi.localIP());
-
-    MIDI.begin();
-
-    AppleMIDI.setHandleConnected([](const APPLEMIDI_NAMESPACE::ssrc_t & ssrc, const char* name) {
-      isConnected++;
-      Serial.print("Connected to session ");
-      Serial.print(ssrc);
-      Serial.print(" Name ");
-      Serial.println(name);
-    });
-    AppleMIDI.setHandleDisconnected([](const APPLEMIDI_NAMESPACE::ssrc_t & ssrc) {
-      isConnected--;
-      Serial.print("Disconnected ");
-      Serial.println(ssrc);
-    });
-
-    MIDI.setHandleNoteOn([](byte channel, byte note, byte velocity) {
-      noteOn(note, velocity);
-    });
-    MIDI.setHandleNoteOff([](byte channel, byte note, byte velocity) {
-      noteOff(note, velocity);
-    });
-
+    wifiManager.resetSettings();
   }
+
+
+  // Create the MIDI task
+  xTaskCreatePinnedToCore(midiTask, "MIDITask", 2048, NULL, 1, &midiTaskHandle, 0);
+  MIDI.begin();
+
+  AppleMIDI.setHandleConnected([](const APPLEMIDI_NAMESPACE::ssrc_t & ssrc, const char* name) {
+    isConnected++;
+    Serial.print("Connected to session ");
+    Serial.print(ssrc);
+    Serial.print(" Name ");
+    Serial.println(name);
+  });
+
+  AppleMIDI.setHandleDisconnected([](const APPLEMIDI_NAMESPACE::ssrc_t & ssrc) {
+    isConnected--;
+    Serial.print("Disconnected ");
+    Serial.println(ssrc);
+  });
+
+  MIDI.setHandleNoteOn([](byte channel, byte note, byte velocity) {
+    noteOn(note, velocity);
+  });
+  MIDI.setHandleNoteOff([](byte channel, byte note, byte velocity) {
+    noteOff(note, velocity);
+  });
 
   // Initialize and start mDNS
   if (MDNS.begin("pianoled")) {
@@ -281,9 +322,7 @@ void setup() {
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
 
-  usbh_setup(show_config_desc_full);  //init usb host for midi devices
-
- if (!SPIFFS.begin(true)) {
+  if (!SPIFFS.begin(true)) {
     Serial.println("An error occurred while mounting SPIFFS.");
     return;
   }
@@ -298,20 +337,19 @@ void setup() {
   FastLED.setBrightness(DEFAULT_BRIGHTNESS);
 
   StartupAnimation();
-  
-  setIPLeds();
+  if (!apMode)
+  {
+    setIPLeds();
+  }
 }
 
 void loop() {
 
-  // Listen to incoming notes
-  MIDI.read();
+  usbh_task();
 
   AsyncElegantOTA.loop();
 
   webSocket.loop();  // Update function for the webSockets
-
-  usbh_task();
 
   currentTime = millis();
 
