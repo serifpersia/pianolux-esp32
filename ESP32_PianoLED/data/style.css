@@ -472,6 +472,7 @@ button {
     width: 100%;
     height: 55px;
     margin-right: 5px;
+    margin-top: 10px;
     outline: none; /* Add this line to hide the focus outline */
 }
 
@@ -487,7 +488,7 @@ button::after {
     padding: var(--border-width);
     border-radius: var(--border-radius);
     background-image: conic-gradient(
-        red,red
+        white,white
     );
     -webkit-mask-image: var(--m-i), var(--m-i);
     mask-image: var(--m-i), var(--m-i);
@@ -497,13 +498,6 @@ button::after {
     mask-composite: exclude;
     -webkit-mask-composite: destination-out;
     filter: hue-rotate(0);
-    animation: rotate-hue linear 2000ms infinite;
-}
-
-@keyframes rotate-hue {
-    to {
-        filter: hue-rotate(1turn);
-    }
 }
 
 button,
@@ -511,24 +505,7 @@ button::after {
     box-sizing: border-box;
 }
 
-button:active {
-    --border-width: 5px;
-}
 
-@keyframes rotate-hue {
-    to {
-        filter: hue-rotate(1turn);
-    }
-}
-
-button,
-button::after {
-    box-sizing: border-box;
-}
-
-button:active {
-    --border-width: 8px;
-}
 
 .checkbox-wrapper-8 .tgl {
     display: none;
@@ -624,6 +601,11 @@ select {
     text-align: center; /* Center-align the text */
 }
 
+.control select {
+    text-align: left; /* Justify text left-aligned */
+    font-weight: bold;
+    font-size: 20px;
+}
 
 footer {
     background-color: #191919;

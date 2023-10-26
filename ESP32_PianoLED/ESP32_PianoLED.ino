@@ -131,9 +131,10 @@ uint8_t hue = 0;
 uint8_t brightness = 255;
 uint8_t bgBrightness = 128;
 uint8_t saturation = 255;
-
-uint8_t Slider1Value = 0;
-uint8_t Slider2Value = 255;
+int bgToggle;
+int fixToggle;
+int reverseToggle;
+int keySizeVal;
 
 unsigned long currentTime = 0;
 unsigned long previousTime = 0;
@@ -167,13 +168,6 @@ int animationIndex;
 
 int splashMaxLength = 8;
 int SPLASH_HEAD_FADE_RATE = 5;
-
-int clientHueVal;
-int clientSaturationVal = 255;
-int clientBrightnessVal = 255;
-int clientFadeVal;
-
-
 
 CRGBPalette16 currentPalette;
 TBlendType currentBlending;
@@ -491,10 +485,10 @@ void changeLEDColor() {
 
 void sliderAction(int sliderNumber, int value) {
   if (sliderNumber == 1) {
-    clientHueVal = value;
-    hue = clientHueVal;
+    hue = value;
   } else if (sliderNumber == 2) {
-    FastLED.setBrightness(value);
+    brightness = value;
+    FastLED.setBrightness(brightness);
   }
 
   else if (sliderNumber == 3) {
@@ -518,9 +512,6 @@ void changeLEDModeAction(int serverMode) {
   //Default Mode
   if (serverMode == 0) {
     MODE = COMMAND_SET_COLOR;
-    hue = clientHueVal;
-    saturation = clientSaturationVal;
-    brightness = clientBrightnessVal;
   }
   //Splash Mode
   else if (serverMode == 1) {
@@ -537,7 +528,6 @@ void changeLEDModeAction(int serverMode) {
   else if (serverMode == 4) {
     MODE = COMMAND_ANIMATION;
     generalFadeRate = 0;
-    animationIndex = 0;
   }
 }
 void blackout() {

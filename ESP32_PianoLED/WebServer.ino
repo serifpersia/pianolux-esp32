@@ -1,16 +1,19 @@
 int numConnectedClients = 0;
+bool inUse = false;
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length) {
   switch (type) {
 
     case WStype_CONNECTED:
-      // Increment the count of connected clients
       numConnectedClients++;
-      if (numConnectedClients == 0) {
-        setIPLeds();
-      } else {
+      if (numConnectedClients == 1 && !inUse) {
         changeLEDModeAction(0);
+        inUse = true;
       }
+      break;
+
+    case WStype_DISCONNECTED:
+      numConnectedClients--;
       break;
 
     case WStype_TEXT:
@@ -30,7 +33,8 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
       } else if (action == "Hue") {
         int value = doc["value"];
         sliderAction(1, value);
-      } else if (action == "Brightness") {
+      }
+      else if (action == "Brightness") {
         int value = doc["value"];
         sliderAction(2, value);
       } else if (action == "Fade") {
@@ -72,9 +76,9 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
       }
       else if (action == "PianoSizeAction")
       {
-        int value = doc["value"];
+        keySizeVal = doc["value"];
 
-        switch (value) {
+        switch (keySizeVal) {
           case 0:
             NUM_LEDS = 176;
             lowestNote = 21;
@@ -109,40 +113,72 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
       }
       else if (action == "FixAction")
       {
-        int value = doc["value"];
-        if (value == 1)
+        fixToggle = doc["value"];
+        if (fixToggle == 1)
         {
           useFix = 1;
         }
-        else if (value == 0)
+        else if (fixToggle == 0)
         {
           useFix = 0;
         }
       }
       else if (action == "BGAction")
       {
-        int value = doc["value"];
-        if (value == 1)
+        bgToggle = doc["value"];
+        if (bgToggle == 1)
         {
           setBG(CHSV(hue, saturation, bgBrightness));
         }
-        else if (value == 0)
+        else if (bgToggle == 0)
         {
           setBG(CHSV(0, 0, 0));
         }
       }
       else if (action == "DirectionAction")
       {
-        int value = doc["value"];
-        if (value == 1)
+        reverseToggle = doc["value"];
+        if (reverseToggle == 1)
         {
           STRIP_DIRECTION = 1;
         }
-        else if (value == 0)
+        else if (reverseToggle == 0)
         {
           STRIP_DIRECTION = 0;
         }
       }
+      else if (action == "RequestValues")
+      {
+        sendJSON();
+      }
       break;
   }
+}
+
+void sendJSON() {
+  // Create a JSON document to hold the current state
+  StaticJsonDocument<200> doc;
+  doc["HUE"] = hue;
+  doc["BRIGHTNESS"] = brightness;
+  doc["FADE"] = generalFadeRate;
+  doc["SPLASH"] = splashMaxLength;
+  doc["BG"] = bgBrightness;
+
+  doc["MODES"] = serverMode;
+  doc["ANIMATIONS"] = animationIndex;
+
+  doc["FIX_TOGGLE"] = fixToggle;
+  doc["BG_TOGGLE"] = bgToggle;
+  doc["REVERSE_TOGGLE"] = reverseToggle;
+  
+  // Add more state variables as needed
+
+  // Serialize the JSON document to a string
+  String jsonStr;
+  serializeJson(doc, jsonStr);
+
+  // Send the JSON data to all connected clients
+  Serial.println("Sending Data To Clients");
+  webSocket.broadcastTXT(jsonStr);
+
 }

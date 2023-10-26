@@ -46,31 +46,26 @@
             <section class="card" id="customize">
                 <div class="control">
                     <label for="selected-item-modes">LED Mode:</label>
-                    <div class="custom-dropdown">
-                        <div class="selected-item" id="selected-item-modes">Select LED Mode</div>
-                        <div class="dropdown-list-modes" id="dropdown-list-modes">
-                            <div class="dropdown-item" data-mode-id="0">Default</div>
-                            <div class="dropdown-item" data-mode-id="1">Splash</div>
-                            <div class="dropdown-item" data-mode-id="2">Random</div>
-                            <div class="dropdown-item" data-mode-id="3">Velocity</div>
-                            <div class="dropdown-item" data-mode-id="4">Animation</div>
-                        </div>
-                    </div>
+                    <select id="selected-item-modes">
+                        <option value="0">Default</option>
+                        <option value="1">Splash</option>
+                        <option value="2">Random</option>
+                        <option value="3">Velocity</option>
+                        <option value="4">Animation</option>
+                    </select>
                 </div>
+
                 <div class="control">
                     <label for="selected-item-animations">Animation:</label>
-                    <div class="custom-dropdown">
-                        <div class="selected-item" id="selected-item-animations">Select Animation</div>
-                        <div class="dropdown-list-animations" id="dropdown-list-animations">
-                            <div class="dropdown-item" data-animation-id="0">RainbowColors</div>
-                            <div class="dropdown-item" data-animation-id="1">RainbowColorsStripeColors</div>
-                            <div class="dropdown-item" data-animation-id="2">OceanColors</div>
-                            <div class="dropdown-item" data-animation-id="3">CloudColors</div>
-                            <div class="dropdown-item" data-animation-id="4">LavaColors</div>
-                            <div class="dropdown-item" data-animation-id="5">ForestColors</div>
-                            <div class="dropdown-item" data-animation-id="6">PartyColors</div>
-                        </div>
-                    </div>
+                    <select id="selected-item-animations">
+                        <option value="0">RainbowColors</option>
+                        <option value="1">RainbowColorsStripeColors</option>
+                        <option value="2">OceanColors</option>
+                        <option value="3">CloudColors</option>
+                        <option value="4">LavaColors</option>
+                        <option value="5">ForestColors</option>
+                        <option value="6">PartyColors</option>
+                    </select>
                 </div>
                 <div class="control">
                     <label for="HUE">Hue</label>

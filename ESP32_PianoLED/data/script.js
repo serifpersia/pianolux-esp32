@@ -23,6 +23,17 @@ function init() {
     // Add open event handler
     Socket.addEventListener('open', function (event) {
         console.log('WebSocket connection opened');
+        sendData('RequestValues');
+    });
+
+
+    // Event listener to handle updates from the server
+    Socket.addEventListener('message', function (event) {
+        var data = JSON.parse(event.data);
+        console.log('Received data from the server:', data);
+
+        // Call the updateUI function to update the UI elements
+        updateUI(data);
     });
 }
 
@@ -41,42 +52,25 @@ function sendData(action, data) {
     }
 }
 
-// Event listeners for button and sliders
-//document.getElementById('BTN_COLOR').addEventListener('click', function () {
-//   sendData('ChangeColor');
-//  console.log('ChangeColor');
-//});
+function addInputListener(controlId, dataKey, factor) {
+    document.getElementById(controlId).addEventListener('input', function () {
+        const value = parseInt(this.value);
+        if (dataKey === 'FADE') {
+            const invertedValue = 255 - value;
+            sendData(dataKey, { value: invertedValue });
+            console.log(invertedValue);
+        } else {
+            sendData(dataKey, { value: value });
+            console.log(value);
+        }
+    });
+}
 
-document.getElementById('HUE').addEventListener('input', function () {
-    var value = parseInt(document.getElementById('HUE').value);
-    sendData('Hue', { value: value });
-    console.log(value);
-});
-
-document.getElementById('BRIGHTNESS').addEventListener('input', function () {
-    var value = parseInt(document.getElementById('BRIGHTNESS').value);
-    sendData('Brightness', { value: value });
-    console.log(value);
-});
-
-document.getElementById('FADE').addEventListener('input', function () {
-    var value = parseInt(document.getElementById('FADE').value);
-    var invertedValue = 255 - value;
-    sendData('Fade', { value: invertedValue });
-    console.log(invertedValue);
-});
-
-document.getElementById('SPLASH').addEventListener('input', function () {
-    var value = parseInt(document.getElementById('SPLASH').value);
-    sendData('Splash', { value: value });
-    console.log(value);
-});
-
-document.getElementById('BG').addEventListener('input', function () {
-    var value = parseInt(document.getElementById('BG').value);
-    sendData('Background', { value: value });
-    console.log(value);
-});
+addInputListener('HUE', 'Hue', 1);
+addInputListener('BRIGHTNESS', 'Brightness', 1);
+addInputListener('FADE', 'Fade', 255);
+addInputListener('SPLASH', 'Splash', 1);
+addInputListener('BG', 'Background', 1);
 
 
 var navbar = document.querySelector('.navbar');
@@ -103,81 +97,66 @@ function handleScroll() {
 window.addEventListener('scroll', handleScroll);
 
 
+function updateUI(data) {
+    function updateControlValue(controlId, dataValue, maxTrack, thumb, handleMoveFunction, factor) {
+        if (dataValue !== undefined) {
+            document.getElementById(controlId).value = dataValue;
+            const maxPosition = maxTrack.offsetWidth - thumb.offsetWidth;
+            const newPosition = (dataValue / factor) * maxPosition;
+            handleMoveFunction(newPosition);
+        }
+    }
+
+    function updateDropdownList(dropdownId, dataValue) {
+        if (dataValue !== undefined) {
+            document.getElementById(dropdownId).value = dataValue;
+        }
+    }
+
+    function updateToggles(controlId, dataValue) {
+        if (dataValue !== undefined) {
+            const checkbox = document.getElementById(controlId);
+            checkbox.checked = dataValue;
+        }
+    }
+
+    updateDropdownList('selected-item-modes', data.MODES);
+    updateDropdownList('selected-item-animations', data.ANIMATIONS);
+
+    updateControlValue('HUE', data.HUE, track, thumb, handleMove, 255);
+    updateControlValue('BRIGHTNESS', data.BRIGHTNESS, brightnessTrack, brightnessThumb, handleBrightnessMove, 255);
+    updateControlValue('FADE', data.FADE, fadeTrack, fadeThumb, handleFadeMove, 255);
+    updateControlValue('SPLASH', data.SPLASH, splashTrack, splashThumb, handleSplashMove, 16);
+    updateControlValue('BG', data.BG, bgTrack, bgThumb, handleBgMove, 255);
+
+    updateToggles('cb1-8', data.FIX_TOGGLE);
+    updateToggles('cb2-8', data.BG_TOGGLE);
+    updateToggles('cb3-8', data.REVERSE_TOGGLE);
+
+}
+
 // DropdownList script for LED Modes
 const selectedItemModes = document.querySelector('#selected-item-modes');
-const dropdownListModes = document.querySelector('#dropdown-list-modes');
 
-// Initially hide the dropdown list for LED Modes
-dropdownListModes.style.display = 'none';
+selectedItemModes.addEventListener('change', () => {
+    const selectedModeId = selectedItemModes.value;
+    console.log('Selected Mode ID:', selectedModeId); // Debugging statement
 
-// Add click event listeners to each dropdown item for LED Modes
-const dropdownItemsModes = document.querySelectorAll('.dropdown-list-modes .dropdown-item');
-dropdownItemsModes.forEach((item) => {
-    item.addEventListener('click', () => {
-        console.log('Item clicked:', item.textContent); // Debugging statement
-        const selectedModeId = parseInt(item.getAttribute('data-mode-id'), 10);
-        console.log('Selected Mode ID:', selectedModeId); // Debugging statement
-        selectedItemModes.textContent = item.textContent;
-        dropdownListModes.style.display = 'none'; // Compact the dropdown list for LED Modes
-        console.log('Sending:', 'ChangeLEDModeAction' + selectedModeId); // Debugging statement
-
-        // Send a WebSocket message for changing the LED mode
-        sendData('ChangeLEDModeAction', { mode: selectedModeId });
-    });
-});
-
-selectedItemModes.addEventListener('click', () => {
-    console.log('Dropdown clicked'); // Debugging statement
-    // Toggle the visibility of the dropdown list for LED Modes
-    if (dropdownListModes.style.display === 'none' || dropdownListModes.style.display === '') {
-        console.log('Opening dropdown'); // Debugging statement
-        dropdownListModes.style.display = 'block';
-    } else {
-        console.log('Closing dropdown'); // Debugging statement
-        dropdownListModes.style.display = 'none';
-    }
+    // Send a WebSocket message for changing the LED mode
+    sendData('ChangeLEDModeAction', { mode: selectedModeId });
+    sendData('RequestValues');
 });
 
 // DropdownList script for Animations
 const selectedItemAnimations = document.querySelector('#selected-item-animations');
-const dropdownListAnimations = document.querySelector('#dropdown-list-animations');
 
-// Initially hide the dropdown list for Animations
-dropdownListAnimations.style.display = 'none';
+selectedItemAnimations.addEventListener('change', () => {
+    const selectedAnimationId = selectedItemAnimations.value;
+    console.log('Selected Animation ID:', selectedAnimationId); // Debugging statement
 
-// Add click event listeners to each dropdown item for Animations
-const dropdownItemsAnimations = document.querySelectorAll('.dropdown-list-animations .dropdown-item');
-dropdownItemsAnimations.forEach((item) => {
-    item.addEventListener('click', () => {
-        console.log('Item clicked:', item.textContent); // Debugging statement
-        const selectedAnimationId = parseInt(item.getAttribute('data-animation-id'), 10);
-        console.log('Selected Animation ID:', selectedAnimationId); // Debugging statement
-        selectedItemAnimations.textContent = item.textContent;
-        dropdownListAnimations.style.display = 'none'; // Compact the dropdown list for Animations
-        console.log('Sending:', 'ChangeAnimationAction' + selectedAnimationId); // Debugging statement
-
-        // Send a WebSocket message for changing the animation
-        sendData('ChangeAnimationAction', { animation: selectedAnimationId });
-    });
+    // Send a WebSocket message for changing the animation
+    sendData('ChangeAnimationAction', { animation: selectedAnimationId });
 });
-
-selectedItemAnimations.addEventListener('click', () => {
-    console.log('Dropdown clicked'); // Debugging statement
-    // Toggle the visibility of the dropdown list for Animations
-    if (dropdownListAnimations.style.display === 'none' || dropdownListAnimations.style.display === '') {
-        console.log('Opening dropdown'); // Debugging statement
-        dropdownListAnimations.style.display = 'block';
-    } else {
-        console.log('Closing dropdown'); // Debugging statement
-        dropdownListAnimations.style.display = 'none';
-    }
-});
-
-
-// Call the init function when the window loads
-window.onload = function (event) {
-    init();
-};
 
 
 // Hue Slider Code
@@ -702,71 +681,41 @@ function handleWindowResize() {
 window.addEventListener('resize', handleWindowResize);
 
 
-const sizes = ["88", "76", "73", "61", "49"];
+function createButtonListener(button, values, index, actionName) {
+    button.addEventListener("click", function () {
+        index = (index + 1) % values.length;
+        button.textContent = values[index];
+        sendData(actionName, { value: index });
+        console.log('Sending:', actionName + index); // Debugging
+    });
+}
+
+const sizes = ["88 Key", "76 Key", "73 Key", "61 Key", "49 Key"];
 let sizeIndex = 0;
+const pianoSizeButton = document.getElementById("PianoSize");
+createButtonListener(pianoSizeButton, sizes, sizeIndex, 'PianoSizeAction');
 
 const ratios = ["1:2", "1:1"];
 let ratioIndex = 0;
-
-const pianoSizeButton = document.getElementById("PianoSize");
 const ledScaleRatioButton = document.getElementById("LEDScaleRatio");
+createButtonListener(ledScaleRatioButton, ratios, ratioIndex, 'LedScaleRatioAction');
 
-pianoSizeButton.addEventListener("click", function () {
-    sizeIndex = (sizeIndex + 1) % sizes.length;
-    pianoSizeButton.textContent = sizes[sizeIndex] + " Key";
-    sendData('PianoSizeAction', { value: sizeIndex });
-    console.log('Sending:', 'PianoSizeAction' + sizeIndex); // Debugging 
-});
-
-ledScaleRatioButton.addEventListener("click", function () {
-    ratioIndex = (ratioIndex + 1) % ratios.length;
-    ledScaleRatioButton.textContent = ratios[ratioIndex];
-    sendData('LedScaleRatioAction', { value: ratioIndex });
-    console.log('Sending:', 'LedScaleRatioAction' + ratioIndex); // Debugging 
-});
+function createCheckboxListener(checkbox, actionName) {
+    checkbox.addEventListener('change', function () {
+        const value = this.checked ? 1 : 0;
+        sendData(actionName, { value });
+        console.log('Sending:', actionName + value); // Debugging
+    });
+}
 
 const cb2Checkbox1 = document.getElementById('cb1-8');
 const cb2Checkbox2 = document.getElementById('cb2-8');
 const cb2Checkbox3 = document.getElementById('cb3-8');
 
-cb2Checkbox1.addEventListener('change', function() {
-    // Check if it's toggle id 1
-    if (this.checked) {
-        // Send data to the socket with action FixAction and value 1
-        sendData('FixAction', { value: 1 });
-        console.log('Sending:', 'FixAction' + 1); // Debugging 
-    } else {
-        // Send data to the socket with action FixAction and value 0
-        sendData('FixAction', { value: 0 });
-        console.log('Sending:', 'FixAction' + 0); // Debugging 
-    }
-});
+createCheckboxListener(cb2Checkbox1, 'FixAction');
+createCheckboxListener(cb2Checkbox2, 'BGAction');
+createCheckboxListener(cb2Checkbox3, 'DirectionAction');
 
-cb2Checkbox2.addEventListener('change', function() {
-    // Check if it's toggle id 2
-    if (this.checked) {
-        // Send data to the socket with action BGAction and value 1
-        sendData('BGAction', { value: 1 });
-        console.log('Sending:', 'BGAction' + 1); // Debugging 
-    } else {
-        // Send data to the socket with action BGAction and value 0
-        sendData('BGAction', { value: 0 });
-        console.log('Sending:', 'BGAction' + 0); // Debugging 
-    }
-});
-
-cb2Checkbox3.addEventListener('change', function() {
-    // Check if it's toggle id 3
-    if (this.checked) {
-        // Send data to the socket with action DirectionAction and value 1
-        sendData('DirectionAction', { value: 1 });
-        console.log('Sending:', 'DirectionAction' + 1); // Debugging 
-    } else {
-        // Send data to the socket with action DirectionAction and value 0
-        sendData('DirectionAction', { value: 0 });
-        console.log('Sending:', 'DirectionAction' + 0); // Debugging 
-    }
-});
 
 const fileLink = document.getElementById('fileLink');
 const confirmationDialog = document.getElementById('confirmationDialog');
@@ -945,3 +894,9 @@ ledDataPinInput.addEventListener("input", function() {
         console.log('Sending:', 'LedDataPinAction', enteredValue);
     }, typingTimeout);
 });
+
+// Call the init function when the window loads
+window.onload = function (event) {
+    init();
+};
+
