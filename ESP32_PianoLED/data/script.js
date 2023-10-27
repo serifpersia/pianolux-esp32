@@ -122,6 +122,7 @@ function updateUI(data) {
 
     updateDropdownList('selected-item-modes', data.MODES);
     updateDropdownList('selected-item-animations', data.ANIMATIONS);
+    updateDropdownList('selected-item-colors', data.COLORS);
 
     updateControlValue('HUE', data.HUE, track, thumb, handleMove, 255);
     updateControlValue('BRIGHTNESS', data.BRIGHTNESS, brightnessTrack, brightnessThumb, handleBrightnessMove, 255);
@@ -158,6 +159,18 @@ selectedItemAnimations.addEventListener('change', () => {
     sendData('ChangeAnimationAction', { animation: selectedAnimationId });
 });
 
+
+// DropdownList script for Colors
+const selectedItemColors = document.querySelector('#selected-item-colors');
+
+selectedItemColors.addEventListener('change', () => {
+    const selectedColorsId = selectedItemColors.value;
+    console.log('Selected Color ID:', selectedColorsId); // Debugging statement
+
+    // Send a WebSocket message for changing the animation
+    sendData('ChangeColorAction', { color: selectedColorsId });
+    sendData('RequestValues');
+});
 
 // Hue Slider Code
 const thumb = document.querySelector('.thumb');

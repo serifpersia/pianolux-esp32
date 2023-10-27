@@ -130,11 +130,13 @@ boolean isOnStrip(int pos) {
 uint8_t hue = 0;
 uint8_t brightness = 255;
 uint8_t bgBrightness = 128;
+uint8_t bgSaturation = 255;
 uint8_t saturation = 255;
 int bgToggle;
 int fixToggle;
 int reverseToggle;
 int keySizeVal;
+int colorIndex;
 
 unsigned long currentTime = 0;
 unsigned long previousTime = 0;
@@ -448,8 +450,6 @@ int mapMidiNoteToLED(int midiNote, int lowestMidiNote, int highestMidiNote, int 
 
 }
 
-
-
 void noteOn(uint8_t note, uint8_t velocity) {
   int ledIndex = mapMidiNoteToLED(note, lowestNote, highestNote, NUM_LEDS); // Map MIDI note to LED index
   keysOn[ledIndex] = true;
@@ -457,7 +457,7 @@ void noteOn(uint8_t note, uint8_t velocity) {
   if (serverMode == 0) {
     controlLeds(ledIndex, hue, saturation, brightness);  // Both use the same index
   } else if (serverMode == 1) {
-    CHSV hsv(hue, 255, 255);
+    CHSV hsv(hue, saturation, brightness);
     addEffect(new FadingRunEffect(splashMaxLength, ledIndex, hsv, SPLASH_HEAD_FADE_RATE, velocity));
   } else if (serverMode == 2) {
     hue = random(256);
@@ -476,19 +476,12 @@ void noteOff(uint8_t note, uint8_t velocity) {
   Serial.println("Note Off: " + String(note) + " mapped to LED: " + String(ledIndex));  // Debug print
 }
 
-void changeLEDColor() {
-  hue = random(256);
-
-  Serial.print("Color Changed! ");
-  Serial.println(hue);
-}
-
 void sliderAction(int sliderNumber, int value) {
   if (sliderNumber == 1) {
     hue = value;
   } else if (sliderNumber == 2) {
-    brightness = value;
-    FastLED.setBrightness(brightness);
+    DEFAULT_BRIGHTNESS = value;
+    FastLED.setBrightness(DEFAULT_BRIGHTNESS);
   }
 
   else if (sliderNumber == 3) {

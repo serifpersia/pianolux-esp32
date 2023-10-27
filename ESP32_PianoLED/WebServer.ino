@@ -28,8 +28,26 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
       }
 
       String action = doc["action"];
-      if (action == "ChangeColor") {
-        changeLEDColor();
+
+      if (action == "ChangeLEDModeAction") {
+        serverMode = doc["mode"];
+        changeLEDModeAction(serverMode);
+        Serial.println("LED ID: ");
+        Serial.print(serverMode);
+      }
+      else if (action == "ChangeAnimationAction") {
+        animationIndex = doc["animation"];
+        Serial.println("Animation ID: ");
+        Serial.print(animationIndex);
+      }
+      else if (action == "ChangeColorAction") {
+        colorIndex = doc["color"];
+        if (colorIndex == 0) {
+          bgSaturation = saturation;
+        }
+        else if (colorIndex == 1) {
+          bgSaturation = 0;
+        }
       } else if (action == "Hue") {
         int value = doc["value"];
         sliderAction(1, value);
@@ -44,38 +62,22 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
       else if (action == "Splash") {
         int value = doc["value"];
         sliderAction(4, value);
-      } else if (action == "ChangeLEDModeAction") {
-        serverMode = doc["mode"];
-        changeLEDModeAction(serverMode);
-        Serial.println("LED ID: ");
-        Serial.print(serverMode);
       }
-      else if (action == "ChangeAnimationAction")
-      {
-        animationIndex = doc["animation"];
-        Serial.println("Animation ID: ");
-        Serial.print(animationIndex);
-      }
-      else if (action == "Background")
-      {
+      else if (action == "Background") {
         int value = doc["value"];
         bgBrightness = value;
       }
-
-      else if (action == "CurrentAction")
-      {
+      else if (action == "CurrentAction") {
         int value = doc["value"];
         FastLED.setMaxPowerInVoltsAndMilliamps(5, value);
       }
-      else if (action == "LedDataPinAction")
-      {
+      else if (action == "LedDataPinAction") {
         int value = doc["value"];
         updateGPIOConfig(value);
         delay(3000); // Debounce the button
         ESP.restart(); // Restart the ESP32
       }
-      else if (action == "PianoSizeAction")
-      {
+      else if (action == "PianoSizeAction") {
         keySizeVal = doc["value"];
 
         switch (keySizeVal) {
@@ -106,72 +108,59 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
             break;
         }
       }
-      else if (action == "LedScaleRatioAction")
-      {
+      else if (action == "LedScaleRatioAction") {
         int value = doc["value"];
         pianoScaleRatio = value;
       }
-      else if (action == "FixAction")
-      {
+      else if (action == "FixAction") {
         fixToggle = doc["value"];
-        if (fixToggle == 1)
-        {
+        if (fixToggle == 1) {
           useFix = 1;
         }
-        else if (fixToggle == 0)
-        {
+        else if (fixToggle == 0) {
           useFix = 0;
         }
       }
-      else if (action == "BGAction")
-      {
+      else if (action == "BGAction") {
         bgToggle = doc["value"];
-        if (bgToggle == 1)
-        {
-          setBG(CHSV(hue, saturation, bgBrightness));
+        if (bgToggle == 1) {
+          setBG(CHSV(hue, bgSaturation, bgBrightness));
         }
-        else if (bgToggle == 0)
-        {
+        else if (bgToggle == 0) {
           setBG(CHSV(0, 0, 0));
         }
       }
-      else if (action == "DirectionAction")
-      {
+      else if (action == "DirectionAction") {
         reverseToggle = doc["value"];
-        if (reverseToggle == 1)
-        {
+        if (reverseToggle == 1) {
           STRIP_DIRECTION = 1;
         }
-        else if (reverseToggle == 0)
-        {
+        else if (reverseToggle == 0) {
           STRIP_DIRECTION = 0;
         }
       }
-      else if (action == "RequestValues")
-      {
-        sendJSON();
+      else if (action == "RequestValues") {
+        sendValues();
       }
       break;
   }
 }
 
-void sendJSON() {
+void sendValues() {
   // Create a JSON document to hold the current state
   StaticJsonDocument<200> doc;
-  doc["HUE"] = hue;
-  doc["BRIGHTNESS"] = brightness;
-  doc["FADE"] = generalFadeRate;
-  doc["SPLASH"] = splashMaxLength;
-  doc["BG"] = bgBrightness;
 
   doc["MODES"] = serverMode;
   doc["ANIMATIONS"] = animationIndex;
-
+  doc["COLORS"] = colorIndex;
+  doc["HUE"] = hue;
+  doc["BRIGHTNESS"] = DEFAULT_BRIGHTNESS;
+  doc["FADE"] = generalFadeRate;
+  doc["SPLASH"] = splashMaxLength;
+  doc["BG"] = bgBrightness;
   doc["FIX_TOGGLE"] = fixToggle;
   doc["BG_TOGGLE"] = bgToggle;
   doc["REVERSE_TOGGLE"] = reverseToggle;
-  
-  // Add more state variables as needed
 
   // Serialize the JSON document to a string
   String jsonStr;
