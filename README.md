@@ -17,7 +17,8 @@
 
 ## Installation
 
-The installation is relatively simple. If you need help or want to join my PianoLED Community Discord Server, feel free to hop in: [Join PianoLED Discord](https://discord.gg/S6xmuX4Hx5)
+The installation is relatively simple. If you need help or want to join my PianoLED Community Discord Server, feel free to hop in:
+ [Join PianoLED Discord](https://discord.gg/S6xmuX4Hx5)
 
 ### Hardware
 
