@@ -24,7 +24,7 @@ The installation is relatively simple. If you need help or want to join my Piano
 
 To get started with PianoLED on the ESP platform, you have two options to choose from:
 
-#### Option 1: ESP32-S2
+#### Option 1: ESP32-S2 Single or Dual USB Port Dev Board
 
 - Create a DIY USB OTG/Female USB cable:
   - Cut down a short(under 15cm) USB cable with a female port on one end.
@@ -42,7 +42,7 @@ To get started with PianoLED on the ESP platform, you have two options to choose
 
 For power, you can use the USB port of the board. The default current limit is set to 450mA. If the plan is to power the LED STRIP separately from the same or different 5V DC supply, make sure both power source grounds are connected to the ground of the ESP32 Board.
 
-#### Option 2: ESP32-S3
+#### Option 2: ESP32-S3 Dual USB Port Dev Board
 
 This is more of a plug & play setup. Depending on whether your board has pre-soldered pin headers and USB-OTG pads soldered, you have to bridge the USB-OTG pads,for boards without this feature, forr them to work with your USB MIDI Device you need to connect the 5V pin to 5v wire of your USB cable connected to the USB OTG/Host capable port. This applies for S2 as well,some S2 boards can also have 2 usb ports one for USB Host but you may need to use 5v Pin if MIDI device doesn't function.
 
