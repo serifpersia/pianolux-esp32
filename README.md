@@ -27,7 +27,7 @@ To get started with PianoLED on the ESP platform, you have two options to choose
 #### Option 1: ESP32-S2
 
 - Create a DIY USB OTG/Female USB cable:
-  - Cut down a fairly long USB cable with a female port on one end.
+  - Cut down a short(under 15cm) USB cable with a female port on one end.
   - Splice 4 female-end jumper wires with the 4 USB wires, matching USB wire colors with jumper cable colors.
 - Connect this DIY cable to pins on the ESP32-S2 as follows:
   - USB - ESP32-S2 Board Pins:
