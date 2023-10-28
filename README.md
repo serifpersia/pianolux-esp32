@@ -44,7 +44,7 @@ For power, you can use the USB port of the board. The default current limit is s
 
 #### Option 2: ESP32-S3 Dual USB Port Dev Board
 
-This is more of a plug & play setup. Depending on whether your board has pre-soldered pin headers and USB-OTG pads soldered, you have to bridge the USB-OTG pads,for boards without this feature, forr them to work with your USB MIDI Device you need to connect the 5V pin to 5v wire of your USB cable connected to the USB OTG/Host capable port. This applies for S2 as well,some S2 boards can also have 2 usb ports one for USB Host but you may need to use 5v Pin if MIDI device doesn't function.
+This is more of a plug & play setup. Depending on whether your board has pre-soldered pin headers and USB-OTG pads soldered, you have to bridge the USB-OTG pads,for boards without this feature, for them to work with your USB MIDI Device you need to connect the 5V pin to 5v wire of your USB cable connected to the USB OTG/Host capable port. This applies for S2 as well,some S2 boards can also have 2 usb ports one for USB Host but you may need to use 5v Pin if MIDI device doesn't function.
 
 The same LED scheme applies to ESP-32S3. A spare COM USB port can be used for basic power, but if you need brighter LEDs, consider powering the LED strip externally.
 
