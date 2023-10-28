@@ -263,6 +263,8 @@ void setup() {
     wifiManager.resetSettings();
   }
 
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
 
   // Create the MIDI task
   xTaskCreatePinnedToCore(midiTask, "MIDITask", 2048, NULL, 1, &midiTaskHandle, 0);

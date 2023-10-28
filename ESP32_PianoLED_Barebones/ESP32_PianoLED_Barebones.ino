@@ -89,8 +89,9 @@ void setup() {
   }
   else
   {
-    Serial.println("Connected...yeey :)");
-    Serial.print("IP address: ");
+    Serial.println("");
+    Serial.println("WiFi connected.");
+    Serial.println("IP address: ");
     Serial.println(WiFi.localIP());
   }
 
