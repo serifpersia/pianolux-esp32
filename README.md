@@ -19,7 +19,8 @@
 
 The installation is relatively simple. If you need help or want to join my PianoLED Community Discord Server, feel free to hop in:
  [Join PianoLED Discord](https://discord.gg/S6xmuX4Hx5)
-This project also supports MIDI over local network so you can use midi device on your pc with this project there is no latency. For Windows use rtpMIDI software,use esp's ip and port 5004. ESP must be in non AP mode to be able to se MIDI over network
+
+This project also supports MIDI over local network so you can use midi device on your pc with this project there is no latency. For Windows use rtpMIDI software,use esp's ip and port 5004. ESP must be in non AP mode to be able to use MIDI over network
 
 ### Hardware
 
