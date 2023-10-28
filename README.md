@@ -13,6 +13,7 @@
 
 - WS2812 5V 144/m
 - WS2812 5V 72/m (1:1 ratio)
+- *88/76 Keys need 176 leds of 144leds/m density so more than 1m of strip is needed, get 2m one and cut the excess(after 176th led).
 
 ## Installation
 
