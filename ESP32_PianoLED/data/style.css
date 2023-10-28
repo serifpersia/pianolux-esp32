@@ -348,61 +348,6 @@ input:checked + .slider:before {
     box-shadow: 0 0 0 6px white; /* Add a white edge (bezel) with a specified width */
 }
 
-/* Updated CSS for the brightness slider */
-.brightness-slider {
-    position: relative;
-    width: 100%;
-    height: 40px; /* Adjust the height as needed */
-}
-
-.brightness-slider .track {
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(to right, #000, transparent); /* Gradient from black to transparent */
-    border-radius: 10px;
-}
-
-.brightness-slider .thumb {
-    position: absolute;
-    width:  45px; /* Adjust the thumb width as needed */
-    height: 45px; /* Adjust the thumb height as needed */
-    background-color: white;
-    border-radius: 50%;
-    top: 50%;
-    transform: translateY(-50%);
-    left: 0;
-    cursor: pointer;
-    box-shadow: 0 0 0 6px white; /* Add a white edge (bezel) with a specified width */
-}
-
-/* Updated CSS for the fade slider */
-.fade-slider {
-    position: relative;
-    width: 100%;
-    height: 40px; /* Adjust the height as needed */
-}
-
-.fade-slider .track {
-    width: 100%;
-    height: 100%;
-    background: #46494b;
-    border-radius: 10px;
-}
-
-.fade-slider .thumb {
-    position: absolute;
-    width: 45px; /* Adjust the thumb width as needed */
-    height: 45px; /* Adjust the thumb height as needed */
-    background-color: white;
-    border-radius: 50%;
-    top: 50%;
-    transform: translateY(-50%);
-    left: 0;
-    cursor: pointer;
-    box-shadow: 0 0 0 6px white; /* Add a white edge (bezel) with a specified width */
-}
-
-
 /* Updated CSS for the Background Light slider */
 .bg-slider {
     position: relative;

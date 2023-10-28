@@ -735,11 +735,12 @@ const confirmationDialog = document.getElementById('confirmationDialog');
 const DownloadOTAUpdatesButton = document.getElementById('Update');
 const UploadOTAButton = document.getElementById('Download');
 const CancelButton = document.getElementById('Cancel');
+const boardSelect = document.getElementById('boardSelect');
 const binarySelect = document.getElementById('binarySelect');
 
 let isDialogOpen = false;
 
-
+// Add event listeners for the "Local," "Online," and "Cancel" buttons outside the fileLink event listener.
 DownloadOTAUpdatesButton.addEventListener('click', () => {
     // If the custom "Local" button is clicked, proceed with the code for local upload.
     confirmationDialog.style.display = 'none';
@@ -750,19 +751,21 @@ DownloadOTAUpdatesButton.addEventListener('click', () => {
 
 UploadOTAButton.addEventListener('click', () => {
     // If the custom "Online" button is clicked, fetch and handle the binary file.
+    const selectedBoard = boardSelect.value;
     const selectedBinary = binarySelect.value;
 
-    if (selectedBinary) {
-        // Now you have the selected binary type.
-        // You can call the fetchAssetsList function with this value.
-        fetchAssetsList(selectedBinary);
+    if (selectedBoard && selectedBinary) {
+        // Now you have both the selected board and binary type.
+        // You can call the fetchAssetsList function with these values.
+        fetchAssetsList(selectedBoard, selectedBinary);
     } else {
-        console.error('Please select a binary type.');
+        console.error('Please select both board and binary type.');
     }
 
     confirmationDialog.style.display = 'none';
     isDialogOpen = false;
 });
+
 
 CancelButton.addEventListener('click', () => {
     // If the custom "Cancel" button is clicked, close the dialog without proceeding.
@@ -786,18 +789,14 @@ function downloadFile(url, fileName) {
 
     // Trigger a click event on the anchor to start the download
     anchor.click();
+    alert('Delete downloaded files after you upload them to ESP32 board!');
 }
 
-function fetchAssetsList(fileType) {
+function fetchAssetsList(board, fileType) {
     const githubApiUrl = `https://api.github.com/repos/serifpersia/pianoled-esp32/releases/latest`;
 
     fetch(githubApiUrl)
-        .then(response => {
-        if (!response.ok) {
-            throw new Error(`Failed to fetch data from GitHub API: ${response.status} ${response.statusText}`);
-        }
-        return response.json();
-    })
+        .then(response => response.json())
         .then(data => {
         const assets = data.assets;
 
@@ -807,8 +806,8 @@ function fetchAssetsList(fileType) {
                 console.log(asset.name);
             });
 
-            // Construct the binary file name based on the fileType
-            const binaryFileName = `${fileType}.bin`;
+            // Construct the binary file name based on the board and fileType
+            const binaryFileName = `${board}_${fileType}.bin`;
             const binaryFile = assets.find(asset => asset.name === binaryFileName);
 
             if (binaryFile) {
@@ -825,7 +824,6 @@ function fetchAssetsList(fileType) {
     })
         .catch(error => {
         console.error('Error fetching release assets:', error);
-        // Display an alert if there was an error fetching data
         alert('No files found on Github Repository!');
     });
 }
