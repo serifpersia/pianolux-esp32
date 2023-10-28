@@ -40,7 +40,7 @@ To get started with PianoLED on the ESP platform, you have two options to choose
     - White Wire - GND Pin
     - Green Wire - Data Pin (default 18)
 
-For power, you can use the USB port of the board. The default current limit is set to 450mA. If the plan is to power the LED STRIP separately from the same 5V DC supply, make sure both power source grounds are connected to the ground of the ESP32 Board.
+For power, you can use the USB port of the board. The default current limit is set to 450mA. If the plan is to power the LED STRIP separately from the same or different 5V DC supply, make sure both power source grounds are connected to the ground of the ESP32 Board.
 
 #### Option 2: ESP32-S3
 
