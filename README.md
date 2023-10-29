@@ -1,4 +1,4 @@
-![image](https://github.com/serifpersia/pianoled-esp32/assets/62844718/9594ac7e-b799-42c0-875f-2f14316d797f)# PianoLED-ESP32 V1
+# PianoLED-ESP32 V1
 
 ![image](https://github.com/serifpersia/pianoled-esp32/assets/62844718/b79ec631-f5a9-41ff-8bf0-f93228759d48)
 
