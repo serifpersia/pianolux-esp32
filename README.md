@@ -1,4 +1,4 @@
-# PianoLED-ESP32 V1
+![image](https://github.com/serifpersia/pianoled-esp32/assets/62844718/9594ac7e-b799-42c0-875f-2f14316d797f)# PianoLED-ESP32 V1
 
 ![image](https://github.com/serifpersia/pianoled-esp32/assets/62844718/b79ec631-f5a9-41ff-8bf0-f93228759d48)
 
@@ -42,6 +42,12 @@ To get started with PianoLED on the ESP platform, you have two options to choose
     - White Wire - GND Pin
     - Green Wire - Data Pin (default 18)
 
+![image](https://github.com/serifpersia/pianoled-esp32/assets/62844718/cea8ebeb-09c5-46e9-a028-67c5447ad0f3)
+
+
+![image](https://github.com/serifpersia/pianoled-esp32/assets/62844718/9ea3a1e8-52e6-40e1-9069-58c918e9e6ef)
+
+
 For power, you can use the USB port of the board. The default current limit is set to 450mA. If the plan is to power the LED STRIP separately from the same or different 5V DC supply, make sure both power source grounds are connected to the ground of the ESP32 Board.
 
 #### Option 2: ESP32-S3 Dual USB Port Dev Board
@@ -49,6 +55,9 @@ For power, you can use the USB port of the board. The default current limit is s
 This is more of a plug & play setup. Depending on whether your board has pre-soldered pin headers and USB-OTG pads soldered, you have to bridge the USB-OTG pads,for boards without this feature, for them to work with your USB MIDI Device you need to connect the 5V pin to 5v wire of your USB cable connected to the USB OTG/Host capable port. This applies for S2 as well,some S2 boards can also have 2 usb ports one for USB Host but you may need to use 5v Pin if MIDI device doesn't function.
 
 The same LED scheme applies to ESP-32S3. A spare COM USB port can be used for basic power, but if you need brighter LEDs, consider powering the LED strip externally.
+
+![image](https://github.com/serifpersia/pianoled-esp32/assets/62844718/a089640f-113e-47b1-8c88-8e38e4728295)
+
 
 ### Software
 
@@ -67,6 +76,9 @@ After selecting your S2/S3 dev board from the tools>boards menu in Arduino IDE, 
 On your WiFi-capable device (usually a smartphone), you will see "PianoLED AP WiFi." The password is "pianoled99." After connecting to it, in your browser, type 192.168.4.1 if you didn't already see the WiFi portal. Here you can go to "Configure" and connect to your local WiFi network. The ESP32 board will restart and be connected to this network.
 
 Download the release binaries for your board. Connect to your ESP32 webserver via "pianoled.local" or by IP address (the LED strip will indicate the IP address), or simply get this info by connecting the ESP32 board back to the PC and, in Arduino Tools menu, find Serial Monitor, press the reset button on ESP32, and you will find your IP if you can't read the IP from the LED strip or "pianoled.local" is not working in your device's web browser.
+
+![image](https://github.com/serifpersia/pianoled-esp32/assets/62844718/91beaa8e-c168-46cb-b048-daac8cc76df6)
+
 
 The final step is to click the update button on the webserver and upload the bin files you downloaded from the release page. You can update the firmware or filesystem in any order you want, but make sure you have both uploaded. Since the ESP32 has the main PianoLED code uploaded now, connecting to the same IP or "pianoled.local" will bring you to the main web interface.
 
