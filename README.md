@@ -69,7 +69,13 @@ Install the following libraries:
 
 - ESP32 Arduino Core and the latest esp32 board package (follow the [official guide](https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html)).
 - Libraries needed for barebones are: WiFiManager, ElegantOTA, and FastLED.
-- ESPAsyncWebServer and ESPAsyncTCP will need to be installed manually by downloading the zips and installing them via the Sketch Manage Libraries "install library from zip" in the Arduino IDE.
+- ESPAsyncWebServer and AsyncTCP will need to be installed manually by downloading the zips and installing them via the Sketch Manage Libraries "install library from zip" in the Arduino IDE.
+
+[ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer)
+
+[AsyncTCP](https://github.com/me-no-dev/AsyncTCP)
+
+[Arduino core for ESP32](https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html)
 
 After selecting your S2/S3 dev board from the tools>boards menu in Arduino IDE, a few things to check before uploading. For S3, make sure your USB MODE is set to TinyUSB. In the tools menu, select the port of your board and click the > arrow to start uploading to the ESP32 Board. If you see "Leaving... Hard resetting via RTS pin...," your upload was successful.
 
