@@ -42,6 +42,9 @@ To get started with PianoLED on the ESP platform, you have two options to choose
     - White Wire - GND Pin
     - Green Wire - Data Pin (default 18)
 
+If you use usb otg port on s2/s3 you might have esp power issue, to fix this bypass the usb otg port and do the 
+diy usb micro b/c to Female A port short cable and connect wires directly to esp32's 5V,GND, 19 &  20 pins.
+
 ![image](https://github.com/serifpersia/pianoled-esp32/assets/62844718/cea8ebeb-09c5-46e9-a028-67c5447ad0f3)
 
 
