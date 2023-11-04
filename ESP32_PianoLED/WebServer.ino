@@ -139,6 +139,15 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
           STRIP_DIRECTION = 0;
         }
       }
+      else if (action == "HueChangeAction") {
+        int value = doc["value"];
+        if (value == 1) {
+          HueChange = true;
+        }
+        else if (value == 0) {
+          HueChange = false;
+        }
+      }
       else if (action == "RequestValues") {
         sendValues();
       }

@@ -724,10 +724,12 @@ function createCheckboxListener(checkbox, actionName) {
 const cb2Checkbox1 = document.getElementById('cb1-8');
 const cb2Checkbox2 = document.getElementById('cb2-8');
 const cb2Checkbox3 = document.getElementById('cb3-8');
+const cb2Checkbox4 = document.getElementById('cb4-8');
 
 createCheckboxListener(cb2Checkbox1, 'FixAction');
 createCheckboxListener(cb2Checkbox2, 'BGAction');
 createCheckboxListener(cb2Checkbox3, 'DirectionAction');
+createCheckboxListener(cb2Checkbox4, 'HueChangeAction');
 
 
 const fileLink = document.getElementById('fileLink');

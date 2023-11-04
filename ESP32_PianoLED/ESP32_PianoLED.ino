@@ -386,10 +386,21 @@ void loop() {
 
   switch (MODE) {
     case COMMAND_ANIMATION:
-      Animatons(animationIndex);
-      static uint8_t startIndex = 0;
-      startIndex = startIndex + 1; /* motion speed */
-      FillLEDsFromPaletteColors(startIndex);
+      if (animationIndex == 7) {
+        // If the selected animation is 7, run the sineWave() animation
+        sineWave();
+      }
+      else if (animationIndex == 8) {
+        // If the selected animation is 7, run the sineWave() animation
+        sparkleDots();
+      }
+      else {
+        // For other animations (0 to 6), use the palette-based approach
+        Animatons(animationIndex);
+        static uint8_t startIndex = 0;
+        startIndex = startIndex + 1; /* motion speed */
+        FillLEDsFromPaletteColors(startIndex);
+      }
       break;
 
 

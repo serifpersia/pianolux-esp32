@@ -456,8 +456,8 @@ button::after {
     display: none;
 }
 .checkbox-wrapper-8 .tgl + .tgl-btn {
-    width: 6em;
-    height: 2em;
+    width: 5.4em;
+    height: 1em;
 }
 .checkbox-wrapper-8 .tgl-skewed + .tgl-btn {
     overflow: hidden;
@@ -472,7 +472,7 @@ button::after {
     width: 100%;
     text-align: center;
     position: absolute;
-    line-height: 2em;
+    line-height: 1em;
     color: #fff;
 }
 .checkbox-wrapper-8 .tgl-skewed + .tgl-btn:after {
@@ -497,36 +497,12 @@ button::after {
 }
 
 
-.toggle-labels
-{
-    display: flex;
-    justify-content: center;
-    width: 100%;
-}
-
-/* Default styles for larger screens */
-.toggle-labels label {
-    font-size: 50px; /* Adjust this size as needed for desktop */
-    padding-top: 20px;
-    padding-left: 25px;
-    padding-right: 25xp;
-}
-
-/* Media query for smaller screens */
-@media (max-width: 700px) {
-    .toggle-labels label {
-        font-size: 18px; /* Smaller font size for mobile */
-        padding-top: 10px; /* Smaller padding on top for mobile */
-        padding-left: 10px;
-        padding-right: 10px; /* Smaller padding on right for mobile */
-    }
-}
-
 .toggles
 {
     display: flex;
     justify-content: center;
     width: 100%;
+    padding-top: 25px;
 }
 
 /* Style for the custom dialog */
