@@ -86,7 +86,7 @@ Install the following libraries:
 
 [Arduino core for ESP32](https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html)
 
-Download the barenes folder which will be used for initial setup, you could use the main folder but you need to install more libraries(latest main is always most up-to-date code wise and release bins might have older version of the project compiled). Barebones is static it will not change unless some other new idea gets more useful.
+Download the barebones folder which will be used for initial setup, you could use the main folder but you need to install more libraries(latest main is always most up-to-date code wise and release bins might have older version of the project compiled). Barebones is static it will not change unless some other new idea gets more useful.
 
 After selecting your S2/S3 dev board from the tools>boards menu in Arduino IDE, a few things to check before uploading. For S3, make sure your USB MODE is set to TinyUSB. In the tools menu, select the port of your board and click the > arrow to start uploading to the ESP32 Board. If you see "Leaving... Hard resetting via RTS pin...," your upload was successful.
 
