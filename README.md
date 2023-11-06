@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://github.com/serifpersia/pianoled-esp32/assets/62844718/d2b8eaa9-83e3-4ef3-b3fc-6f9342fefa28">
+  <img src="https://github.com/serifpersia/pianoled-esp32/assets/62844718/4aeb819a-cbd7-4347-891b-b957f1046b6d">
   
   [![Release](https://img.shields.io/github/release/serifpersia/pianoled-esp32.svg?style=flat-square)](https://github.com/serifpersia/pianoled-esp32/releases)
   [![License](https://img.shields.io/github/license/serifpersia/pianoled-esp32?color=blue&style=flat-square)](https://raw.githubusercontent.com/serifpersia/pianoled-esp32/master/LICENSE)
