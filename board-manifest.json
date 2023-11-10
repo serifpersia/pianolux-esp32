@@ -1,5 +1,5 @@
 {
-  "name": "ESPHome",
+  "name": "Test",
   "builds": [
     {
       "chipFamily": "ESP32-S2",
