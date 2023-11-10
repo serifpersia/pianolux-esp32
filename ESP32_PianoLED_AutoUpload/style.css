@@ -1,0 +1,61 @@
+.logo
+{
+    display: flex;
+    justify-content: center;
+    height: 180px;
+    padding-bottom: 50px;
+}
+
+.piano-svg
+{
+    height: 462px;
+    width: 462px;
+}
+
+@media (min-width: 768px) {
+    .piano-svg {
+        width: 800px;
+        height: 800px;
+    }
+    .logo
+    {
+        height: 310px;
+    }
+}
+
+body
+{
+    background: #191919;
+    padding: 0x;
+    margin: 0px;
+}
+
+#container {
+    text-align: center;
+    background-color: #46494b;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+select {
+    padding: 15px;
+    margin: 10px;
+    width: 200px;
+    font-size: 20px;
+    margin-bottom: 20px
+}
+
+button {
+    padding: 12px 20px;
+    font-size: 16px;
+    background-color: #4CAF50;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #45a049;
