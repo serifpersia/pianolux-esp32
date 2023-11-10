@@ -1,0 +1,12 @@
+{
+  "name": "WLED",
+  "builds": [
+    {
+      "chipFamily": "ESP32-S2",
+      "improv": false,
+      "parts": [
+        { "path": "test/WLED_0.14.0_ESP32-S2.bin", "offset": 0 },
+      ]
+    }
+  ]
+}
