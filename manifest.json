@@ -1,13 +1,13 @@
 {
-  "name": "PianoLED Web",
-  "version": "2023.10.6",
-  "home_assistant_domain": "esphome",
+  "name": "Test",
+  "version": "1.0",
+  "home_assistant_domain": "test",
   "builds": [
     {
       "chipFamily": "ESP32-S2",
       "parts": [
         {
-          "path": "WLED_0.14.0_ESP32-S2.bin",
+          "path": "merged-firmware.bin",
           "offset": 0
         }
       ]
