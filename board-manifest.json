@@ -1,12 +1,12 @@
 {
   "name": "Test",
-  "version": "v1.0.0",
+  "version": "1.0.2",
   "builds": [
     {
       "chipFamily": "ESP32-S2",
       "parts": [
-        { "path": "merged-firmware.bin", "offset": 0 },
+        { "path": "https://github.com/serifpersia/pianoled-esp32/releases/test/esp32s2_firmware.bin", "offset": 0 }
       ]
-    },
+    }
   ]
 }
