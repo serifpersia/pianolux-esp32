@@ -1,20 +1,15 @@
 {
-  "name": "ESPHome",
-  "version": "2021.11.0",
+  "name": "PianoLED Web",
+  "version": "2023.10.6",
   "home_assistant_domain": "esphome",
-  "funding_url": "https://esphome.io/guides/supporters.html",
-  "new_install_prompt_erase": false,
   "builds": [
     {
-      "chipFamily": "ESP32",
+      "chipFamily": "ESP32-S2",
       "parts": [
-        { "path": "merged-firmware.bin", "offset": 0 },
-      ]
-    },
-    {
-      "chipFamily": "ESP8266",
-      "parts": [
-        { "path": "esp8266.bin", "offset": 0 }
+        {
+          "path": "/test/WLED_0.14.0_ESP32-S2.bin",
+          "offset": 0
+        }
       ]
     }
   ]
