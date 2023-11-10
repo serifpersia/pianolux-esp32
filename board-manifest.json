@@ -1,11 +1,11 @@
 {
   "name": "PianoLED",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "home_assistant_domain": "",
   "funding_url": "",
   "builds": [
     {
-      "chipFamily": "ESP32",
+      "chipFamily": "ESP32-S2",
       "parts": [
         { "path": "merged-firmware.bin", "offset": 0 }
       ]
