@@ -1,0 +1,12 @@
+{
+  "name": "Test",
+  "version": "v1.0.0",
+  "builds": [
+    {
+      "chipFamily": "ESP32-S2",
+      "parts": [
+        { "path": "merged-firmware.bin", "offset": 0 },
+      ]
+    },
+  ]
+}
