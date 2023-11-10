@@ -1,0 +1,20 @@
+{
+  "name": "PianoLED",
+  "version": "1.0.0",
+  "builds": [
+    {
+      "chipFamily": "ESP32-S2",
+      "parts": [
+        { "path": "https://github.com/serifpersia/pianoled-esp32/releases/download/v1/esp32s2_firmware.bin" },
+        { "path": "https://github.com/serifpersia/pianoled-esp32/releases/download/v1/esp32s2_filesystem.bin" }
+      ]
+    },
+    {
+      "chipFamily": "ESP32-S3",
+      "parts": [
+        { "path": "https://github.com/serifpersia/pianoled-esp32/releases/download/v1/esp32s3_firmware.bin" },
+        { "path": "https://github.com/serifpersia/pianoled-esp32/releases/download/v1/esp32s3_filesystem.bin" }
+      ]
+    }
+  ]
+}

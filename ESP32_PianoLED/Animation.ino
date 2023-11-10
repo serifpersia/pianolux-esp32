@@ -1,5 +1,11 @@
 bool HueChange; // Boolean to control hue change
 
+int snakePosition = random(MAX_NUM_LEDS);
+int snakeLength = 4;
+int foodPosition = -1;
+bool startSnake = true;
+
+
 void Animatons(int selectedAnimation) {
   //Animation(temp name_1)
   if (selectedAnimation == 0) {
@@ -46,7 +52,7 @@ void sineWave() {
       hue++;
     }
   }
-  
+
   leds[sinBeat] = CHSV(hue, 255, 255);
   fadeToBlackBy(leds, NUM_LEDS, 25);
 }
@@ -68,8 +74,64 @@ void sparkleDots()
   // random colored speckles that blink in and fade smoothly
   fadeToBlackBy( leds, NUM_LEDS, 10);
   int pos = random16(NUM_LEDS);
-  
+
   leds[pos] += CHSV( hue, 255, 255);
 
-  FastLED.delay(1000 / 60);
+  FastLED.delay(1000 / UPDATES_PER_SECOND);
+}
+
+
+void Snake() {
+  if (startSnake) {
+    spawnFood();
+    startSnake = false;
+  }
+
+  snakeAnimation();
+  updateLEDs();
+}
+
+void updateLEDs() {
+  fill_solid(leds, NUM_LEDS, CRGB::Black);
+  for (int i = 0; i < snakeLength; i++) {
+    int brightness = map(i, 0, snakeLength - 1, 255, 0);
+    CRGB color = CRGB::Red;
+    color.nscale8(calculateBrightness(i, snakeLength));
+    leds[(snakePosition - i + NUM_LEDS) % NUM_LEDS] = color;
+  }
+  leds[foodPosition] = CRGB::Orange;
+}
+
+uint8_t calculateBrightness(int index, int snakeLength) {
+  // Calculate the brightness gradient based on the position of the LED in the snake
+  // Here, we use a simple linear gradient from full brightness to off (0) over the length of the snake
+  return map(index, 0, snakeLength - 1, 255, 0);
+}
+
+void snakeAnimation() {
+  snakePosition = (snakePosition + 1) % NUM_LEDS;
+  if (snakePosition == foodPosition) {
+    snakeLength += 4;
+    spawnFood();
+  }
+}
+
+void spawnFood() {
+  if (snakeLength >= NUM_LEDS) {
+    snakeLength = 4;
+    startSnake = true;
+  } else {
+    do {
+      foodPosition = random(NUM_LEDS);
+    } while (isFoodOnSnake(foodPosition));
+  }
+}
+
+bool isFoodOnSnake(int position) {
+  for (int i = 0; i < snakeLength; i++) {
+    if ((snakePosition - i + NUM_LEDS) % NUM_LEDS == position) {
+      return true;
+    }
+  }
+  return false;
 }

@@ -394,6 +394,10 @@ void loop() {
         // If the selected animation is 7, run the sineWave() animation
         sparkleDots();
       }
+      else if (animationIndex == 9) {
+        // If the selected animation is 7, run the sineWave() animation
+        Snake();
+      }
       else {
         // For other animations (0 to 6), use the palette-based approach
         Animatons(animationIndex);
