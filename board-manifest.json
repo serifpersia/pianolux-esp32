@@ -1,0 +1,14 @@
+{
+  "name": "PianoLED",
+  "version": "1.1.0",
+  "home_assistant_domain": "",
+  "funding_url": "",
+  "builds": [
+    {
+      "chipFamily": "ESP32-S2",
+      "parts": [
+        { "path": "https://github.com/serifpersia/pianoled-esp32/releases/download/test/merged-firmware.bin", "offset": 0 }
+      ]
+    }
+  ]
+}
