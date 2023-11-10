@@ -1,0 +1,16 @@
+{
+  "name": "PianoLED Web",
+  "version": "2023.10.6",
+  "home_assistant_domain": "esphome",
+  "builds": [
+    {
+      "chipFamily": "ESP32-S2",
+      "parts": [
+        {
+          "path": "https://github.com/serifpersia/pianoled-esp32/blob/auto-install-page/test/WLED_0.14.0_ESP32-S2.bin?raw=true",
+          "offset": 0
+        }
+      ]
+    }
+  ]
+}
