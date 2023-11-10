@@ -5,7 +5,7 @@
     {
       "chipFamily": "ESP32-S2",
       "parts": [
-        { "path": "merged-firmware.bin", "offset": 0 }
+        { "path": "w-firmware.bin", "offset": 0 }
       ]
     }
   ]
