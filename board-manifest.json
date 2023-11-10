@@ -5,7 +5,7 @@
     {
       "chipFamily": "ESP32-S2",
       "parts": [
-        { "path": "https://github.com/serifpersia/pianoled-esp32/releases/download/v1/esp32s2.bin" }
+        { "path": "https://github.com/serifpersia/pianoled-esp32/releases/download/test/esp32s2.bin" }
       ]
     }
   ]
