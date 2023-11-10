@@ -1,0 +1,12 @@
+{
+  "name": "Test",
+  "version": "1.0.5",
+  "builds": [
+    {
+      "chipFamily": "ESP32-S2",
+      "parts": [
+        { "path": "https://github.com/serifpersia/pianoled-esp32/releases/download/test/wled.bin", "offset": 0 }
+      ]
+    }
+  ]
+}
