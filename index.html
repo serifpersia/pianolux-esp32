@@ -10,6 +10,7 @@
                 type="module"
                 src="https://unpkg.com/esp-web-tools@9/dist/web/install-button.js?module"
                 ></script>
+        <script src="script.js"></script>
     </head>
     <header>
         <div class="logo">
@@ -152,6 +153,13 @@
     <body>
         <div id="container">
             <esp-web-install-button manifest="manifest.json"></esp-web-install-button>
+            <a href="#" id="viewIP" onclick="connectToDevice()">View IP</a>
+        </div>
+
+        <div id="popup">
+            <h2>Device Information</h2>
+            <p id="deviceInfo"></p>
+            <a href="#" id="placeholderLink" onclick="openLink()">Visit Device</a>
         </div>
     </body>
 </html>

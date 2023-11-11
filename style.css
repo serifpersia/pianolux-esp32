@@ -59,3 +59,44 @@ button {
 
 button:hover {
     background-color: #45a049;
+}
+
+#popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    background-color: #ffffff; /* Light background color for the popup */
+    color: #121212; /* Dark text color for the popup */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    border-radius: 25px;
+}
+#placeholderLink {
+    display: block;
+    margin-top: 10px;
+    padding: 5px 10px;
+    background-color: #3498db; /* Blue background color for the link */
+    color: #ffffff; /* Light text color for the link */
+    text-decoration: none;
+    text-align: center;
+}
+
+#placeholderLink:hover {
+    background-color: #2980b9; /* Darker blue background color on hover */
+}
+
+#viewIP {
+    padding: 5px;
+    background-color: mediumspringgreen; /* Blue background color for the link */
+    color: #ffffff; /* Light text color for the link */
+    text-decoration: none;
+    text-align: center;
+    border-radius: 5px;
+}
+
+#viewIP:hover {
+    background-color: red; /* Darker blue background color on hover */
+}
