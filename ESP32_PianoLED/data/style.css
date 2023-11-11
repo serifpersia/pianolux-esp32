@@ -46,15 +46,16 @@ body, p {
 
 .navbar {
     background-color: #191919;
-    top: 0;
+    bottom: 0; /* Updated to bottom */
     width: 100%;
-    position: sticky;
+    position: fixed; /* Updated to fixed */
     display: flex;
-    justify-content: center; /* Center horizontally */
-    opacity: 0; /* Initially hide the navbar */
-    transition: opacity 0.3s ease-in-out; /* Add a transition effect */
+    justify-content: center;
+    opacity: 1; /* Updated to 1 to make it initially visible */
+    transition: opacity 0.3s ease-in-out;
     z-index: 20;
 }
+
 
 .controls-icon {
     display: flex;

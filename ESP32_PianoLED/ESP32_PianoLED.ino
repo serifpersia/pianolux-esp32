@@ -181,55 +181,9 @@ float distance(CRGB color1, CRGB color2) {
   return sqrt(pow(color1.r - color2.r, 2) + pow(color1.g - color2.g, 2) + pow(color1.b - color2.b, 2));
 }
 
-void StartupAnimation() {
-  for (int i = 0; i < NUM_LEDS; i++) {
-    leds[i] = CHSV(getHueForPos(i), 255, 255);
-    FastLED.show();
-    leds[i] = CHSV(0, 0, 0);
-  }
-  FastLED.show();
-}
-
-
 int8_t isConnected = 0;
 
 APPLEMIDI_CREATE_DEFAULTSESSION_INSTANCE();
-
-
-const char* ssid = "PianoLED AP";
-const char* password = "pianoled99";
-const char* hostname = "PianoLED AP";
-
-const IPAddress staticIP(192, 168, 1, 1);
-const IPAddress gateway(192, 168, 1, 1);
-const IPAddress subnet(255, 255, 255, 0);
-
-bool apMode = true; // Start in AP mode
-
-const int jumperPin = 10;
-
-WiFiManager wifiManager;
-
-void startAP() {
-  // Connect to the WiFi network
-  WiFi.softAP(ssid, password);
-  WiFi.setHostname(hostname);
-  WiFi.softAPConfig(staticIP, gateway, subnet);
-
-  apMode = true;
-  Serial.println("Switched to AP mode");
-}
-
-void startSTA() {
-
-  WiFi.mode(WIFI_STA);
-  apMode = false;
-  Serial.println("Switched to STA mode");
-
-  // Start WiFi Manager for configuring STA mode
-  wifiManager.autoConnect("PianoLED Setup AP", "pianoled99");
-}
-
 
 // Task handles
 TaskHandle_t midiTaskHandle = NULL;
@@ -243,111 +197,102 @@ void midiTask(void *pvParameters) {
 
 void setup() {
 
-  Serial.begin(115200);
-
-  pinMode(jumperPin, INPUT_PULLUP);
-
   usbh_setup(show_config_desc_full);  //init usb host for midi devices
 
-  // Check the state of the jumper wire
-  if (digitalRead(jumperPin) == LOW) {
-    // Jumper wire is not connected, use WiFi Manager in AP mode
-    startAP();
-  } else {
-    // Jumper wire is connected, use WiFi Manager in STA mode
-    startSTA();
-  }
+  Serial.begin(115200);
+  WiFiManager wifiManager;
 
-  if (apMode)
-  {
+  WiFi.mode(WIFI_STA);
+
+  // Start WiFi Manager for configuring STA mode
+  if (!wifiManager.autoConnect("PianoLED Setup AP", "pianoled99")) {
+    // Failed to connect or configure, handle the error here
+    Serial.println("Failed to connect to WiFi and configure settings, resseting...");
     wifiManager.resetSettings();
-  }
-
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
-
-  // Create the MIDI task
-  xTaskCreatePinnedToCore(midiTask, "MIDITask", 2048, NULL, 1, &midiTaskHandle, 0);
-  MIDI.begin();
-
-  AppleMIDI.setHandleConnected([](const APPLEMIDI_NAMESPACE::ssrc_t & ssrc, const char* name) {
-    isConnected++;
-    Serial.print("Connected to session ");
-    Serial.print(ssrc);
-    Serial.print(" Name ");
-    Serial.println(name);
-  });
-
-  AppleMIDI.setHandleDisconnected([](const APPLEMIDI_NAMESPACE::ssrc_t & ssrc) {
-    isConnected--;
-    Serial.print("Disconnected ");
-    Serial.println(ssrc);
-  });
-
-  MIDI.setHandleNoteOn([](byte channel, byte note, byte velocity) {
-    noteOn(note, velocity);
-  });
-  MIDI.setHandleNoteOff([](byte channel, byte note, byte velocity) {
-    noteOff(note, velocity);
-  });
-
-  // Initialize and start mDNS
-  if (MDNS.begin("pianoled")) {
-    Serial.println("MDNS Responder Started!");
-  }
-
-  // Serve HTML from ESP32 SPIFFS data directory
-  if (SPIFFS.begin()) {
-    server.serveStatic("/", SPIFFS, "/");
-    server.onNotFound([](AsyncWebServerRequest * request) {
-      if (request->url() == "/") {
-        request->send(SPIFFS, "/index.html", "text/html");
-      } else {
-        request->send(404, "text/plain", "Not Found");
-      }
-    });
+    ESP.restart();
   } else {
-    Serial.println("Failed to mount SPIFFS file system");
-  }
+    // Successfully connected to WiFi, print the IP address
+    Serial.println("Connected to WiFi");
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
 
-  AsyncElegantOTA.begin(&server);
+    // Create the MIDI task
+    xTaskCreatePinnedToCore(midiTask, "MIDITask", 2048, NULL, 1, &midiTaskHandle, 0);
+    MIDI.begin();
 
-  server.begin();
+    AppleMIDI.setHandleConnected([](const APPLEMIDI_NAMESPACE::ssrc_t & ssrc, const char* name) {
+      isConnected++;
+      Serial.print("Connected to session ");
+      Serial.print(ssrc);
+      Serial.print(" Name ");
+      Serial.println(name);
+    });
 
-  // Add service to mDNS for HTTP
-  MDNS.addService("http", "tcp", 80);
+    AppleMIDI.setHandleDisconnected([](const APPLEMIDI_NAMESPACE::ssrc_t & ssrc) {
+      isConnected--;
+      Serial.print("Disconnected ");
+      Serial.println(ssrc);
+    });
 
-  webSocket.begin();
-  webSocket.onEvent(webSocketEvent);
+    MIDI.setHandleNoteOn([](byte channel, byte note, byte velocity) {
+      noteOn(note, velocity);
+    });
+    MIDI.setHandleNoteOff([](byte channel, byte note, byte velocity) {
+      noteOff(note, velocity);
+    });
 
-  if (!SPIFFS.begin(true)) {
-    Serial.println("An error occurred while mounting SPIFFS.");
-    return;
-  }
+    // Initialize and start mDNS
+    if (MDNS.begin("pianoled")) {
+      Serial.println("MDNS Responder Started!");
+    }
 
-  // Read the initial GPIO pin configuration from the file
-  int mygpio = readGPIOConfig();
+    // Serve HTML from ESP32 SPIFFS data directory
+    if (SPIFFS.begin()) {
+      server.serveStatic("/", SPIFFS, "/");
+      server.onNotFound([](AsyncWebServerRequest * request) {
+        if (request->url() == "/") {
+          request->send(SPIFFS, "/index.html", "text/html");
+        } else {
+          request->send(404, "text/plain", "Not Found");
+        }
+      });
+    } else {
+      Serial.println("Failed to mount SPIFFS file system");
+    }
 
-  wsstrip = new ESP32RMT_WS2812B<GRB>(mygpio);
-  FastLED.addLeds(wsstrip, leds, NUM_LEDS);  // define or create your buffer somewehere
+    AsyncElegantOTA.begin(&server);
 
-  FastLED.setMaxPowerInVoltsAndMilliamps(5, MAX_POWER_MILLIAMPS);  // set power limit
-  FastLED.setBrightness(DEFAULT_BRIGHTNESS);
+    server.begin();
 
-  StartupAnimation();
-  if (!apMode)
-  {
+    // Add service to mDNS for HTTP
+    MDNS.addService("http", "tcp", 80);
+
+    webSocket.begin();
+    webSocket.onEvent(webSocketEvent);
+
+    if (!SPIFFS.begin(true)) {
+      Serial.println("An error occurred while mounting SPIFFS.");
+      return;
+    }
+
+    // Read the initial GPIO pin configuration from the file
+    int mygpio = readGPIOConfig();
+
+    wsstrip = new ESP32RMT_WS2812B<GRB>(mygpio);
+    FastLED.addLeds(wsstrip, leds, NUM_LEDS);  // define or create your buffer somewehere
+
+    FastLED.setMaxPowerInVoltsAndMilliamps(5, MAX_POWER_MILLIAMPS);  // set power limit
+    FastLED.setBrightness(DEFAULT_BRIGHTNESS);
     setIPLeds();
   }
 }
 
 void loop() {
+  AsyncElegantOTA.loop();
+  webSocket.loop();  // Update function for the webSockets
+  sendIP();
 
   usbh_task();
-
-  AsyncElegantOTA.loop();
-
-  webSocket.loop();  // Update function for the webSockets
 
   currentTime = millis();
 
@@ -500,13 +445,14 @@ void sliderAction(int sliderNumber, int value) {
     DEFAULT_BRIGHTNESS = value;
     FastLED.setBrightness(DEFAULT_BRIGHTNESS);
   }
-
   else if (sliderNumber == 3) {
     generalFadeRate = value;
   }
-
   else if (sliderNumber == 4) {
     splashMaxLength = value;
+  }
+  else if (sliderNumber == 5) {
+    bgBrightness = value;
   }
   Serial.print("Slider ");
   Serial.print(sliderNumber);
@@ -646,4 +592,16 @@ void setIPLeds()
   // Show the entire IP address
   generalFadeRate = 0;
   FastLED.show();
+}
+
+void sendIP()
+{
+  if (Serial.available() > 0) {
+    int command = Serial.read();
+    if (command == 255) {
+      // Send the local IP address back to the client
+      IPAddress localIP = WiFi.localIP();
+      Serial.println(localIP);
+    }
+  }
 }

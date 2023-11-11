@@ -172,6 +172,24 @@ selectedItemColors.addEventListener('change', () => {
     sendData('RequestValues');
 });
 
+
+// Function to handle the end of the interaction
+function handleEnd(inputElement) {
+    // Trigger the input event manually on the provided input element
+    const inputEvent = new Event('input', {
+        bubbles: true,
+        cancelable: true,
+    });
+    inputElement.dispatchEvent(inputEvent);
+
+    // Check the state of the BGAction checkbox
+    const bgCheckbox = document.getElementById('cb2-8'); // Adjust the ID accordingly
+    if (bgCheckbox.checked) {
+        bgCheckbox.checked = false;
+        bgCheckbox.click();
+    }
+}
+
 // Hue Slider Code
 const thumb = document.querySelector('.thumb');
 const track = document.querySelector('.track');
@@ -197,13 +215,6 @@ function handleMove(xPosition) {
 
     // Set the thumb's background color based on the hue value
     thumb.style.backgroundColor = `hsl(${hue}, 100%, 50%)`;
-
-    // Trigger the input event manually on the hue slider
-    const inputEvent = new Event('input', {
-        bubbles: true,
-        cancelable: true,
-    });
-    hueValueInput.dispatchEvent(inputEvent);
 }
 
 // Mouse drag
@@ -224,6 +235,8 @@ thumb.addEventListener('mousedown', (e) => {
 
     function onMouseUp() {
         isDragging = false;
+        handleEnd(hueValueInput);
+
         thumb.style.transition = 'left 0.3s ease'; // Restore smooth transition
         document.removeEventListener('mousemove', onMouseMove);
         document.removeEventListener('mouseup', onMouseUp);
@@ -248,6 +261,8 @@ thumb.addEventListener('touchstart', (e) => {
 
     function onTouchEnd() {
         isDragging = false;
+        handleEnd(hueValueInput);
+
         thumb.style.transition = 'left 0.3s ease'; // Restore smooth transition
         document.removeEventListener('touchmove', onTouchMove);
         document.removeEventListener('touchend', onTouchEnd);
@@ -259,12 +274,10 @@ track.addEventListener('click', (e) => {
     const clickX = e.clientX - track.getBoundingClientRect().left;
     const thumbPosition = clickX - thumb.offsetWidth / 2;
     handleMove(thumbPosition);
-
+    handleEnd(hueValueInput);
     // Restore smooth transition for the thumb
     thumb.style.transition = 'left 0.3s ease';
 });
-
-
 
 // Brightness Slider Code
 const brightnessThumb = document.querySelector('.brightness-slider .thumb');
@@ -296,12 +309,6 @@ function handleBrightnessMove(xPosition) {
 
     // Update the brightness value in the hidden input
     brightnessValueInput.value = brightness;
-    // Trigger the input event manually on the hue slider
-    const inputEvent = new Event('input', {
-        bubbles: true,
-        cancelable: true,
-    });
-    brightnessValueInput.dispatchEvent(inputEvent);
 }
 
 // Update the brightness slider's track gradient when the hue slider value changes
@@ -327,6 +334,7 @@ brightnessThumb.addEventListener('mousedown', (e) => {
 
     function onBrightnessMouseUp() {
         isBrightnessDragging = false;
+        handleEnd(brightnessValueInput);
         brightnessThumb.style.transition = 'left 0.3s ease'; // Restore smooth transition
         document.removeEventListener('mousemove', onBrightnessMouseMove);
         document.removeEventListener('mouseup', onBrightnessMouseUp);
@@ -350,6 +358,7 @@ brightnessThumb.addEventListener('touchstart', (e) => {
 
     function onBrightnessTouchEnd() {
         isBrightnessDragging = false;
+        handleEnd(brightnessValueInput);
         brightnessThumb.style.transition = 'left 0.3s ease'; // Restore smooth transition
         document.removeEventListener('touchmove', onBrightnessTouchMove);
         document.removeEventListener('touchend', onBrightnessTouchEnd);
@@ -360,7 +369,7 @@ brightnessTrack.addEventListener('click', (e) => {
     const clickX = e.clientX - brightnessTrack.getBoundingClientRect().left;
     const thumbPosition = clickX - brightnessThumb.offsetWidth / 2;
     handleBrightnessMove(thumbPosition);
-
+    handleEnd(brightnessValueInput);
     // Restore smooth transition for the brightness thumb
     brightnessThumb.style.transition = 'left 0.3s ease';
 });
@@ -395,13 +404,6 @@ function handleFadeMove(xPosition) {
     const fade = Math.round((xPosition / maxPosition) * 255);
 
     fadeValueInput.value = fade;
-
-    // Trigger the input event manually on the fade slider
-    const inputEvent = new Event('input', {
-        bubbles: true,
-        cancelable: true,
-    });
-    fadeValueInput.dispatchEvent(inputEvent);
 }
 
 // Mouse drag
@@ -422,6 +424,7 @@ fadeThumb.addEventListener('mousedown', (e) => {
 
     function onMouseUp() {
         isFadeDragging = false;
+        handleEnd(fadeValueInput);
         fadeThumb.style.transition = 'left 0.3s ease'; // Restore smooth transition
         document.removeEventListener('mousemove', onMouseMove);
         document.removeEventListener('mouseup', onMouseUp);
@@ -446,6 +449,7 @@ fadeThumb.addEventListener('touchstart', (e) => {
 
     function onTouchEnd() {
         isFadeDragging = false;
+        handleEnd(fadeValueInput);
         fadeThumb.style.transition = 'left 0.3s ease'; // Restore smooth transition
         document.removeEventListener('touchmove', onTouchMove);
         document.removeEventListener('touchend', onTouchEnd);
@@ -457,7 +461,7 @@ fadeTrack.addEventListener('click', (e) => {
     const clickX = e.clientX - fadeTrack.getBoundingClientRect().left;
     const thumbPosition = clickX - fadeThumb.offsetWidth / 2;
     handleFadeMove(thumbPosition);
-
+    handleEnd(fadeValueInput);
     // Restore smooth transition for the thumb
     fadeThumb.style.transition = 'left 0.3s ease';
 });
@@ -484,13 +488,6 @@ function handleSplashMove(xPosition) {
     const splash = Math.round((xPosition / maxPosition) * 16);
 
     splashValueInput.value = splash;
-
-    // Trigger the input event manually on the splash slider
-    const inputEvent = new Event('input', {
-        bubbles: true,
-        cancelable: true,
-    });
-    splashValueInput.dispatchEvent(inputEvent);
 }
 
 // Mouse drag
@@ -511,6 +508,7 @@ splashThumb.addEventListener('mousedown', (e) => {
 
     function onMouseUp() {
         isSplashDragging = false;
+        handleEnd(splashValueInput);
         splashThumb.style.transition = 'left 0.3s ease'; // Restore smooth transition
         document.removeEventListener('mousemove', onMouseMove);
         document.removeEventListener('mouseup', onMouseUp);
@@ -535,6 +533,7 @@ splashThumb.addEventListener('touchstart', (e) => {
 
     function onTouchEnd() {
         isSplashDragging = false;
+        handleEnd(splashValueInput);
         splashThumb.style.transition = 'left 0.3s ease'; // Restore smooth transition
         document.removeEventListener('touchmove', onTouchMove);
         document.removeEventListener('touchend', onTouchEnd);
@@ -546,7 +545,7 @@ splashTrack.addEventListener('click', (e) => {
     const clickX = e.clientX - splashTrack.getBoundingClientRect().left;
     const thumbPosition = clickX - splashThumb.offsetWidth / 2;
     handleSplashMove(thumbPosition);
-
+    handleEnd(splashValueInput);
     // Restore smooth transition for the thumb
     splashThumb.style.transition = 'left 0.3s ease';
 });
@@ -578,13 +577,6 @@ function handleBgMove(xPosition) {
     const brightness = Math.round((xPosition / maxPosition) * 255);
 
     bgValueInput.value = brightness;
-
-    // Trigger the input event manually on the background slider
-    const inputEvent = new Event('input', {
-        bubbles: true,
-        cancelable: true,
-    });
-    bgValueInput.dispatchEvent(inputEvent);
 }
 
 // Mouse drag for background slider
@@ -605,6 +597,7 @@ bgThumb.addEventListener('mousedown', (e) => {
 
     function onMouseUp() {
         isBgDragging = false;
+        handleEnd(bgValueInput);
         bgThumb.style.transition = 'left 0.3s ease'; // Restore smooth transition
         document.removeEventListener('mousemove', onMouseMove);
         document.removeEventListener('mouseup', onMouseUp);
@@ -629,6 +622,7 @@ bgThumb.addEventListener('touchstart', (e) => {
 
     function onTouchEnd() {
         isBgDragging = false;
+        handleEnd(bgValueInput);
         bgThumb.style.transition = 'left 0.3s ease'; // Restore smooth transition
         document.removeEventListener('touchmove', onTouchMove);
         document.removeEventListener('touchend', onTouchEnd);
@@ -640,7 +634,7 @@ bgTrack.addEventListener('click', (e) => {
     const clickX = e.clientX - bgTrack.getBoundingClientRect().left;
     const thumbPosition = clickX - bgThumb.offsetWidth / 2;
     handleBgMove(thumbPosition);
-
+    handleEnd(bgValueInput);
     // Restore smooth transition for the thumb
     bgThumb.style.transition = 'left 0.3s ease';
 });

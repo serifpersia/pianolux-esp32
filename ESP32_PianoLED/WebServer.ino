@@ -65,7 +65,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
       }
       else if (action == "Background") {
         int value = doc["value"];
-        bgBrightness = value;
+        sliderAction(5, value);
       }
       else if (action == "CurrentAction") {
         int value = doc["value"];
