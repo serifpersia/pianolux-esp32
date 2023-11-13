@@ -688,13 +688,146 @@ function handleWindowResize() {
 window.addEventListener('resize', handleWindowResize);
 
 
+// Step 1: Create an SVG element
+var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+svg.setAttribute("height", "100%"); // Set the SVG width to 100% of its container
+svg.setAttribute("width", "100%"); // Set the SVG width to 100% of its container
+
+// Step 2: Append the SVG element to the div
+var div = document.getElementById("pianoKeysVisuals");
+div.appendChild(svg);
+
+// Calculate the width for each rectangle
+var totalRectangles = 52;
+var rectangleWidth = 100 / totalRectangles; // 100% divided by the number of rectangles
+
+// Step 3: Create and append 52 white rectangles
+for (var i = 0; i < totalRectangles; i++) {
+    // Create rectangle
+    var rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    rect.setAttribute("width", rectangleWidth + "%");
+    rect.setAttribute("height", "100%");
+    rect.setAttribute("fill", "white");
+    rect.setAttribute("stroke", "black");
+    rect.setAttribute("stroke-width", "1");
+    rect.setAttribute("rx", "3"); // Set border-radius for rounded corners
+
+    // Move each white rectangle to its correct position
+    rect.setAttribute("x", i * rectangleWidth + "%");
+
+    // Append the rectangle to the SVG element
+    svg.appendChild(rect);
+}
+
+// Step 4: Create a black rectangle
+var blackRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+blackRect.setAttribute("width", rectangleWidth / 1.25 + "%");
+blackRect.setAttribute("height", "70%"); // Half of the height of a white key
+blackRect.setAttribute("fill", "black");
+blackRect.setAttribute("stroke", "black");
+blackRect.setAttribute("stroke-width", "1");
+blackRect.setAttribute("rx", "3"); // Set border-radius for rounded corners
+
+// Position the black key between the center of the first and second white keys
+blackRect.setAttribute("x", (rectangleWidth / 1.75) + "%");
+
+// Append the black rectangle to the SVG element
+svg.appendChild(blackRect);
+
+// Define the positions for black keys across 7 octaves
+var blackKeyPositions = [
+    1.05, 2.15, 4.05, 5.1, 6.15, // First octave
+    8.05, 9.1, 11.05, 12.1, 13.15, // Second octave
+    15.05, 16.1, 18.05, 19.1, 20.15, // Third octave
+    22.05, 23.1, 25.05, 26.1, 27.15, // Fourth octave
+    29.05, 30.1, 32.05, 33.1, 34.15, // Fifth octave
+    36.05, 37.1, 39.05, 40.1, 41.15, // Sixth octave
+    43.05, 44.1, 46.05, 47.1, 48.15  // Seventh octave
+];
+var patternX = 4; // Adjust this value as needed
+
+// Create and append black rectangles based on the positions
+for (var i = 0; i < blackKeyPositions.length; i++) {
+    var position = blackKeyPositions[i];
+
+    // Create black rectangle
+    var blackRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    blackRect.setAttribute("width", rectangleWidth / 1.25 + "%");
+    blackRect.setAttribute("height", "70%"); // Half of the height of a white key
+    blackRect.setAttribute("fill", "black");
+    blackRect.setAttribute("stroke", "black");
+    blackRect.setAttribute("stroke-width", "1");
+    blackRect.setAttribute("rx", "3"); // Set border-radius for rounded corners
+
+    // Position the black key
+    blackRect.setAttribute("x", patternX + (position * rectangleWidth) - (rectangleWidth / 1.75) + "%");
+
+    // Append the black rectangle to the SVG element
+    svg.appendChild(blackRect);
+}
+// Step 4: Create two rectangles for highlighting
+const highlightRect1 = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+highlightRect1.setAttribute("width", "0%");
+highlightRect1.setAttribute("height", "100%");
+highlightRect1.setAttribute("fill", "rgba(32, 32, 32, 0.8)"); // Red color with 50% opacity
+
+const highlightRect2 = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+highlightRect2.setAttribute("width", "0%");
+highlightRect2.setAttribute("height", "100%");
+highlightRect2.setAttribute("fill", "rgba(32, 32, 32, 0.8)");// Blue color with 50% opacity
+
+// Append the highlight rectangles to the SVG element
+svg.appendChild(highlightRect1);
+svg.appendChild(highlightRect2);
+
 function createButtonListener(button, values, index, actionName) {
     button.addEventListener("click", function () {
         index = (index + 1) % values.length;
         button.textContent = values[index];
         sendData(actionName, { value: index });
+
+        // Update the position and width of the highlight rectangles based on the button state
+        updateHighlightRectangles(index);
+
         console.log('Sending:', actionName + index); // Debugging
     });
+}
+
+// Function to update highlight rectangles based on the button state
+function updateHighlightRectangles(sizeIndex) {
+    // Adjust the width and x position based on the button state
+    switch (sizeIndex) {
+        case 0: // "88 Key"
+            highlightRect1.setAttribute("width", "0%"); // Customize width for this case
+            highlightRect1.setAttribute("x", "0%"); // Customize x position for this case
+            highlightRect2.setAttribute("width", "0%");
+            highlightRect2.setAttribute("x", "0%");
+            break;
+        case 1: // "76 Key"
+            highlightRect1.setAttribute("width", "7.8%"); // Customize width for this case
+            highlightRect1.setAttribute("x", "0%"); // Customize x position for this case
+            highlightRect2.setAttribute("width", "7.8%");
+            highlightRect2.setAttribute("x", "94.2%");
+            break;
+        case 2: // "73 Key"
+            highlightRect1.setAttribute("width", "7.8%"); // Customize width for this case
+            highlightRect1.setAttribute("x", "0%"); // Customize x position for this case
+            highlightRect2.setAttribute("width", "9.6%");
+            highlightRect2.setAttribute("x", "90.4%");
+            break;
+        case 3: // "61 Key"
+            highlightRect1.setAttribute("width", "17.4%"); // Customize width for this case
+            highlightRect1.setAttribute("x", "0%"); // Customize x position for this case
+            highlightRect2.setAttribute("width", "13.5%");
+            highlightRect2.setAttribute("x", "86.5%");
+            break;
+        case 4: // "49 Key"
+            highlightRect1.setAttribute("width", "17.4%"); // Customize width for this case
+            highlightRect1.setAttribute("x", "0%"); // Customize x position for this case
+            highlightRect2.setAttribute("width", "27%");
+            highlightRect2.setAttribute("x", "73%");
+            break;
+    }
 }
 
 const sizes = ["88 Key", "76 Key", "73 Key", "61 Key", "49 Key"];
@@ -906,4 +1039,3 @@ ledDataPinInput.addEventListener("input", function() {
 window.onload = function (event) {
     init();
 };
-
