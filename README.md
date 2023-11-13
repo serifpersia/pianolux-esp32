@@ -22,7 +22,7 @@
 
 ## Installation
 
-Go to the PianoLED [website](https://serifpersia.github.io/pianoled-esp32/) to install PianoLED on ESP32 S2/S3 with one button.
+Go to the PianoLED [website](https://serifpersia.github.io/pianoled-esp32/install.html) to install PianoLED on ESP32 S2/S3 with one button.
 You can find your ESP32 S3/S3 IP via the website ViewIP or reading it from leds or from your router's DHCP clients page
 
 Join Discord Server for any help, questions or suggestions: 
