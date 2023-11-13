@@ -195,12 +195,6 @@ void midiTask(void *pvParameters) {
     vTaskDelay(pdMS_TO_TICKS(1)); // Adjust the delay as needed
   }
 }
-
-bool apMode = true; // Start in AP mode
-const int jumperPin = 10;
-
-WiFiManager wifiManager;
-
 void StartupAnimation() {
   for (int i = 0; i < NUM_LEDS; i++) {
     leds[i] = CHSV(getHueForPos(i), 255, 255);
@@ -210,18 +204,20 @@ void StartupAnimation() {
   FastLED.show();
 }
 
-void startAP() {
+bool apMode = true; // Start in AP mode
+const int jumperPin = 10;
+
+void startAP(WiFiManager &wifiManager) {
   if (!wifiManager.startConfigPortal("PianoLED Setup AP")) {
     Serial.println("failed to connect");
     delay(3000);
-    //reset and try again, or maybe put it to deep sleep
+    // reset and try again, or maybe put it to deep sleep
     ESP.restart();
     delay(5000);
   }
 }
 
-void startSTA() {
-
+void startSTA(WiFiManager &wifiManager) {
   WiFi.mode(WIFI_STA);
   apMode = false;
   Serial.println("Switched to STA mode");
@@ -229,23 +225,25 @@ void startSTA() {
   // Start WiFi Manager for configuring STA mode
   wifiManager.autoConnect("PianoLED Setup AP", "pianoled99");
 }
+
 void setup() {
 
   Serial.begin(115200);
 
   pinMode(jumperPin, INPUT_PULLUP);
 
-  usbh_setup(show_config_desc_full);  //init usb host for midi devices
+  // Create WiFiManager object inside setup
+  WiFiManager wifiManager;
 
   // Check the state of the jumper wire
   if (digitalRead(jumperPin) == LOW) {
     // Jumper wire is connected, use WiFi Manager in AP mode
-    startAP();
+    startAP(wifiManager);
   } else {
     // Jumper wire is not connected, use WiFi Manager in STA mode
-    startSTA();
+    startSTA(wifiManager);
   }
-
+  
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 
@@ -342,6 +340,9 @@ void setup() {
   {
     setIPLeds();
   }
+
+  usbh_setup(show_config_desc_full);  //init usb host for midi devices
+
 }
 
 void loop() {
