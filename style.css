@@ -1,13 +1,19 @@
-.logo
-{
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background: #191919;
+    padding: 0;
+    margin: 0;
+}
+
+.logo {
     display: flex;
     justify-content: center;
     height: 180px;
     padding-bottom: 50px;
 }
 
-.piano-svg
-{
+.piano-svg {
     height: 462px;
     width: 462px;
 }
@@ -17,17 +23,40 @@
         width: 800px;
         height: 800px;
     }
-    .logo
-    {
+    .logo {
         height: 310px;
     }
 }
 
-body
-{
-    background: #191919;
-    padding: 0x;
-    margin: 0px;
+nav {
+    background-color: #333;
+    overflow: hidden;
+    text-align: center; /* Center the links horizontally */
+    margin-bottom: 25px;
+}
+
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    display: inline-block; /* Center the list horizontally */
+}
+
+li {
+    display: inline; /* Display list items inline */
+}
+
+li a {
+    display: inline-block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+li a:hover {
+    background-color: #555;
 }
 
 #container {
@@ -89,8 +118,8 @@ button:hover {
 }
 
 #viewIP {
-    padding: 5px;
-    background-color: mediumspringgreen; /* Blue background color for the link */
+    padding: 8px;
+    background-color: green; /* Blue background color for the link */
     color: #ffffff; /* Light text color for the link */
     text-decoration: none;
     text-align: center;

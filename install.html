@@ -4,8 +4,12 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>PianoLED</title>
+        <title>PianoLED Install</title>
         <link rel="stylesheet" type="text/css" href="style.css">
+        <script
+                type="module"
+                src="https://unpkg.com/esp-web-tools@9/dist/web/install-button.js?module"
+                ></script>
         <script src="script.js"></script>
     </head>
     <header>
@@ -156,5 +160,14 @@
                 <!-- Add more sections as needed -->
             </ul>
         </nav>
+        <div id="container">
+            <esp-web-install-button manifest="manifest.json"></esp-web-install-button>
+            <a href="#" id="viewIP" onclick="connectToDevice()">View IP</a>
+        </div>
+        <div id="popup">
+            <h2>Device Information</h2>
+            <p id="deviceInfo"></p>
+            <a href="#" id="placeholderLink" onclick="openLink()">Visit Device</a>
+        </div>
     </body>
 </html>
