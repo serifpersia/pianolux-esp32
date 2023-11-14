@@ -13,6 +13,7 @@
 
 - ESP32-S2
 - ESP32-S3
+- *Any WiFi capable ESP32 board can be used with netowrk MIDI but S2/S3 are only boards that support direct usb
 
 ## Supported LED Strips
 
