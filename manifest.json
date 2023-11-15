@@ -5,6 +5,7 @@
   "builds": [
     {
       "chipFamily": "ESP32-S2",
+      "flashSize": "16MB",
       "parts": [
         {
           "path": "esp32s2.bin",
