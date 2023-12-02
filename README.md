@@ -6,6 +6,12 @@
   [![Discord](https://img.shields.io/discord/1077195120950120458.svg?colorB=blue&label=discord&style=flat-square)](https://discord.gg/S6xmuX4Hx5)
 </div>
 
+## Demo
+<div align="center">
+
+[![PianoLED Demo](https://github.com/serifpersia/pianoled-arduino/assets/62844718/a2b7f978-be6d-4da2-badf-6ee7dd0ce6f6)](https://www.youtube.com/watch?v=giaSAFUxdw8)
+
+</div>
 
 **PianoLED-ESP32** is a simple web-based interface that allows you to control a WS2812 5V LED Strip with a USB MIDI Piano. You can configure all effects, colors, and parameters through a locally hosted webserver on the ESP32 board.
 
