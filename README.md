@@ -9,7 +9,7 @@
 ## Demo
 <div align="center">
 
-[![PianoLED Demo](https://github.com/serifpersia/pianoled-arduino/assets/62844718/a2b7f978-be6d-4da2-badf-6ee7dd0ce6f6)](https://www.youtube.com/watch?v=giaSAFUxdw8)
+https://github.com/serifpersia/pianoled-esp32/assets/62844718/48c77c5e-b7bd-4edb-aa62-6e316cbeebec
 
 </div>
 
