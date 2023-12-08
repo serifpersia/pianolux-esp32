@@ -40,17 +40,13 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
         Serial.println("Animation ID: ");
         Serial.print(animationIndex);
       }
-      else if (action == "ChangeColorAction") {
-        colorIndex = doc["color"];
-        if (colorIndex == 0) {
-          bgSaturation = saturation;
-        }
-        else if (colorIndex == 1) {
-          bgSaturation = 0;
-        }
-      } else if (action == "Hue") {
+      else if (action == "Hue") {
         int value = doc["value"];
         sliderAction(1, value);
+      }
+      else if (action == "Saturation") {
+        int value = doc["value"];
+        sliderAction(6, value);
       }
       else if (action == "Brightness") {
         int value = doc["value"];
@@ -68,12 +64,12 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
         sliderAction(5, value);
       }
       else if (action == "CurrentAction") {
-        int value = doc["value"];
-        FastLED.setMaxPowerInVoltsAndMilliamps(5, value);
+        ledCurrent = doc["value"];
+        FastLED.setMaxPowerInVoltsAndMilliamps(5, ledCurrent);
       }
       else if (action == "LedDataPinAction") {
-        int value = doc["value"];
-        updateGPIOConfig(value);
+        ledPin = doc["value"];
+        updateGPIOConfig(ledPin);
         delay(3000); // Debounce the button
         ESP.restart(); // Restart the ESP32
       }
@@ -124,7 +120,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
       else if (action == "BGAction") {
         bgToggle = doc["value"];
         if (bgToggle == 1) {
-          setBG(CHSV(hue, bgSaturation, bgBrightness));
+          setBG(CHSV(hue, saturation, bgBrightness));
         }
         else if (bgToggle == 0) {
           setBG(CHSV(0, 0, 0));
@@ -139,14 +135,9 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
           STRIP_DIRECTION = 0;
         }
       }
-      else if (action == "HueChangeAction") {
-        int value = doc["value"];
-        if (value == 1) {
-          HueChange = true;
-        }
-        else if (value == 0) {
-          HueChange = false;
-        }
+      else if (action == "BGUpdateAction") {
+        bgUpdateToggle = doc["value"];
+        setBG(CHSV(hue, saturation, bgBrightness));
       }
       else if (action == "RequestValues") {
         sendValues();
@@ -157,12 +148,13 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
 
 void sendValues() {
   // Create a JSON document to hold the current state
-  StaticJsonDocument<200> doc;
+  StaticJsonDocument<400> doc;
 
   doc["MODES"] = serverMode;
   doc["ANIMATIONS"] = animationIndex;
   doc["COLORS"] = colorIndex;
   doc["HUE"] = hue;
+  doc["SATURATION"] = saturation;
   doc["BRIGHTNESS"] = DEFAULT_BRIGHTNESS;
   doc["FADE"] = generalFadeRate;
   doc["SPLASH"] = splashMaxLength;
@@ -170,6 +162,9 @@ void sendValues() {
   doc["FIX_TOGGLE"] = fixToggle;
   doc["BG_TOGGLE"] = bgToggle;
   doc["REVERSE_TOGGLE"] = reverseToggle;
+  doc["BGUPDATE_TOGGLE"] = bgUpdateToggle;
+  doc["CURRENT"] = ledCurrent;
+  doc["LEDPIN"] = ledPin;
 
   // Serialize the JSON document to a string
   String jsonStr;

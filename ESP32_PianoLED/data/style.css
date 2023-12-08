@@ -277,6 +277,34 @@ input:checked + .slider:before {
     box-shadow: 0 0 0 6px white; /* Add a white edge (bezel) with a specified width */
 }
 
+/* Updated CSS for the Background Light slider */
+.saturation-slider {
+    position: relative;
+    width: 100%;
+    height: 40px; /* Adjust the height as needed */
+}
+
+.saturation-slider .track {
+    width: 100%;
+    height: 100%;
+    background: #46494b;
+    border-radius: 10px;
+}
+
+.saturation-slider .thumb {
+    position: absolute;
+    width:  45px; /* Adjust the thumb width as needed */
+    height: 45px; /* Adjust the thumb height as needed */
+    background-color: white;
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 0;
+    cursor: pointer;
+    box-shadow: 0 0 0 6px white; /* Add a white edge (bezel) with a specified width */
+}
+
+
 /* Updated CSS for the brightness slider */
 .brightness-slider {
     position: relative;

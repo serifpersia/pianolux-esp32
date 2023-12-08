@@ -130,14 +130,17 @@ boolean isOnStrip(int pos) {
 
 uint8_t hue = 0;
 uint8_t brightness = 255;
-uint8_t bgBrightness = 128;
-uint8_t bgSaturation = 255;
 uint8_t saturation = 255;
+uint8_t bgBrightness = 128;
+
 int bgToggle;
 int fixToggle;
 int reverseToggle;
+int bgUpdateToggle = 1;
 int keySizeVal;
 int colorIndex;
+int ledCurrent = 450;
+int ledPin = 18;
 
 unsigned long currentTime = 0;
 unsigned long previousTime = 0;
@@ -243,7 +246,7 @@ void setup() {
     // Jumper wire is not connected, use WiFi Manager in STA mode
     startSTA(wifiManager);
   }
-  
+
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 
@@ -327,9 +330,9 @@ void setup() {
   }
 
   // Read the initial GPIO pin configuration from the file
-  int mygpio = readGPIOConfig();
+  ledPin = readGPIOConfig();
 
-  wsstrip = new ESP32RMT_WS2812B<GRB>(mygpio);
+  wsstrip = new ESP32RMT_WS2812B<GRB>(ledPin);
   FastLED.addLeds(wsstrip, leds, NUM_LEDS);  // define or create your buffer somewehere
 
   FastLED.setMaxPowerInVoltsAndMilliamps(5, MAX_POWER_MILLIAMPS);  // set power limit
@@ -513,6 +516,9 @@ void sliderAction(int sliderNumber, int value) {
   }
   else if (sliderNumber == 5) {
     bgBrightness = value;
+  }
+  else if (sliderNumber == 6) {
+    saturation = value;
   }
   Serial.print("Slider ");
   Serial.print(sliderNumber);

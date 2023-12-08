@@ -55,23 +55,19 @@ function sendData(action, data) {
 function addInputListener(controlId, dataKey, factor) {
     document.getElementById(controlId).addEventListener('input', function () {
         const value = parseInt(this.value);
-        if (dataKey === 'FADE') {
-            const invertedValue = 255 - value;
-            sendData(dataKey, { value: invertedValue });
-            console.log(invertedValue);
-        } else {
-            sendData(dataKey, { value: value });
-            console.log(value);
-        }
+        sendData(dataKey, { value: value });
+        console.log(dataKey);
+        console.log(value);
+
     });
 }
 
 addInputListener('HUE', 'Hue', 1);
+addInputListener('SATURATION', 'Saturation', 1);
 addInputListener('BRIGHTNESS', 'Brightness', 1);
-addInputListener('FADE', 'Fade', 255);
+addInputListener('FADE', 'Fade', 1);
 addInputListener('SPLASH', 'Splash', 1);
 addInputListener('BG', 'Background', 1);
-
 
 var navbar = document.querySelector('.navbar');
 var scrolling = false;
@@ -120,11 +116,18 @@ function updateUI(data) {
         }
     }
 
+    function updateInputs(controlId, dataValue) {
+        if (dataValue !== undefined) {
+            const inputs = document.getElementById(controlId);
+            inputs.value = dataValue;
+        }
+    }
+
     updateDropdownList('selected-item-modes', data.MODES);
     updateDropdownList('selected-item-animations', data.ANIMATIONS);
-    updateDropdownList('selected-item-colors', data.COLORS);
 
     updateControlValue('HUE', data.HUE, track, thumb, handleMove, 255);
+    updateControlValue('SATURATION', data.SATURATION, saturationTrack, saturationThumb, handleSaturationMove, 255);
     updateControlValue('BRIGHTNESS', data.BRIGHTNESS, brightnessTrack, brightnessThumb, handleBrightnessMove, 255);
     updateControlValue('FADE', data.FADE, fadeTrack, fadeThumb, handleFadeMove, 255);
     updateControlValue('SPLASH', data.SPLASH, splashTrack, splashThumb, handleSplashMove, 16);
@@ -133,6 +136,10 @@ function updateUI(data) {
     updateToggles('cb1-8', data.FIX_TOGGLE);
     updateToggles('cb2-8', data.BG_TOGGLE);
     updateToggles('cb3-8', data.REVERSE_TOGGLE);
+    updateToggles('cb4-8', data.BGUPDATE_TOGGLE);
+
+    updateInputs('maxCurrent',data.CURRENT);
+    updateInputs('ledDataPin',data.LEDPIN);
 
 }
 
@@ -159,20 +166,6 @@ selectedItemAnimations.addEventListener('change', () => {
     sendData('ChangeAnimationAction', { animation: selectedAnimationId });
 });
 
-
-// DropdownList script for Colors
-const selectedItemColors = document.querySelector('#selected-item-colors');
-
-selectedItemColors.addEventListener('change', () => {
-    const selectedColorsId = selectedItemColors.value;
-    console.log('Selected Color ID:', selectedColorsId); // Debugging statement
-
-    // Send a WebSocket message for changing the animation
-    sendData('ChangeColorAction', { color: selectedColorsId });
-    sendData('RequestValues');
-});
-
-
 // Function to handle the end of the interaction
 function handleEnd(inputElement) {
     // Trigger the input event manually on the provided input element
@@ -184,7 +177,8 @@ function handleEnd(inputElement) {
 
     // Check the state of the BGAction checkbox
     const bgCheckbox = document.getElementById('cb2-8'); // Adjust the ID accordingly
-    if (bgCheckbox.checked) {
+    const bgupdateCheckbox = document.getElementById('cb4-8'); // Adjust the ID accordingly
+    if (bgCheckbox.checked && bgupdateCheckbox.checked) {
         bgCheckbox.checked = false;
         bgCheckbox.click();
     }
@@ -279,6 +273,107 @@ track.addEventListener('click', (e) => {
     thumb.style.transition = 'left 0.3s ease';
 });
 
+// Saturation slider
+const saturationThumb = document.querySelector('.saturation-slider .thumb');
+const saturationTrack = document.querySelector('.saturation-slider .track');
+const saturationValueInput = document.getElementById('SATURATION');
+let isSaturationDragging = false;
+
+// Function to update the saturation track gradient based on the hue value and current saturation level
+function updateSaturationTrackGradient(hue) {
+    const track = document.querySelector('.saturation-slider .track');
+    // Map the hue value from 0-360 to 0-255
+    const mappedHue = Math.round((hue / 180) * 255);
+    // Get the current saturation level
+    const saturation = parseInt(saturationValueInput.value);
+    // Update the track gradient CSS with the mapped hue value and current saturation level
+    track.style.background = `linear-gradient(to right, #fff, hsl(${mappedHue}, 100%, 50%))`;
+}
+// Function to handle mouse and touch move
+function handleSaturationMove(xPosition) {
+    const maxPosition = saturationTrack.offsetWidth - saturationThumb.offsetWidth;
+    const minPosition = 0;
+
+    // Ensure the thumb stays within the track bounds
+    xPosition = Math.max(minPosition, Math.min(xPosition, maxPosition));
+
+    saturationThumb.style.left = xPosition + 'px';
+
+    // Calculate the saturation value based on thumb position
+    const saturation = Math.round((xPosition / maxPosition) * 255);
+
+    saturationValueInput.value = saturation;
+    updateSaturationTrackGradient(hueValueInput.value);
+}
+
+// Mouse drag
+saturationThumb.addEventListener('mousedown', (e) => {
+    isSaturationDragging = true;
+    saturationThumb.style.transition = 'none';
+    const offsetX = e.clientX - saturationThumb.getBoundingClientRect().left;
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+
+    function onMouseMove(e) {
+        if (!isSaturationDragging) return;
+
+        const newPosition = e.clientX - saturationTrack.getBoundingClientRect().left - offsetX;
+        handleSaturationMove(newPosition);
+    }
+
+    function onMouseUp() {
+        isSaturationDragging = false;
+        handleEnd(saturationValueInput);
+        saturationThumb.style.transition = 'left 0.3s ease'; // Restore smooth transition
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+    }
+});
+
+// Touch event handling for mobile devices
+saturationThumb.addEventListener('touchstart', (e) => {
+    isSaturationDragging = true;
+    saturationThumb.style.transition = 'none';
+    const offsetX = e.touches[0].clientX - saturationThumb.getBoundingClientRect().left;
+
+    document.addEventListener('touchmove', onTouchMove);
+    document.addEventListener('touchend', onTouchEnd);
+
+    function onTouchMove(e) {
+        if (!isSaturationDragging) return;
+
+        const newPosition = e.touches[0].clientX - saturationTrack.getBoundingClientRect().left - offsetX;
+        handleSaturationMove(newPosition);
+    }
+
+    function onTouchEnd() {
+        isSaturationDragging = false;
+        handleEnd(saturationValueInput);
+        saturationThumb.style.transition = 'left 0.3s ease'; // Restore smooth transition
+        document.removeEventListener('touchmove', onTouchMove);
+        document.removeEventListener('touchend', onTouchEnd);
+    }
+});
+
+// Track click
+saturationTrack.addEventListener('click', (e) => {
+    const clickX = e.clientX - saturationTrack.getBoundingClientRect().left;
+    const thumbPosition = clickX - saturationThumb.offsetWidth / 2;
+    handleSaturationMove(thumbPosition);
+    handleEnd(saturationValueInput);
+    // Restore smooth transition for the thumb
+    saturationThumb.style.transition = 'left 0.3s ease';
+});
+
+// Set the initial background brightness
+const initialSaturation = parseInt(saturationValueInput.value);
+
+// Calculate the initial thumb position based on the initial value
+const initialSaturationThumbPosition = (initialSaturation / 255) * (saturationTrack.offsetWidth - saturationThumb.offsetWidth);
+saturationThumb.style.left = initialSaturationThumbPosition + 'px';
+updateSaturationTrackGradient(hueValueInput.value);
+
 // Brightness Slider Code
 const brightnessThumb = document.querySelector('.brightness-slider .thumb');
 const brightnessTrack = document.querySelector('.brightness-slider .track');
@@ -315,6 +410,7 @@ function handleBrightnessMove(xPosition) {
 hueValueInput.addEventListener('input', () => {
     const hue = parseInt(hueValueInput.value);
     updateBrightnessTrackGradient(hue);
+    updateSaturationTrackGradient(hue);
 });
 
 brightnessThumb.addEventListener('mousedown', (e) => {
@@ -378,10 +474,9 @@ brightnessTrack.addEventListener('click', (e) => {
 const initialBrightness = parseInt(brightnessValueInput.value);
 const maxBrightness = 255; // Maximum brightness value
 const initialBrightnessPosition = (initialBrightness / maxBrightness) * (brightnessTrack.offsetWidth - brightnessThumb.offsetWidth);
-const hue = parseInt(hueValueInput.value);
 brightnessThumb.style.left = initialBrightnessPosition + 'px';
 // Initialize the brightness slider's track gradient based on the initial hue
-updateBrightnessTrackGradient(hue);
+updateBrightnessTrackGradient(hueValueInput.value);
 
 
 // Fade slider
@@ -648,12 +743,14 @@ bgThumb.style.left = initialBGBrightnessThumbPosition + 'px';
 
 function handleWindowResize() {
     const maxHuePosition = track.offsetWidth - thumb.offsetWidth;
+    const maxSaturationPosition =  saturationTrack.offsetWidth - saturationThumb.offsetWidth;
     const maxBrightnessPosition =  brightnessTrack.offsetWidth - brightnessThumb.offsetWidth;
     const maxFadePosition = fadeTrack.offsetWidth - fadeThumb.offsetWidth;
     const maxSplashPosition = splashTrack.offsetWidth - splashThumb.offsetWidth;
     const maxBGPosition = bgTrack.offsetWidth - bgThumb.offsetWidth;
 
     const mappedHue = (parseInt(hueValueInput.value) / 255) * 360;
+    const mappedSaturation = (parseInt(saturationValueInput.value));
     const mappedBrightness = (parseInt(brightnessValueInput.value));
     const mappedFade = (parseInt(fadeValueInput.value));
     const mappedSplash = (parseInt(splashValueInput.value));
@@ -661,6 +758,7 @@ function handleWindowResize() {
 
     // Calculate the new position based on the mapped hue value
     const newPosition = (mappedHue / 360) * maxHuePosition;
+    const newSaturationPosition = (mappedSaturation / 255) * maxSaturationPosition;
     const newBrightnessPosition = (mappedBrightness / 255) * maxBrightnessPosition;
     const newFadePosition = (mappedFade / 255) * maxFadePosition;
     const newSplashPosition = (mappedSplash / 16) * maxSplashPosition;
@@ -668,6 +766,7 @@ function handleWindowResize() {
 
     // Update the thumb's position
     thumb.style.left = newPosition + 'px';
+    saturationThumb.style.left = newSaturationPosition + 'px';
     brightnessThumb.style.left = newBrightnessPosition + 'px';
     fadeThumb.style.left = newFadePosition + 'px';
     splashThumb.style.left = newSplashPosition + 'px';
@@ -679,6 +778,7 @@ function handleWindowResize() {
     // Update the thumb's background color
     thumb.style.backgroundColor = backgroundColor;
     thumb.style.transition = 'left 0s ease';
+    saturationThumb.style.transition = 'left 0s ease';
     brightnessThumb.style.transition = 'left 0s ease';
     fadeThumb.style.transition = 'left 0s ease';
     splashThumb.style.transition = 'left 0s ease';
@@ -786,8 +886,11 @@ function createButtonListener(button, values, index, actionName) {
         button.textContent = values[index];
         sendData(actionName, { value: index });
 
-        // Update the position and width of the highlight rectangles based on the button state
-        updateHighlightRectangles(index);
+        // Check if the clicked button has the specific ID "PianoSize"
+        if (button.id === "PianoSize") {
+            // Update the position and width of the highlight rectangles based on the button state
+            updateHighlightRectangles(index);
+        }
 
         console.log('Sending:', actionName + index); // Debugging
     });
@@ -856,7 +959,7 @@ const cb2Checkbox4 = document.getElementById('cb4-8');
 createCheckboxListener(cb2Checkbox1, 'FixAction');
 createCheckboxListener(cb2Checkbox2, 'BGAction');
 createCheckboxListener(cb2Checkbox3, 'DirectionAction');
-createCheckboxListener(cb2Checkbox4, 'HueChangeAction');
+createCheckboxListener(cb2Checkbox4, 'BGUpdateAction');
 
 
 const fileLink = document.getElementById('fileLink');

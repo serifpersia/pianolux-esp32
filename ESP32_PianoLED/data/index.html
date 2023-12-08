@@ -73,12 +73,10 @@
                         <option value="9">Snake</option>
                     </select>
                 </div>
-                <div class="control">
-                    <label for="selected-item-colors">BG Color:</label>
-                    <select id="selected-item-colors">
-                        <option value="0">Hue</option>
-                        <option value="1">White</option>
-                    </select>
+                <label for="BGUpdate">Update BG Color</label>
+                <div class="checkbox-wrapper-8">
+                    <input type="checkbox" id="cb4-8" class="tgl tgl-skewed">
+                    <label for="cb4-8" data-tg-on="ON" data-tg-off="OFF" class="tgl-btn"></label>
                 </div>
                 <div class="control">
                     <label for="HUE">Hue</label>
@@ -86,6 +84,14 @@
                         <div class="track"></div>
                         <div class="thumb"></div>
                         <input type="hidden" id="HUE" name="hue" min="0" max="255" value="0">
+                    </div>
+                </div>
+                <div class="control">
+                    <label for="SATURATION">Saturation</label>
+                    <div class="saturation-slider">
+                        <div class="track"></div>
+                        <div class="thumb"></div>
+                        <input type="hidden" id="SATURATION" name="saturation" min="0" max="255" value="255">
                     </div>
                 </div>
                 <div class="control">
@@ -101,7 +107,7 @@
                     <div class="fade-slider">
                         <div class="track"></div>
                         <div class="thumb"></div>
-                        <input type="hidden" id="FADE" name="fade" min="0" max="255" value="0">
+                    <input type="hidden" id="FADE" name="fade" min="0" max="255" value="255">
                     </div>
                 </div>
                 <div class="control">
@@ -148,10 +154,6 @@
                         <div class="checkbox-wrapper-8">
                             <input type="checkbox" id="cb3-8" class="tgl tgl-skewed">
                             <label for="cb3-8" data-tg-on="ON" data-tg-off="RV LED" class="tgl-btn"></label>
-                        </div>
-                        <div class="checkbox-wrapper-8">
-                            <input type="checkbox" id="cb4-8" class="tgl tgl-skewed">
-                            <label for="cb4-8" data-tg-on="ON" data-tg-off="HUE" class="tgl-btn"></label>
                         </div>
                     </div>
                 </div>
