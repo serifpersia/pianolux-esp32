@@ -60,12 +60,16 @@ li a:hover {
 }
 
 #container {
-    text-align: center;
-    background-color: #46494b;
+    text-align: left; /* Align the content to the left within the container */
+    background-color: #191919;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 1);
+    max-width: 1000px; /* Set a fixed maximum width for the container */
+    margin: 0 auto; /* Center the container horizontally */
+    overflow: hidden; /* Prevent horizontal scrollbar if content overflows */
 }
+
 
 select {
     padding: 15px;
@@ -128,4 +132,69 @@ button:hover {
 
 #viewIP:hover {
     background-color: red; /* Darker blue background color on hover */
+}
+
+#readme-content {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+    font-size: 16px;
+    color: white;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+#readme-content h1,
+#readme-content h2,
+#readme-content h3,
+#readme-content h4,
+#readme-content h5,
+#readme-content h6 {
+    color: #0366d6;
+}
+
+#readme-content p {
+    margin-bottom: 1.5em;
+}
+
+#readme-content a {
+    color: #0366d6;
+    text-decoration: none;
+}
+
+#readme-content a:hover {
+    text-decoration: underline;
+}
+
+#readme-content ul,
+#readme-content ol {
+    margin-bottom: 1.5em;
+}
+
+#readme-content code {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    background-color: #f6f8fa;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+#readme-content pre {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    background-color: #f6f8fa;
+    padding: 16px;
+    border-radius: 4px;
+    overflow: auto;
+}
+
+#readme-content blockquote {
+    color: #6a737d;
+    border-left: 4px solid #dfe2e5;
+    padding: 0 15px;
+    margin: 0 0 20px;
+}
+
+#buttons
+{
+   text-align: center;
 }

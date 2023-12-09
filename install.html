@@ -161,8 +161,12 @@
             </ul>
         </nav>
         <div id="container">
-            <esp-web-install-button manifest="manifest.json"></esp-web-install-button>
-            <a href="#" id="viewIP" onclick="connectToDevice()">View IP</a>
+            <div id="buttons">
+                <esp-web-install-button manifest="manifest.json"></esp-web-install-button>
+                <a href="#" id="viewIP" onclick="connectToDevice()">View IP</a>
+            </div>
+            <div id="readme-content">
+            </div>
         </div>
         <div id="popup">
             <h2>Device Information</h2>
