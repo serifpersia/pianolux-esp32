@@ -37,7 +37,7 @@ Join Discord Server for any help, questions or suggestions:
 Go to the PianoLED [website](https://serifpersia.github.io/pianoled-esp32/install.html) to install PianoLED on ESP32 S2/S3 with one button.
 
 Grab WiFi capable device(PC with WiFi,Laptops or Phone) and connect to ESP32 Access Point to connect to your local WiFi network 2.4Ghz, 5Ghz SSID's are not supported by these boards
-Captivve portal page should pop up on phones on other devices you need to go the 192.168.4.1 IP to see this WiFi setup page(Wifi Manager)
+Captivve portal page should pop up on phones on other devices you need to go the 192.168.4.1 IP to see this WiFi setup page(Wifi Manager) The password for Setup Wifi AP is pianoled99
 If pianoled.local is not working as IP access link to esp32 webserver, you can find your ESP32 S3/S3 IP via the website ViewIP or reading it from leds or from your router's DHCP clients page
 
 <div align="center">
