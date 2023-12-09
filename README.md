@@ -40,7 +40,15 @@ Grab WiFi capable device(PC with WiFi,Laptops or Phone) and connect to ESP32 Acc
 Captivve portal page should pop up on phones on other devices you need to go the 192.168.4.1 IP to see this WiFi setup page(Wifi Manager)
 If pianoled.local is not working as IP access link to esp32 webserver, you can find your ESP32 S3/S3 IP via the website ViewIP or reading it from leds or from your router's DHCP clients page
 
+<div align="center">
+
+![image](https://github.com/serifpersia/pianoled-esp32/assets/62844718/517ca2b5-0b0e-4097-9eeb-8ab6f628471e)
+
+![image](https://github.com/serifpersia/pianoled-esp32/assets/62844718/d434b35e-ba09-46ee-a913-94badfedc3e2)
+
 ![image](https://github.com/serifpersia/pianoled-esp32/assets/62844718/91beaa8e-c168-46cb-b048-daac8cc76df6)
+
+</div>
 
 This project also supports MIDI over local network so you can use midi device on your pc with this project there is no latency. For Windows use rtpMIDI software,use esp's ip and port 5004. ESP must be in non AP mode to be able to use MIDI over network
 
