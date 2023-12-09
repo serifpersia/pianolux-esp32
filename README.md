@@ -31,7 +31,9 @@ https://github.com/serifpersia/pianoled-esp32/assets/62844718/48c77c5e-b7bd-4edb
 ## Installation
 
 Go to the PianoLED [website](https://serifpersia.github.io/pianoled-esp32/install.html) to install PianoLED on ESP32 S2/S3 with one button.
-Connect to ESP32 AP to connect to your local WiFi network 2.4Ghz, 5Ghz SSID's are not supported by these boards
+
+Grab WiFi capable device(PC with WiFi,Laptops or Phone) and connect to ESP32 Access Point to connect to your local WiFi network 2.4Ghz, 5Ghz SSID's are not supported by these boards
+Captive page should pop up on phones on other devices you need to go the 192.168.4.2 IP to see this WiFi setup page(Wifi Manager)
 You can find your ESP32 S3/S3 IP via the website ViewIP or reading it from leds or from your router's DHCP clients page
 
 Join Discord Server for any help, questions or suggestions: 
