@@ -20,6 +20,15 @@
           "offset": 0
         }
       ]
+    },
+    {
+      "chipFamily": "ESP32",
+      "parts": [
+        {
+          "path": "esp32.bin",
+          "offset": 0
+        }
+      ]
     }
   ]
 }
