@@ -38,7 +38,7 @@ Go to the PianoLED [website](https://serifpersia.github.io/pianoled-esp32/instal
 
 Grab WiFi capable device(PC with WiFi,Laptops or Phone) and connect to ESP32 Access Point to connect to your local WiFi network 2.4Ghz, 5Ghz SSID's are not supported by these boards
 Captivve portal page should pop up on phones on other devices you need to go the 192.168.4.1 IP to see this WiFi setup page(Wifi Manager)
-If pianoled.local is not working as ip acess link to esp32 webserver, you can find your ESP32 S3/S3 IP via the website ViewIP or reading it from leds or from your router's DHCP clients page
+If pianoled.local is not working as IP access link to esp32 webserver, you can find your ESP32 S3/S3 IP via the website ViewIP or reading it from leds or from your router's DHCP clients page
 
 ![image](https://github.com/serifpersia/pianoled-esp32/assets/62844718/91beaa8e-c168-46cb-b048-daac8cc76df6)
 
