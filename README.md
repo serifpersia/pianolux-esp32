@@ -35,6 +35,7 @@ Join Discord Server for any help, questions or suggestions:
 ## Installation
 Auto Install Method:
 - Go to the PianoLED [website](https://serifpersia.github.io/pianoled-esp32/install.html) to install PianoLED on ESP32 S2/S3 with one button.
+- Works only on chromium based web browsers(Google Chrome, Edge, Brave...)
 
 Manual install Method:
 - Arduino IDE and ESP32 Arduino Core SDK required to be able to upload barebones sketch.
