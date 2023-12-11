@@ -33,11 +33,16 @@ Join Discord Server for any help, questions or suggestions:
 - *88/76 Keys need 176 leds of 144leds/m density so more than 1m of strip is needed, get 2m one and cut the excess(after 176th led).
 
 ## Installation
+Auto Install Method:
+- Go to the PianoLED [website](https://serifpersia.github.io/pianoled-esp32/install.html) to install PianoLED on ESP32 S2/S3 with one button.
 
-Go to the PianoLED [website](https://serifpersia.github.io/pianoled-esp32/install.html) to install PianoLED on ESP32 S2/S3 with one button.
+Manual install Method:
+- Arduino IDE and ESP32 Arduino Core SDK required to be able to upload barebones sketch.
+After barebones code is installed simply download correct firmware and filesystem bins for your board and use the Elegant OTA web interface of the barebones sketch code uploaded to esp32 board to upload PianoLED project to your board. Alternatively clone the project and compile and upload to your board. You would need to install required libraries in order to compile and upload the PianoLED sketch and sketch data. Arduino IDE 1.8.x is the only version that supports the spiffs upload tool so keep that in mind if you decide to use this method to upload PianoLED to your esp32 board. Depending on
 
+## Setup
 Grab WiFi capable device(PC with WiFi,Laptops or Phone) and connect to ESP32 Access Point to connect to your local WiFi network 2.4Ghz, 5Ghz SSID's are not supported by these boards
-Captivve portal page should pop up on phones on other devices you need to go the 192.168.4.1 IP to see this WiFi setup page(Wifi Manager) The password for Setup Wifi AP is pianoled99
+Captive portal page should pop up on phones on other devices you need to go the 192.168.4.1 IP to see this WiFi setup page(Wifi Manager) The password for Setup Wifi AP is pianoled99
 If pianoled.local is not working as IP access link to esp32 webserver, you can find your ESP32 S3/S3 IP via the website ViewIP or reading it from leds or from your router's DHCP clients page
 
 <div align="center">
@@ -75,7 +80,7 @@ To get started with PianoLED on the ESP platform, you have two options to choose
     - Green Wire - Data Pin (default 18)
 
 If you use usb otg port on s2/s3 you might have esp power issue, to fix this bypass the usb otg port and do the 
-diy usb micro b/c to Female A port short cable and connect wires directly to esp32's 5V,GND, 19 &  20 pins.
+diy usb micro b/c to Female A port short cable and connect wires directly to esp32's 5V, GND, 19 &  20 pins.
 
 ![image](https://github.com/serifpersia/pianoled-esp32/assets/62844718/cea8ebeb-09c5-46e9-a028-67c5447ad0f3)
 
