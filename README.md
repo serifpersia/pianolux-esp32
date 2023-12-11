@@ -48,11 +48,11 @@ Grab WiFi capable device(PC with WiFi,Laptops or Phone) and connect to ESP32 Acc
 Captive portal page should pop up on phones on other devices you need to go the 192.168.4.1 IP to see this WiFi setup page(Wifi Manager) The password for Setup Wifi AP is pianoled99
 If pianoled.local is not working as IP access link to esp32 webserver, you can find your ESP32 S3/S3 IP via the website ViewIP or reading it from leds or from your router's DHCP clients page
 
+![1](https://github.com/serifpersia/pianoled-esp32/assets/62844718/2f00777b-a9aa-476f-b022-fb964bd11fd5)
+
+![2](https://github.com/serifpersia/pianoled-esp32/assets/62844718/09958410-1c90-44cf-adde-88ce63cfff7d)
+
 <div align="center">
-
-![image](https://github.com/serifpersia/pianoled-esp32/assets/62844718/517ca2b5-0b0e-4097-9eeb-8ab6f628471e)
-
-![image](https://github.com/serifpersia/pianoled-esp32/assets/62844718/d434b35e-ba09-46ee-a913-94badfedc3e2)
 
 ![image](https://github.com/serifpersia/pianoled-esp32/assets/62844718/91beaa8e-c168-46cb-b048-daac8cc76df6)
 
