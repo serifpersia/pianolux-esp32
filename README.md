@@ -40,8 +40,8 @@ Auto Install Method:
 Manual install Method:
 - Arduino IDE and ESP32 Arduino Core SDK required to be able to upload barebones sketch.
 After barebones code is installed simply download correct firmware and filesystem bins for your board and use the Elegant OTA web interface of the barebones sketch code uploaded to esp32 board to upload PianoLED project to your board. Alternatively clone the project and compile and upload to your board. You would need to install required libraries in order to compile and upload the PianoLED sketch and sketch data. Arduino IDE 1.8.x is the only version that supports the spiffs upload tool so keep that in mind if you decide to use this method to upload PianoLED to your esp32 board.
-- Barebones sketch requires FastLED library & AsyncElegantOTA, ESPAsyncWebServer, AsyncTCP to compile the sketch and sucessfully upload it to esp32 boards.
-- Full PianoLED project sketch requires quite a lot more libraries such as: ArduinoOTA, WiFiManager, ArduinoJson, WebSockets
+- Barebones sketch requires FastLED library WiFiManager AsyncElegantOTA, manual zip install clone zips from github repos (ESPAsyncWebServer, AsyncTCP) to compile the sketch and sucessfully upload it to esp32 boards.
+- Full PianoLED project sketch requires quite more libraries such as: ArduinoOTA, , ArduinoJson, WebSockets
 
 ## Setup
 Grab WiFi capable device(PC with WiFi,Laptops or Phone) and connect to ESP32 Access Point to connect to your local WiFi network 2.4Ghz, 5Ghz SSID's are not supported by these boards
