@@ -60,7 +60,10 @@ If pianoled.local is not working as IP access link to esp32 webserver, you can f
 
 This project also supports MIDI over local network so you can use midi device on your pc with this project there is no latency. For Windows use rtpMIDI software,use esp's ip and port 5004. ESP must be in non AP mode to be able to use MIDI over network
 
+<div align="center">
+
 ![image](https://github.com/serifpersia/pianoled-esp32/assets/62844718/607b969f-22e1-47f6-ab7a-4f76f3074b41)
+</div>
 
 ### Hardware
 
