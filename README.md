@@ -1,10 +1,12 @@
 # PianoLED-ESP32
+<div align="center">
 
 ![PianoLED-ESP32](https://github.com/serifpersia/pianoled-esp32/assets/62844718/4aeb819a-cbd7-4347-891b-b957f1046b6d)
-
 [![Release](https://img.shields.io/github/release/serifpersia/pianoled-esp32.svg?style=flat-square)](https://github.com/serifpersia/pianoled-esp32/releases)
 [![License](https://img.shields.io/github/license/serifpersia/pianoled-esp32?color=blue&style=flat-square)](https://raw.githubusercontent.com/serifpersia/pianoled-esp32/master/LICENSE)
 [![Discord](https://img.shields.io/discord/1077195120950120458.svg?colorB=blue&label=discord&style=flat-square)](https://discord.gg/S6xmuX4Hx5)
+
+</div>
 
 ## Demo
 <div align="center">
