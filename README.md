@@ -39,7 +39,10 @@ Use Auto install page to automatically install PianoLED firmware on your board.w
 - ESP32, S2 4MB flash size supported
 - ESP32 S3 16MB flash size supported
 - Only Google Chrome and Edge are supported.
+
 [Install](https://serifpersia.github.io/pianoled-esp32/install.html)
+
+Manual Installation
 
 1. Install Arduino IDE and necessary libraries.
    - Import the ESP32 Arduino core, follow [these instructions](https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html).
