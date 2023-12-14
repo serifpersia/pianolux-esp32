@@ -1,12 +1,33 @@
 {
-  "name": "Test",
+  "name": "PianoLED",
   "version": "1.0",
-  "home_assistant_domain": "test",
+  "home_assistant_domain": "pianoled",
   "builds": [
     {
       "chipFamily": "ESP32-S2",
       "parts": [
-        { "path": "esp32s2.bin", "offset": 0 },
+        {
+          "path": "esp32s2.bin",
+          "offset": 0
+        }
+      ]
+    },
+    {
+      "chipFamily": "ESP32-S3",
+      "parts": [
+        {
+          "path": "esp32s3.bin",
+          "offset": 0
+        }
+      ]
+    },
+    {
+      "chipFamily": "ESP32",
+      "parts": [
+        {
+          "path": "esp32.bin",
+          "offset": 0
+        }
       ]
     }
   ]
