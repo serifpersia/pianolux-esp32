@@ -40,7 +40,7 @@ Use Auto install page to automatically install PianoLED firmware on your board.w
 - ESP32 S3 16MB flash size supported
 - Only Google Chrome and Edge are supported.
 
-[![Auto Install](https://img.shields.io/badge/Auto-%20Install-blue?style=flat-square)](https://serifpersia.github.io/pianoled-esp32/install.html)
+[![Auto Install](https://img.shields.io/badge/Auto-%20Install-blue?style=flat-square)](https://serifpersia.github.io/pianoled-esp32/)
 
 Manual Installation
 
