@@ -6,27 +6,27 @@ body {
     margin: 0;
 }
 
-.logo {
+.logo
+{
     display: flex;
-    justify-content: center;
-    height: 180px;
-    padding-bottom: 50px;
+    padding: 25px;
+    justify-content: left;
+    align-items: center; /* Add this line to center vertically */
 }
 
-.piano-svg {
-    height: 462px;
-    width: 462px;
+.piano-svg
+{
+    height: 100px;
+    width: 100px;
 }
 
 @media (min-width: 768px) {
     .piano-svg {
-        width: 800px;
-        height: 800px;
-    }
-    .logo {
-        height: 310px;
+        width: 300px;
+        height: 300px;
     }
 }
+
 
 nav {
     background-color: #333;
@@ -64,7 +64,7 @@ li a:hover {
     background-color: #191919;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 1);
+    box-shadow: 0 0 5px #fff;
     max-width: 1000px; /* Set a fixed maximum width for the container */
     margin: 0 auto; /* Center the container horizontally */
     overflow: hidden; /* Prevent horizontal scrollbar if content overflows */
@@ -134,67 +134,8 @@ button:hover {
     background-color: red; /* Darker blue background color on hover */
 }
 
-#readme-content {
-    font-family: 'Arial', sans-serif;
-    line-height: 1.6;
-    font-size: 16px;
-    color: white;
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-#readme-content h1,
-#readme-content h2,
-#readme-content h3,
-#readme-content h4,
-#readme-content h5,
-#readme-content h6 {
-    color: #0366d6;
-}
-
-#readme-content p {
-    margin-bottom: 1.5em;
-}
-
-#readme-content a {
-    color: #0366d6;
-    text-decoration: none;
-}
-
-#readme-content a:hover {
-    text-decoration: underline;
-}
-
-#readme-content ul,
-#readme-content ol {
-    margin-bottom: 1.5em;
-}
-
-#readme-content code {
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 14px;
-    background-color: #f6f8fa;
-    padding: 2px 4px;
-    border-radius: 4px;
-}
-
-#readme-content pre {
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 14px;
-    background-color: #f6f8fa;
-    padding: 16px;
-    border-radius: 4px;
-    overflow: auto;
-}
-
-#readme-content blockquote {
-    color: #6a737d;
-    border-left: 4px solid #dfe2e5;
-    padding: 0 15px;
-    margin: 0 0 20px;
-}
 
 #buttons
 {
-   text-align: center;
+    text-align: center;
 }
