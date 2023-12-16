@@ -35,7 +35,7 @@ For support, questions, or suggestions, join our Discord Server:
 
 ## Installation
 
-Use Auto install page to automatically install PianoLED firmware on your board.with one click.
+Use Auto install page to automatically install PianoLED firmware on your board with one click.
 - ESP32, S2 4MB flash size supported
 - ESP32 S3 16MB flash size supported
 - Only Google Chrome and Edge are supported.
