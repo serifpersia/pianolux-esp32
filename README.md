@@ -1,4 +1,3 @@
-# PianoLED-ESP32
 <div align="center">
 
 ![PianoLED-ESP32](https://github.com/serifpersia/pianoled-esp32/assets/62844718/4aeb819a-cbd7-4347-891b-b957f1046b6d)
