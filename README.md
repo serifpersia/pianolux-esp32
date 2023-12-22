@@ -65,7 +65,7 @@ Manual Installation
 
 ![image](https://github.com/serifpersia/pianoled-esp32/assets/62844718/10bee33d-2ba6-42b8-a66d-34b45768c436)
 
-## MIDI over Local Network
+## Read IP Address via LEDS
 Read IP from LED strip(default data pin 18)
 Follow this image to read your ip. the format is usually xxx.xxx.x.x or xx or x x x)
 
