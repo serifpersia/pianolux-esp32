@@ -66,6 +66,13 @@ Manual Installation
 ![image](https://github.com/serifpersia/pianoled-esp32/assets/62844718/10bee33d-2ba6-42b8-a66d-34b45768c436)
 
 ## MIDI over Local Network
+Read IP from LED strip(default data pin 18)
+Follow this image to read your ip. the format is usually xxx.xxx.x.x or xx or x x x)
+
+![278872118-91beaa8e-c168-46cb-b048-daac8cc76df6](https://github.com/serifpersia/pianoled-esp32/assets/62844718/3bd11a11-d939-49d8-b532-466c98aa4975)
+
+
+## MIDI over Local Network
 
 This project supports MIDI over a local network, enabling the use of MIDI devices on your PC with no latency. For Windows, use rtpMIDI software, and use ESP's IP and port 5004. Ensure the ESP is in non-AP mode to use MIDI over the network.
 
