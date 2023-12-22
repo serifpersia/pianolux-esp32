@@ -5,7 +5,6 @@ int snakeLength = 4;
 int foodPosition = -1;
 bool startSnake = true;
 
-
 void Animatons(int selectedAnimation) {
   //Animation(temp name_1)
   if (selectedAnimation == 0) {
@@ -47,8 +46,7 @@ void sineWave() {
 
   // Set the LED color using the hue value or use the current hue based on changeHue
   if (HueChange) {
-    EVERY_N_MILLISECONDS(20)
-    {
+    EVERY_N_MILLISECONDS(20) {
       hue++;
     }
   }
@@ -57,29 +55,25 @@ void sineWave() {
   fadeToBlackBy(leds, NUM_LEDS, 25);
 }
 
-void sparkleDots()
-{
+void sparkleDots() {
+  int sparkleHue;
 
   if (HueChange) {
-    EVERY_N_MILLISECONDS(20)
-    {
-      hue++;
+    EVERY_N_MILLISECONDS(20) {
+      sparkleHue++;
     }
-  }
-  else
-  {
-    hue = random8(0, 15);
+  } else {
+    sparkleHue = random8(0, 15);
   }
 
   // random colored speckles that blink in and fade smoothly
-  fadeToBlackBy( leds, NUM_LEDS, 10);
+  fadeToBlackBy(leds, NUM_LEDS, 10);
   int pos = random16(NUM_LEDS);
 
-  leds[pos] += CHSV( hue, 255, 255);
+  leds[pos] += CHSV(sparkleHue, 255, 255);
 
   FastLED.delay(1000 / UPDATES_PER_SECOND);
 }
-
 
 void Snake() {
   if (startSnake) {

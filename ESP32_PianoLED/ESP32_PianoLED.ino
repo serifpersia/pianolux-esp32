@@ -24,17 +24,12 @@
 #include <ESPAsyncWebServer.h>
 #include <WebSocketsServer.h>
 
-//FastLED Lib
-#include <FastLED.h>
-#include "FadingRunEffect.h"
-#include "FadeController.h"
+//ESP Storage Lib
+#include <SPIFFS.h>
 
 //USB Lib
 #include <usb/usb_host.h>
 #include "usbhhelp.hpp"
-
-//ESP Storage Lib
-#include <SPIFFS.h>
 
 //MIDI
 //#define MIDIOUTTEST 1
@@ -47,6 +42,11 @@ elapsedMillis MIDIOutTimer;
 #define NO_SESSION_NAME
 #include <AppleMIDI.h>
 
+//FastLED Lib
+#include <FastLED.h>
+#include "FadingRunEffect.h"
+#include "FadeController.h"
+
 // Initialization of webserver and websocket
 AsyncWebServer server(80);
 WebSocketsServer webSocket(81);
@@ -58,14 +58,14 @@ WebSocketsServer webSocket(81);
 #define MAX_EFFECTS 128
 
 #include "w2812-rmt.hpp"  // Include the custom ESP32RMT_WS2812B class
-ESP32RMT_WS2812B<GRB> *wsstrip;
+ESP32RMT_WS2812B<GRB>* wsstrip;
 
-
+//Read LED Data Pin from config file from SPIFFS Storage
 int readGPIOConfig() {
   File configFile = SPIFFS.open("/led_gpio_config.txt", "r");
   if (!configFile) {
     Serial.println("Failed to open config file.");
-    return -1; // Return an error value or a default GPIO pin.
+    return -1;  // Return an error value or a default GPIO pin.
   }
 
   // Read the GPIO pin number from the file
@@ -192,10 +192,10 @@ APPLEMIDI_CREATE_DEFAULTSESSION_INSTANCE();
 // Task handles
 TaskHandle_t midiTaskHandle = NULL;
 
-void midiTask(void *pvParameters) {
+void midiTask(void* pvParameters) {
   while (1) {
-    MIDI.read(); // Handle MIDI messages
-    vTaskDelay(pdMS_TO_TICKS(1)); // Adjust the delay as needed
+    MIDI.read();                   // Handle MIDI messages
+    vTaskDelay(pdMS_TO_TICKS(1));  // Adjust the delay as needed
   }
 }
 void StartupAnimation() {
@@ -207,26 +207,33 @@ void StartupAnimation() {
   FastLED.show();
 }
 
-bool apMode = true; // Start in AP mode
+bool apMode = true;  // Start in AP mode
 const int jumperPin = 10;
 
-void startAP(WiFiManager &wifiManager) {
+void startAP(WiFiManager& wifiManager) {
   if (!wifiManager.startConfigPortal("PianoLED Setup AP")) {
-    Serial.println("failed to connect");
-    delay(3000);
-    // reset and try again, or maybe put it to deep sleep
     ESP.restart();
-    delay(5000);
   }
 }
 
-void startSTA(WiFiManager &wifiManager) {
+void startSTA(WiFiManager& wifiManager) {
   WiFi.mode(WIFI_STA);
   apMode = false;
-  Serial.println("Switched to STA mode");
 
   // Start WiFi Manager for configuring STA mode
-  wifiManager.autoConnect("PianoLED Setup AP", "pianoled99");
+
+  //Try to connect within 5 seconds
+  wifiManager.setConnectTimeout(5);
+  // Set callback to be invoked when configuration is updated
+  wifiManager.setSaveConfigCallback([]() {
+    Serial.println("Configurations updated");
+    ESP.restart();
+  });
+
+  if (!wifiManager.autoConnect("AutoConnectAP")) {
+    wifiManager.resetSettings();
+    ESP.restart();
+  }
 }
 
 void setup() {
@@ -247,10 +254,43 @@ void setup() {
     startSTA(wifiManager);
   }
 
+  //Print ESP32's IP Address
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 
-  // Initialize OTA
+
+  // Initialize and start mDNS
+  if (MDNS.begin("pianoled")) {
+    Serial.println("MDNS Responder Started!");
+  }
+
+
+
+  // Serve HTML from ESP32 SPIFFS data directory
+  if (SPIFFS.begin()) {
+    server.serveStatic("/", SPIFFS, "/");
+    server.onNotFound([](AsyncWebServerRequest* request) {
+      if (request->url() == "/") {
+        request->send(SPIFFS, "/index.html", "text/html");
+      } else {
+        request->send(404, "text/plain", "Not Found");
+      }
+    });
+  } else {
+    Serial.println("Failed to mount SPIFFS file system");
+  }
+
+  AsyncElegantOTA.begin(&server);
+
+  server.begin();
+
+  // Add service to mDNS for HTTP
+  MDNS.addService("http", "tcp", 80);
+
+  webSocket.begin();
+  webSocket.onEvent(webSocketEvent);
+
+  // Initialize OTA for wireless code upload from Arduino IDE
   ArduinoOTA.onStart([]() {
     Serial.println("OTA Start");
   });
@@ -274,7 +314,7 @@ void setup() {
   xTaskCreatePinnedToCore(midiTask, "MIDITask", 2048, NULL, 1, &midiTaskHandle, 0);
   MIDI.begin();
 
-  AppleMIDI.setHandleConnected([](const APPLEMIDI_NAMESPACE::ssrc_t & ssrc, const char* name) {
+  AppleMIDI.setHandleConnected([](const APPLEMIDI_NAMESPACE::ssrc_t& ssrc, const char* name) {
     isConnected++;
     Serial.print("Connected to session ");
     Serial.print(ssrc);
@@ -282,7 +322,7 @@ void setup() {
     Serial.println(name);
   });
 
-  AppleMIDI.setHandleDisconnected([](const APPLEMIDI_NAMESPACE::ssrc_t & ssrc) {
+  AppleMIDI.setHandleDisconnected([](const APPLEMIDI_NAMESPACE::ssrc_t& ssrc) {
     isConnected--;
     Serial.print("Disconnected ");
     Serial.println(ssrc);
@@ -295,40 +335,6 @@ void setup() {
     noteOff(note, velocity);
   });
 
-  // Initialize and start mDNS
-  if (MDNS.begin("pianoled")) {
-    Serial.println("MDNS Responder Started!");
-  }
-
-  // Serve HTML from ESP32 SPIFFS data directory
-  if (SPIFFS.begin()) {
-    server.serveStatic("/", SPIFFS, "/");
-    server.onNotFound([](AsyncWebServerRequest * request) {
-      if (request->url() == "/") {
-        request->send(SPIFFS, "/index.html", "text/html");
-      } else {
-        request->send(404, "text/plain", "Not Found");
-      }
-    });
-  } else {
-    Serial.println("Failed to mount SPIFFS file system");
-  }
-
-  AsyncElegantOTA.begin(&server);
-
-  server.begin();
-
-  // Add service to mDNS for HTTP
-  MDNS.addService("http", "tcp", 80);
-
-  webSocket.begin();
-  webSocket.onEvent(webSocketEvent);
-
-  if (!SPIFFS.begin(true)) {
-    Serial.println("An error occurred while mounting SPIFFS.");
-    return;
-  }
-
   // Read the initial GPIO pin configuration from the file
   ledPin = readGPIOConfig();
 
@@ -339,13 +345,11 @@ void setup() {
   FastLED.setBrightness(DEFAULT_BRIGHTNESS);
 
   StartupAnimation();
-  if (!apMode)
-  {
+  if (!apMode) {
     setIPLeds();
   }
 
   usbh_setup(show_config_desc_full);  //init usb host for midi devices
-
 }
 
 void loop() {
@@ -397,16 +401,13 @@ void loop() {
       if (animationIndex == 7) {
         // If the selected animation is 7, run the sineWave() animation
         sineWave();
-      }
-      else if (animationIndex == 8) {
+      } else if (animationIndex == 8) {
         // If the selected animation is 7, run the sineWave() animation
         sparkleDots();
-      }
-      else if (animationIndex == 9) {
+      } else if (animationIndex == 9) {
         // If the selected animation is 7, run the sineWave() animation
         Snake();
-      }
-      else {
+      } else {
         // For other animations (0 to 6), use the palette-based approach
         Animatons(animationIndex);
         static uint8_t startIndex = 0;
@@ -414,9 +415,7 @@ void loop() {
         FillLEDsFromPaletteColors(startIndex);
       }
       break;
-
-
-    // Add more cases for additional modes or functionality here
+      // Add more cases for additional modes or functionality here
 
     default:
       // Handle unknown mode or do nothing
@@ -425,7 +424,6 @@ void loop() {
 
   FastLED.show();
 }
-
 
 void controlLeds(int ledNo, int hueVal, int saturationVal, int brightnessVal) {
   if (ledNo < 0 || ledNo >= NUM_LEDS) {
@@ -444,8 +442,8 @@ int mapMidiNoteToLED(int midiNote, int lowestMidiNote, int highestMidiNote, int 
   int startIndex = 0;
 
   // Define the threshold notes where the shifts will occur
-  int shiftThreshold1 = 57; // MIDI note for A3
-  int shiftThreshold2 = 93; // MIDI note for C7
+  int shiftThreshold1 = 57;  // MIDI note for A3
+  int shiftThreshold2 = 93;  // MIDI note for C7
 
   // Calculate the LED index using linear mapping
   int ledIndex = map(midiNote, lowestMidiNote, highestMidiNote, startIndex, endIndex - 1);
@@ -467,16 +465,13 @@ int mapMidiNoteToLED(int midiNote, int lowestMidiNote, int highestMidiNote, int 
 
   if (pianoScaleRatio == 1) {
     return startIndex + (midiNote - lowestNote);
-  }
-  else
-  {
+  } else {
     return ledIndex;
   }
-
 }
 
 void noteOn(uint8_t note, uint8_t velocity) {
-  int ledIndex = mapMidiNoteToLED(note, lowestNote, highestNote, NUM_LEDS); // Map MIDI note to LED index
+  int ledIndex = mapMidiNoteToLED(note, lowestNote, highestNote, NUM_LEDS);  // Map MIDI note to LED index
   keysOn[ledIndex] = true;
 
   if (serverMode == 0) {
@@ -496,7 +491,7 @@ void noteOn(uint8_t note, uint8_t velocity) {
 }
 
 void noteOff(uint8_t note, uint8_t velocity) {
-  int ledIndex = mapMidiNoteToLED(note, lowestNote, highestNote, NUM_LEDS); // Map MIDI note to LED index
+  int ledIndex = mapMidiNoteToLED(note, lowestNote, highestNote, NUM_LEDS);  // Map MIDI note to LED index
   keysOn[ledIndex] = false;
   Serial.println("Note Off: " + String(note) + " mapped to LED: " + String(ledIndex));  // Debug print
 }
@@ -507,17 +502,13 @@ void sliderAction(int sliderNumber, int value) {
   } else if (sliderNumber == 2) {
     DEFAULT_BRIGHTNESS = value;
     FastLED.setBrightness(DEFAULT_BRIGHTNESS);
-  }
-  else if (sliderNumber == 3) {
+  } else if (sliderNumber == 3) {
     generalFadeRate = value;
-  }
-  else if (sliderNumber == 4) {
+  } else if (sliderNumber == 4) {
     splashMaxLength = value;
-  }
-  else if (sliderNumber == 5) {
+  } else if (sliderNumber == 5) {
     bgBrightness = value;
-  }
-  else if (sliderNumber == 6) {
+  } else if (sliderNumber == 6) {
     saturation = value;
   }
   Serial.print("Slider ");
@@ -580,9 +571,8 @@ void setColorFromVelocity(int velocity, int& hue, int& saturation, int& brightne
   saturation = 255;
 }
 
-
 // Add a new effect
-void addEffect(FadingRunEffect * effect) {
+void addEffect(FadingRunEffect* effect) {
   if (numEffects < MAX_EFFECTS) {
     effects[numEffects] = effect;
     numEffects++;
@@ -590,7 +580,7 @@ void addEffect(FadingRunEffect * effect) {
 }
 
 // Remove an effect
-void removeEffect(FadingRunEffect * effect) {
+void removeEffect(FadingRunEffect* effect) {
   for (int i = 0; i < numEffects; i++) {
     if (effects[i] == effect) {
       // Shift the remaining effects down
@@ -609,16 +599,15 @@ void setBG(CRGB colorToSet) {
   FastLED.show();
 }
 
-void setIPLeds()
-{
+void setIPLeds() {
   IPAddress localIP = WiFi.localIP();
   String ipStr = localIP.toString();
 
   // Define colors
-  CRGB redColor = CRGB(255, 0, 0);   // Red
-  CRGB blueColor = CRGB(0, 0, 255);  // Blue
-  CRGB blackColor = CRGB(0, 0, 0);   // Black (off)
-  CRGB whiteColor = CRGB(255, 255, 255); // White
+  CRGB redColor = CRGB(255, 0, 0);        // Red
+  CRGB blueColor = CRGB(0, 0, 255);       // Blue
+  CRGB blackColor = CRGB(0, 0, 0);        // Black (off)
+  CRGB whiteColor = CRGB(255, 255, 255);  // White
 
   // Define LED index and spacing
   int ledIndex = 0;
@@ -657,8 +646,7 @@ void setIPLeds()
   FastLED.show();
 }
 
-void sendIP()
-{
+void sendIP() {
   if (Serial.available() > 0) {
     int command = Serial.read();
     if (command == 255) {

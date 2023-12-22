@@ -173,5 +173,4 @@ void sendValues() {
   // Send the JSON data to all connected clients
   Serial.println("Sending Data To Clients");
   webSocket.broadcastTXT(jsonStr);
-
 }

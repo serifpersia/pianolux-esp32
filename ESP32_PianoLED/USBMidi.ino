@@ -6,9 +6,6 @@ const size_t MIDI_OUT_BUFFERS = 8;
 usb_transfer_t *MIDIOut = NULL;
 usb_transfer_t *MIDIIn[MIDI_IN_BUFFERS] = { NULL };
 
-
-
-
 void check_interface_desc_MIDI(const void *p) {
   const usb_intf_desc_t *intf = (const usb_intf_desc_t *)p;
 
