@@ -37,6 +37,7 @@ For support, questions, or suggestions, join our Discord Server:
 Use Auto install page to automatically install PianoLED firmware on your board with one click.
 - ESP32, S2 4MB flash size supported
 - ESP32 S3 16MB flash size supported
+- ESP32 4MB flash size supported
 - Only Google Chrome and Edge are supported.
 
 [![Auto Install](https://img.shields.io/badge/Auto-%20Install-blue?style=flat-square)](https://serifpersia.github.io/pianoled-esp32/)
@@ -102,3 +103,68 @@ To get started with PianoLED on the ESP platform, you have two options:
 This is more of a plug & play setup. Depending on whether your board has pre-soldered pin headers and USB-OTG pads soldered, you have to bridge the USB-OTG pads.
 
 ![Option 2 Setup](https://github.com/serifpersia/pianoled-esp32/assets/62844718/a089640f-113e-47b1-8c88-8e38e4728295)
+
+## Features
+
+### LED Modes
+
+- **Default Mode 🎹:**
+  - Plain HSB colored playing LEDs.
+
+- **Splash Mode 💦:**
+  - Splash effect from played MIDI notes.
+
+- **Split Mode ↔️:**
+  - Split playing LEDs into two with adjustable colors.
+
+- **Random Mode 🎲:**
+  - Random hue changes with each triggered MIDI note.
+
+- **Velocity Mode ⚡:**
+  - LEDs react based on MIDI note velocity.
+
+- **Animation Mode 🎥:**
+  - Static looping LED animations with 10 options.
+  - MIDI input is ignored in this mode.
+
+### Global Controls
+
+- **Color Control Sliders 🌈:**
+  - Adjust hue, saturation, and brightness.
+
+- **Fade Length ⏱️:**
+  - Control the duration of the fade effect.
+
+- **Background Light 💡:**
+  - Toggle and adjust background LED lights.
+
+- **Board Config Parameters ⚙️:**
+  - Set max current, LED strip data pin.
+
+- **Piano Size Configuration 🎹:**
+  - Button to configure piano size.
+
+- **MIDI to LED Map Ratios 🎵:**
+  - 1:2 and 1:1 mapping options.
+
+- **Visual Representation 🎨:**
+  - Full 88-key piano keyboard for visual aid
+### Global Toggles
+
+- **FX LED 🔀:**
+  - Shift LEDs at certain solder joined points on the strip
+
+- **BG LED 🌌:**
+  - Toggle background light LEDs.
+  - Adjust color and brightness separately.
+
+- **Update BG Color 🔄:**
+  - Apply HSB color adjustments to background light.
+
+- **RV LED 🔁:**
+  - Reverse LED strip direction for added flexibility.
+ 
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
