@@ -53,6 +53,7 @@
                     <select id="selected-item-modes">
                         <option value="0">Default</option>
                         <option value="1">Splash</option>
+                        <option value="5">Split</option>
                         <option value="2">Random</option>
                         <option value="3">Velocity</option>
                         <option value="4">Animation</option>
@@ -73,10 +74,19 @@
                         <option value="9">Snake</option>
                     </select>
                 </div>
-                <label for="BGUpdate">Update BG Color</label>
-                <div class="checkbox-wrapper-8">
-                    <input type="checkbox" id="cb4-8" class="tgl tgl-skewed">
-                    <label for="cb4-8" data-tg-on="ON" data-tg-off="OFF" class="tgl-btn"></label>
+                <div class="controls">
+                    <label for="SplitColorUpdate">Update Split Colors</label>
+                    <div class="colorControls">
+                        <button id="SETLEFTSPLIT">Set Left Split</button>
+                        <button id="SETRIGHTSPLIT">Set Right Split</button>
+                    </div>
+                </div>
+                <div class="controls">
+                    <label for="BGUpdate">Update BG Color</label>
+                    <div class="checkbox-wrapper-8">
+                        <input type="checkbox" id="cb4-8" class="tgl tgl-skewed">
+                        <label for="cb4-8" data-tg-on="ON" data-tg-off="OFF" class="tgl-btn"></label>
+                    </div>
                 </div>
                 <div class="control">
                     <label for="HUE">Hue</label>
@@ -107,7 +117,7 @@
                     <div class="fade-slider">
                         <div class="track"></div>
                         <div class="thumb"></div>
-                    <input type="hidden" id="FADE" name="fade" min="0" max="255" value="255">
+                        <input type="hidden" id="FADE" name="fade" min="0" max="255" value="255">
                     </div>
                 </div>
                 <div class="control">
@@ -139,6 +149,14 @@
                 <div class="buttons">
                     <button id="PianoSize">88 Keys</button>
                     <button id="LEDScaleRatio">1:2</button>
+                </div>
+                <div class="control">
+                    <label for="SPLIT">Split Control</label>
+                    <div class="split-slider">
+                        <div class="track"></div>
+                        <div class="thumb"></div>
+                        <input type="hidden" id="SPLIT" name="split" value="50" step="1" min="0" max="100"/>
+                    </div>
                 </div>
                 <div id="pianoKeysVisuals"></div>
                 <div class="control">

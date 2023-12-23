@@ -34,46 +34,37 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
         changeLEDModeAction(serverMode);
         Serial.println("LED ID: ");
         Serial.print(serverMode);
-      }
-      else if (action == "ChangeAnimationAction") {
+      } else if (action == "ChangeAnimationAction") {
         animationIndex = doc["animation"];
         Serial.println("Animation ID: ");
         Serial.print(animationIndex);
-      }
-      else if (action == "Hue") {
+      } else if (action == "Hue") {
         int value = doc["value"];
         sliderAction(1, value);
-      }
-      else if (action == "Saturation") {
+      } else if (action == "Saturation") {
         int value = doc["value"];
         sliderAction(6, value);
-      }
-      else if (action == "Brightness") {
+      } else if (action == "Brightness") {
         int value = doc["value"];
         sliderAction(2, value);
       } else if (action == "Fade") {
         int value = doc["value"];
         sliderAction(3, value);
-      }
-      else if (action == "Splash") {
+      } else if (action == "Splash") {
         int value = doc["value"];
         sliderAction(4, value);
-      }
-      else if (action == "Background") {
+      } else if (action == "Background") {
         int value = doc["value"];
         sliderAction(5, value);
-      }
-      else if (action == "CurrentAction") {
+      } else if (action == "CurrentAction") {
         ledCurrent = doc["value"];
         FastLED.setMaxPowerInVoltsAndMilliamps(5, ledCurrent);
-      }
-      else if (action == "LedDataPinAction") {
+      } else if (action == "LedDataPinAction") {
         ledPin = doc["value"];
         updateGPIOConfig(ledPin);
-        delay(3000); // Debounce the button
-        ESP.restart(); // Restart the ESP32
-      }
-      else if (action == "PianoSizeAction") {
+        delay(3000);    // Debounce the button
+        ESP.restart();  // Restart the ESP32
+      } else if (action == "PianoSizeAction") {
         keySizeVal = doc["value"];
 
         switch (keySizeVal) {
@@ -103,43 +94,48 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
             highestNote = 84;
             break;
         }
-      }
-      else if (action == "LedScaleRatioAction") {
+      } else if (action == "LedScaleRatioAction") {
         int value = doc["value"];
         pianoScaleRatio = value;
-      }
-      else if (action == "FixAction") {
+      } else if (action == "FixAction") {
         fixToggle = doc["value"];
         if (fixToggle == 1) {
           useFix = 1;
-        }
-        else if (fixToggle == 0) {
+        } else if (fixToggle == 0) {
           useFix = 0;
         }
-      }
-      else if (action == "BGAction") {
+      } else if (action == "BGAction") {
         bgToggle = doc["value"];
         if (bgToggle == 1) {
           setBG(CHSV(hue, saturation, bgBrightness));
-        }
-        else if (bgToggle == 0) {
+        } else if (bgToggle == 0) {
           setBG(CHSV(0, 0, 0));
         }
-      }
-      else if (action == "DirectionAction") {
+      } else if (action == "DirectionAction") {
         reverseToggle = doc["value"];
         if (reverseToggle == 1) {
           STRIP_DIRECTION = 1;
-        }
-        else if (reverseToggle == 0) {
+        } else if (reverseToggle == 0) {
           STRIP_DIRECTION = 0;
         }
-      }
-      else if (action == "BGUpdateAction") {
+      } else if (action == "BGUpdateAction") {
         bgUpdateToggle = doc["value"];
         setBG(CHSV(hue, saturation, bgBrightness));
-      }
-      else if (action == "RequestValues") {
+      } else if (action == "Split") {
+        splitPosition = doc["value"];
+      } else if (action == "SetSplitAction") {
+        int splitIndex = doc["index"];
+        int splitHue = doc["hue"];
+        int splitSaturation = doc["saturation"];
+        int splitBrightness = doc["brightness"];
+        if (splitIndex == 0) {
+          // Handle left split
+          splitLeftColor = CHSV(splitHue, splitSaturation, splitBrightness);
+        } else if (splitIndex == 1) {
+          // Handle right split
+          splitRightColor = CHSV(splitHue, splitSaturation, splitBrightness);
+        }
+      } else if (action == "RequestValues") {
         sendValues();
       }
       break;
@@ -159,6 +155,7 @@ void sendValues() {
   doc["FADE"] = generalFadeRate;
   doc["SPLASH"] = splashMaxLength;
   doc["BG"] = bgBrightness;
+  doc["SPLIT"] = splitPosition;
   doc["FIX_TOGGLE"] = fixToggle;
   doc["BG_TOGGLE"] = bgToggle;
   doc["REVERSE_TOGGLE"] = reverseToggle;

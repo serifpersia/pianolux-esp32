@@ -426,6 +426,29 @@ input:checked + .slider:before {
     text-align: center;
 }
 
+/* Updated CSS for the fade slider */
+.split-slider {
+    position: relative;
+    width: 100%;
+    height: 40px; /* Adjust the height as needed */
+}
+
+.split-slider .track {
+    width: 100%;
+    height: 100%;
+    background: #46494b;
+    border-radius: 10px;
+}
+
+.split-slider .thumb {
+    position: absolute;
+    width: 20px; /* Adjust the thumb width as needed */
+    height: 45px; /* Adjust the thumb height as needed */
+    border-radius: 0%;
+    background-color: white;
+    transform: translateY(-50%);
+}
+
 /* Target the spin buttons and hide them for all browsers */
 input[type="number"] {
     -moz-appearance: textfield; /* Remove spin buttons in Firefox */
@@ -437,10 +460,11 @@ input[type="number"]::-webkit-outer-spin-button {
     appearance: none;
 }
 
-
+.colorControls{
+    display: flex;
+}
 .buttons{
     display: flex;
-    padding-bottom: 25px;
 }
 button {
     --border-radius: 15px;
@@ -483,6 +507,10 @@ button::after {
     mask-composite: exclude;
     -webkit-mask-composite: destination-out;
     filter: hue-rotate(0);
+}
+
+button:active {
+    color: red;
 }
 
 button,

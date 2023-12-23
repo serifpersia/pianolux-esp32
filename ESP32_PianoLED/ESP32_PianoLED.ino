@@ -133,6 +133,15 @@ uint8_t brightness = 255;
 uint8_t saturation = 255;
 uint8_t bgBrightness = 128;
 
+// Define split positions (percentage)
+int splitPosition = 50;  // Example: 50 means the split is in the middle
+int splitLeftMinPitch = 21;
+int splitRightMaxPitch = 108;
+
+// Define split colors
+CHSV splitLeftColor = CHSV(0, 255, 255);     // Red color
+CHSV splitRightColor = CHSV(160, 255, 255);  // Blue color
+
 int bgToggle;
 int fixToggle;
 int reverseToggle;
@@ -264,12 +273,10 @@ void setup() {
     Serial.println("MDNS Responder Started!");
   }
 
-
-
   // Serve HTML from ESP32 SPIFFS data directory
   if (SPIFFS.begin()) {
     server.serveStatic("/", SPIFFS, "/");
-    server.onNotFound([](AsyncWebServerRequest* request) {
+    server.onNotFound([](AsyncWebServerRequest * request) {
       if (request->url() == "/") {
         request->send(SPIFFS, "/index.html", "text/html");
       } else {
@@ -415,7 +422,7 @@ void loop() {
         FillLEDsFromPaletteColors(startIndex);
       }
       break;
-      // Add more cases for additional modes or functionality here
+    // Add more cases for additional modes or functionality here
 
     default:
       // Handle unknown mode or do nothing
@@ -486,6 +493,19 @@ void noteOn(uint8_t note, uint8_t velocity) {
     int hue, saturation, brightness;
     setColorFromVelocity(velocity, hue, saturation, brightness);
     controlLeds(ledIndex, hue, saturation, brightness);
+  }
+  //Split Mode
+  else if (serverMode == 5) {
+    // Split Mode
+    uint8_t splitIndex = map(note, splitLeftMinPitch, splitRightMaxPitch, 0, 100);
+
+    if (splitIndex <= splitPosition) {
+      // Use left color
+      controlLeds(ledIndex, splitLeftColor.h, splitLeftColor.s, splitLeftColor.v);
+    } else {
+      // Use right color
+      controlLeds(ledIndex, splitRightColor.h, splitRightColor.s, splitRightColor.v);
+    }
   }
   Serial.println("Note On: " + String(note) + " mapped to LED: " + String(ledIndex));  // Debug print
 }

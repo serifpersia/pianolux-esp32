@@ -68,6 +68,7 @@ addInputListener('BRIGHTNESS', 'Brightness', 1);
 addInputListener('FADE', 'Fade', 1);
 addInputListener('SPLASH', 'Splash', 1);
 addInputListener('BG', 'Background', 1);
+addInputListener('SPLIT', 'Split', 1);
 
 var navbar = document.querySelector('.navbar');
 var scrolling = false;
@@ -132,6 +133,7 @@ function updateUI(data) {
     updateControlValue('FADE', data.FADE, fadeTrack, fadeThumb, handleFadeMove, 255);
     updateControlValue('SPLASH', data.SPLASH, splashTrack, splashThumb, handleSplashMove, 16);
     updateControlValue('BG', data.BG, bgTrack, bgThumb, handleBgMove, 255);
+    updateControlValue('SPLIT', data.SPLIT, splitTrack, splitThumb, handleSplitMove, 100);
 
     updateToggles('cb1-8', data.FIX_TOGGLE);
     updateToggles('cb2-8', data.BG_TOGGLE);
@@ -741,6 +743,95 @@ const initialBgBrightness = parseInt(bgValueInput.value);
 const initialBGBrightnessThumbPosition = (initialBgBrightness / 255) * (bgTrack.offsetWidth - bgThumb.offsetWidth);
 bgThumb.style.left = initialBGBrightnessThumbPosition + 'px';
 
+// Split slider
+const splitThumb = document.querySelector('.split-slider .thumb');
+const splitTrack = document.querySelector('.split-slider .track');
+const splitValueInput = document.getElementById('SPLIT');
+let isSplitDragging = false;
+
+// Function to handle mouse and touch move for split slider
+function handleSplitMove(xPosition) {
+    const maxPosition = splitTrack.offsetWidth - splitThumb.offsetWidth;
+    const minPosition = 0;
+
+    // Ensure the thumb stays within the track bounds
+    xPosition = Math.max(minPosition, Math.min(xPosition, maxPosition));
+
+    splitThumb.style.left = xPosition + 'px';
+
+    // Calculate the split value based on thumb position
+    const splitValue = Math.round((xPosition / maxPosition) * 100);
+
+    splitValueInput.value = splitValue;
+}
+
+// Mouse drag for split slider
+splitThumb.addEventListener('mousedown', (e) => {
+    isSplitDragging = true;
+    splitThumb.style.transition = 'none';
+    const offsetX = e.clientX - splitThumb.getBoundingClientRect().left;
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+
+    function onMouseMove(e) {
+        if (!isSplitDragging) return;
+
+        const newPosition = e.clientX - splitTrack.getBoundingClientRect().left - offsetX;
+        handleSplitMove(newPosition);
+    }
+
+    function onMouseUp() {
+        isSplitDragging = false;
+        handleEnd(splitValueInput);
+        splitThumb.style.transition = 'left 0.3s ease'; // Restore smooth transition
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+    }
+});
+
+// Touch event handling for mobile devices for split slider
+splitThumb.addEventListener('touchstart', (e) => {
+    isSplitDragging = true;
+    splitThumb.style.transition = 'none';
+    const offsetX = e.touches[0].clientX - splitThumb.getBoundingClientRect().left;
+
+    document.addEventListener('touchmove', onTouchMove);
+    document.addEventListener('touchend', onTouchEnd);
+
+    function onTouchMove(e) {
+        if (!isSplitDragging) return;
+
+        const newPosition = e.touches[0].clientX - splitTrack.getBoundingClientRect().left - offsetX;
+        handleSplitMove(newPosition);
+    }
+
+    function onTouchEnd() {
+        isSplitDragging = false;
+        handleEnd(splitValueInput);
+        splitThumb.style.transition = 'left 0.3s ease'; // Restore smooth transition
+        document.removeEventListener('touchmove', onTouchMove);
+        document.removeEventListener('touchend', onTouchEnd);
+    }
+});
+
+// Track click for split slider
+splitTrack.addEventListener('click', (e) => {
+    const clickX = e.clientX - splitTrack.getBoundingClientRect().left;
+    const thumbPosition = clickX - splitThumb.offsetWidth / 2;
+    handleSplitMove(thumbPosition);
+    handleEnd(splitValueInput);
+    // Restore smooth transition for the thumb
+    splitThumb.style.transition = 'left 0.3s ease';
+});
+
+// Set the initial split
+const initialSplit = parseInt(splitValueInput.value);
+
+// Calculate the initial thumb position based on the initial value
+const initialSplitThumbPosition = (initialSplit / 100) * (splitTrack.offsetWidth - splitThumb.offsetWidth);
+splitThumb.style.left = initialSplitThumbPosition + 'px';
+
 function handleWindowResize() {
     const maxHuePosition = track.offsetWidth - thumb.offsetWidth;
     const maxSaturationPosition =  saturationTrack.offsetWidth - saturationThumb.offsetWidth;
@@ -748,6 +839,7 @@ function handleWindowResize() {
     const maxFadePosition = fadeTrack.offsetWidth - fadeThumb.offsetWidth;
     const maxSplashPosition = splashTrack.offsetWidth - splashThumb.offsetWidth;
     const maxBGPosition = bgTrack.offsetWidth - bgThumb.offsetWidth;
+    const maxSplitPosition = splitTrack.offsetWidth - splitThumb.offsetWidth;
 
     const mappedHue = (parseInt(hueValueInput.value) / 255) * 360;
     const mappedSaturation = (parseInt(saturationValueInput.value));
@@ -755,6 +847,7 @@ function handleWindowResize() {
     const mappedFade = (parseInt(fadeValueInput.value));
     const mappedSplash = (parseInt(splashValueInput.value));
     const mappedBG = (parseInt(bgValueInput.value)); 
+    const mappedSplit = (parseInt(splitValueInput.value)); 
 
     // Calculate the new position based on the mapped hue value
     const newPosition = (mappedHue / 360) * maxHuePosition;
@@ -763,6 +856,7 @@ function handleWindowResize() {
     const newFadePosition = (mappedFade / 255) * maxFadePosition;
     const newSplashPosition = (mappedSplash / 16) * maxSplashPosition;
     const newBGPosition = (mappedBG / 255) * maxBGPosition;
+    const newSplitPosition = (mappedSplit / 100) * maxSplitPosition;
 
     // Update the thumb's position
     thumb.style.left = newPosition + 'px';
@@ -771,6 +865,7 @@ function handleWindowResize() {
     fadeThumb.style.left = newFadePosition + 'px';
     splashThumb.style.left = newSplashPosition + 'px';
     bgThumb.style.left = newBGPosition + 'px';
+    splitThumb.style.left = newSplitPosition + 'px';
 
     // Calculate the background color based on the hue value
     const backgroundColor = `hsl(${mappedHue}, 100%, 50%)`;
@@ -783,6 +878,7 @@ function handleWindowResize() {
     fadeThumb.style.transition = 'left 0s ease';
     splashThumb.style.transition = 'left 0s ease';
     bgThumb.style.transition = 'left 0s ease';
+    splitThumb.style.transition = 'left 0s ease';
 }
 // Add the event listener for window resize
 window.addEventListener('resize', handleWindowResize);
@@ -876,9 +972,71 @@ highlightRect2.setAttribute("width", "0%");
 highlightRect2.setAttribute("height", "100%");
 highlightRect2.setAttribute("fill", "rgba(32, 32, 32, 0.8)");// Blue color with 50% opacity
 
+const highlightRectLeft = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+highlightRectLeft.setAttribute("height", "10%");
+highlightRectLeft.setAttribute("fill", "rgba(255, 0, 0, 1)"); // Red color with 100% opacity
+
+const highlightRectRight = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+highlightRectRight.setAttribute("height", "10%");
+highlightRectRight.setAttribute("fill", "rgba(0, 0, 255, 1)"); // Blue color with 100% opacity
+
+// Append the highlight rectangles to the SVG element
+svg.appendChild(highlightRectLeft);
+svg.appendChild(highlightRectRight);
+
+// Set the initial ratio
+let splitRatio = 50; // in percentage
+
+// Update the widths and positions based on the ratio
+function updateHighlightRects() {
+    const totalWidth = 100; // Total width of the container
+
+    const leftWidth = (totalWidth * splitRatio) / 100;
+    const rightWidth = totalWidth - leftWidth;
+
+    highlightRectLeft.setAttribute("width", leftWidth + "%");
+    highlightRectRight.setAttribute("width", rightWidth + "%");
+
+    // Update the position of the right rectangle
+    highlightRectRight.setAttribute("x", leftWidth + "%");
+}
+
+document.getElementById("SPLIT").addEventListener("input", function () {
+    splitRatio = this.value;
+    updateHighlightRects();
+});
+
+updateHighlightRects();
+
+
 // Append the highlight rectangles to the SVG element
 svg.appendChild(highlightRect1);
 svg.appendChild(highlightRect2);
+
+function addButtonHSBListener(controlId, actionName, index) {
+    document.getElementById(controlId).addEventListener('click', function () {
+
+
+        const hue = hueValueInput.value;
+        const saturation = saturationValueInput.value;
+        const brightness = brightnessValueInput.value;
+
+        const mappedHue = (hueValueInput.value / 255) * 360;  // 0-255 range for hue, converted to 0-360 degrees
+        const mappedSaturation = (saturationValueInput.value / 255) * 100; // 0-255 range for saturation, converted to 0-100%
+        const mappedBrightness = (brightnessValueInput.value / 255) * 50; // 0-255 range for brightness, converted to 0-50% (50% lightness)
+
+        const highlightRect = index === 0 ? highlightRectLeft : highlightRectRight;
+        highlightRect.setAttribute("fill", `hsl(${mappedHue}, ${mappedSaturation}%, ${mappedBrightness}%)`);
+
+        // Send data with hue, saturation, brightness, and actionName
+        sendData(actionName, { hue: hue, saturation: saturation, brightness: brightness, index: index });
+    });
+}
+
+// Example usage:
+addButtonHSBListener('SETLEFTSPLIT', 'SetSplitAction', 0);  // Left split
+addButtonHSBListener('SETRIGHTSPLIT', 'SetSplitAction', 1);  // Right split
+
 
 function createButtonListener(button, values, index, actionName) {
     button.addEventListener("click", function () {
