@@ -1183,7 +1183,7 @@ function downloadFile(url, fileName) {
 }
 
 function fetchAssetsList(board, fileType) {
-    const githubApiUrl = `https://api.github.com/repos/serifpersia/pianoled-esp32/releases/latest`;
+    const githubApiUrl = `https://api.github.com/repos/serifpersia/pianolux-esp32/releases/latest`;
 
     fetch(githubApiUrl)
         .then(response => response.json())

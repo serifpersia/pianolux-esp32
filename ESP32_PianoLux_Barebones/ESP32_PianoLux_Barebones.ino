@@ -1,16 +1,18 @@
 /*
-  PianoLED on ESP32S2/S3 boards is an open-source project that aims to provide MIDI-based LED control to the masses.
+  PianoLux on ESP32S2/S3 boards is an open-source project that aims to provide MIDI-based LED control to the masses.
   It is developed by a one-person team, yours truly, known as serifpersia, or Scarlett.
 
-  If you modify this code and redistribute the PianoLED project, please ensure that you
+  If you modify this code and redistribute the PianoLux project, please ensure that you
   don't remove this disclaimer or appropriately credit the original author of the project
-  by linking to the project's source on GitHub: github.com/serifpersia/pianoled-esp32/
+  by linking to the project's source on GitHub: github.com/serifpersia/pianolux-esp32/
   Failure to comply with these terms would constitute a violation of the project's
-  MIT license under which PianoLED is released.
+  MIT license under which PianoLux is released.
 
   Copyright © 2023 Serif Rami, also known as serifpersia.
 
 */
+
+//PianoLux
 
 //WIFI Libs
 #include <WiFiManager.h>
