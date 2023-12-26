@@ -12,32 +12,52 @@ static void midi_transfer_cb(usb_transfer_t *transfer) {
         // Parse MIDI data
         uint8_t cableNumber = p[i] & 0x0F;
         uint8_t statusByte = p[i + 1];
-        uint8_t note = p[i + 2];
-        uint8_t velocity = p[i + 3];
+        uint8_t channel = p[i + 2];  // For Note On/Off, this is the note number. For CC, it's the controller number.
+        uint8_t value = p[i + 3];    // For Note On/Off, this is the velocity. For CC, it's the controller value.
 
         // Format the parsed MIDI data as a string
         char midiString[50];  // Adjust the size as needed
-        snprintf(midiString, sizeof(midiString), "Ch%d %s Note: %d Velocity: %d",
-                 cableNumber, (statusByte >= 0x80 && statusByte < 0x90) ? "Note Off" : "Note On",
-                 note, velocity);
+        snprintf(midiString, sizeof(midiString), "Ch%d %s Channel: %d Value: %d",
+                 cableNumber, (statusByte >= 0x80 && statusByte < 0x90) ? "Note Off" : (statusByte >= 0x90 && statusByte < 0xA0) ? "Note On"
+                                                                                     : (statusByte >= 0xB0 && statusByte < 0xC0) ? "Control Change"
+                                                                                                                                 : "Other",
+                 channel, value);
 
-        // Execute noteOn or noteOff based on the MIDI statusByte
+        // Execute noteOn, noteOff, or process CC message based on the MIDI statusByte
         if (statusByte >= 0x80 && statusByte < 0x90) {
-          noteOff(note, velocity);
+          noteOff(channel, value);
           if (isConnected) {
-            MIDI.sendNoteOff(note, velocity, 1);
+            MIDI.sendNoteOff(channel, value, 1);
           }
         } else if (statusByte >= 0x90 && statusByte < 0xA0) {
-          if (velocity == 0) {
-            noteOff(note, velocity);  // Treat "Note On" with 0 velocity as "Note Off"
+          if (value == 0) {
+            noteOff(channel, value);  // Treat "Note On" with 0 velocity as "Note Off"
             if (isConnected) {
-              MIDI.sendNoteOff(note, velocity, 1);
+              MIDI.sendNoteOff(channel, value, 1);
             }
           } else {
-            noteOn(note, velocity);
+            noteOn(channel, value);
             if (isConnected) {
-              MIDI.sendNoteOn(note, velocity, 1);
+              MIDI.sendNoteOn(channel, value, 1);
             }
+          }
+        } else if (statusByte >= 0xB0 && statusByte < 0xC0) {
+          // Handle Control Change messages here
+
+          // Check if it's the sustain pedal CC (controller number 64)
+          if (channel == 64) {
+            // Process the sustain pedal CC messagery
+            MIDI.sendControlChange(channel, value, 1);
+          }
+          // Check if it's the soft pedal CC (controller number 67)
+          else if (channel == 67) {
+            // Process the soft pedal CC message
+            MIDI.sendControlChange(channel, value, 1);
+          }
+          // Check if it's the sostenuto pedal CC (controller number 66)
+          else if (channel == 66) {
+            // Process the sostenuto pedal CC message
+            MIDI.sendControlChange(channel, value, 1);
           }
         }
       }
