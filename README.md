@@ -1,6 +1,6 @@
 <div align="center">
-
-![image](https://github.com/serifpersia/pianolux-esp32/assets/62844718/df9e1fc6-df19-40de-a04f-9b182e3790de)
+   
+![githubpianolux](https://github.com/serifpersia/pianolux-esp32/assets/62844718/07f6d112-2015-4e35-8551-68effcefb60e)
 
 [![Release](https://img.shields.io/github/release/serifpersia/pianolux-esp32.svg?style=flat-square)](https://github.com/serifpersia/pianolux-esp32/releases)
 [![License](https://img.shields.io/github/license/serifpersia/pianolux-esp32?color=blue&style=flat-square)](https://raw.githubusercontent.com/serifpersia/pianolux-esp32/master/LICENSE)
