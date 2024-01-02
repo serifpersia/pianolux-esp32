@@ -1,32 +1,16 @@
 body {
     margin: 0;
     font-family: 'Arial', sans-serif;
-    background: #191919;
+    background: #231f20;
     padding: 0;
     margin: 0;
 }
 
-.logo
-{
+.logo {
     display: flex;
-    padding: 25px;
-    justify-content: left;
-    align-items: center; /* Add this line to center vertically */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
 }
-
-.piano-svg
-{
-    height: 100px;
-    width: 100px;
-}
-
-@media (min-width: 768px) {
-    .piano-svg {
-        width: 300px;
-        height: 300px;
-    }
-}
-
 
 nav {
     background-color: #333;
@@ -61,7 +45,7 @@ li a:hover {
 
 #container {
     text-align: left; /* Align the content to the left within the container */
-    background-color: #191919;
+    background-color: #231f20;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 0 5px #fff;
