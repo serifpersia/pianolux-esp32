@@ -60,7 +60,7 @@ Simply access the web interface by IP or MDNS pianolux.local
 
 ## Read IP Address via LEDS & MDNS
 Read IP from LED strip(default data pin 18)
-Follow this image to read your ip. the format is usually xxx.xxx.x.x or xx or x x x)
+Follow this image to read your ESP32's IP address
 
 You can also access the web interface of PianoLux by using MDNS hostname by typing pianolux.local instead of IP.
 MDNS might work depending on your network and devices. 
