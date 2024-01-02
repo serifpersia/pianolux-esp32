@@ -245,28 +245,6 @@ void startSTA(WiFiManager& wifiManager) {
   }
 }
 
-unsigned long previousMillis;
-unsigned long reconnectInterval = 30000;
-
-// Define a flag to track whether the device is online
-bool isOnline = false;
-
-void reconnectWiFi()
-{
-  // if WiFi is down, try reconnecting
-  if ((WiFi.status() != WL_CONNECTED) && (currentTime - previousMillis >= reconnectInterval)) {
-    WiFi.reconnect();
-    previousMillis = currentTime;
-
-    // Reset the online flag when attempting to reconnect
-    isOnline = true;
-  }
-  // Check if WiFi is now connected and the online flag is not set
-  else if (WiFi.status() == WL_CONNECTED && isOnline) {
-    ESP.restart();
-  }
-}
-
 void setup() {
 
   Serial.begin(115200);
@@ -452,8 +430,6 @@ void loop() {
   }
 
   FastLED.show();
-
-  reconnectWiFi();
 }
 
 void controlLeds(int ledNo, int hueVal, int saturationVal, int brightnessVal) {
