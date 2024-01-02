@@ -220,7 +220,7 @@ bool apMode = true;  // Start in AP mode
 const int jumperPin = 10;
 
 void startAP(WiFiManager& wifiManager) {
-  if (!wifiManager.startConfigPortal("PianoLED Setup AP")) {
+  if (!wifiManager.startConfigPortal("PianoLED AP")) {
     ESP.restart();
   }
 }
@@ -239,8 +239,30 @@ void startSTA(WiFiManager& wifiManager) {
     ESP.restart();
   });
 
-  if (!wifiManager.autoConnect("AutoConnectAP")) {
+  if (!wifiManager.autoConnect("PianoLED AP")) {
     wifiManager.resetSettings();
+    ESP.restart();
+  }
+}
+
+unsigned long previousMillis;
+unsigned long reconnectInterval = 30000;
+
+// Define a flag to track whether the device is online
+bool isOnline = false;
+
+void reconnectWiFi()
+{
+  // if WiFi is down, try reconnecting
+  if ((WiFi.status() != WL_CONNECTED) && (currentTime - previousMillis >= reconnectInterval)) {
+    WiFi.reconnect();
+    previousMillis = currentTime;
+
+    // Reset the online flag when attempting to reconnect
+    isOnline = true;
+  }
+  // Check if WiFi is now connected and the online flag is not set
+  else if (WiFi.status() == WL_CONNECTED && isOnline) {
     ESP.restart();
   }
 }
@@ -430,6 +452,8 @@ void loop() {
   }
 
   FastLED.show();
+
+  reconnectWiFi();
 }
 
 void controlLeds(int ledNo, int hueVal, int saturationVal, int brightnessVal) {
