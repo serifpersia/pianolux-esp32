@@ -1,7 +1,7 @@
 {
-  "name": "PianoLED",
+  "name": "PianoLux",
   "version": "1.2",
-  "home_assistant_domain": "pianoled",
+  "home_assistant_domain": "pianolux",
   "builds": [
     {
       "chipFamily": "ESP32-S2",
