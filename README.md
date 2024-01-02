@@ -6,7 +6,6 @@
 [![License](https://img.shields.io/github/license/serifpersia/pianolux-esp32?color=blue&style=flat-square)](https://raw.githubusercontent.com/serifpersia/pianolux-esp32/master/LICENSE)
 [![Discord](https://img.shields.io/discord/1077195120950120458.svg?colorB=blue&label=discord&style=flat-square)](https://discord.gg/MAypyD7k86)
 </div>
-
 ## Demo
 <div align="center">
    
