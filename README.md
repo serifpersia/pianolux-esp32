@@ -59,9 +59,13 @@ Manual Installation
 ![WiFi Setup](https://github.com/serifpersia/pianolux-esp32/assets/62844718/2f00777b-a9aa-476f-b022-fb964bd11fd5)
 ![image](https://github.com/serifpersia/pianolux-esp32/assets/62844718/10bee33d-2ba6-42b8-a66d-34b45768c436)
 
-## Read IP Address via LEDS
+## Read IP Address via LEDS & MDNS
 Read IP from LED strip(default data pin 18)
 Follow this image to read your ip. the format is usually xxx.xxx.x.x or xx or x x x)
+
+You can also access the web interface of PianoLux by using MDNS hostname by typing pianolux.local instead of IP.
+MDNS might work depending on your network and devices. 
+Most should be able to connect but you can always use IP route instead
 
 ![278872118-91beaa8e-c168-46cb-b048-daac8cc76df6](https://github.com/serifpersia/pianolux-esp32/assets/62844718/3bd11a11-d939-49d8-b532-466c98aa4975)
 
