@@ -6,7 +6,7 @@
   don't remove this disclaimer or appropriately credit the original author of the project
   by linking to the project's source on GitHub: github.com/serifpersia/pianolux-esp32/
   Failure to comply with these terms would constitute a violation of the project's
-  MIT license under which PianoLED is released.
+  MIT license under which PianoLux is released.
 
   Copyright © 2023 Serif Rami, also known as serifpersia.
 
@@ -220,7 +220,7 @@ bool apMode = true;  // Start in AP mode
 const int jumperPin = 10;
 
 void startAP(WiFiManager& wifiManager) {
-  if (!wifiManager.startConfigPortal("PianoLED AP")) {
+  if (!wifiManager.startConfigPortal("PianoLux AP")) {
     ESP.restart();
   }
 }
@@ -239,7 +239,7 @@ void startSTA(WiFiManager& wifiManager) {
     ESP.restart();
   });
 
-  if (!wifiManager.autoConnect("PianoLED AP")) {
+  if (!wifiManager.autoConnect("PianoLux AP")) {
     wifiManager.resetSettings();
     ESP.restart();
   }
@@ -269,7 +269,7 @@ void setup() {
 
 
   // Initialize and start mDNS
-  if (MDNS.begin("pianoled")) {
+  if (MDNS.begin("pianolux")) {
     Serial.println("MDNS Responder Started!");
   }
 
