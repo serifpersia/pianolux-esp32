@@ -51,13 +51,12 @@ Manual Installation
 3. Libraries that need manual zip installation:
    - [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer)
    - [AsyncTCP](https://github.com/me-no-dev/AsyncTCP)
-
-4. Select your ESP32 dev board(esp32, esp32s2 or esp32s3). After successful upload, go through WiFi setup. Visit the ESP32's IP address to continue (pianolux.local might also work).
-   - Download the latest bin files for your board from the [release](https://github.com/serifpersia/pianolux-esp32/releases/tag/latest) page and upload via ElegantOTA page.
-   - Configure the LED strip data pin (default is 18).
-
-![WiFi Setup](https://github.com/serifpersia/pianolux-esp32/assets/62844718/2f00777b-a9aa-476f-b022-fb964bd11fd5)
-![image](https://github.com/serifpersia/pianolux-esp32/assets/62844718/10bee33d-2ba6-42b8-a66d-34b45768c436)
+  
+## Setup
+After auto or manual installation. Connect to ESP32's Access Point WiFi. If your WiFi capable device didn't redirect you to WiFiManager's captive portal,
+go to it manually by typing 192.168.4.1
+Once here click on Configure Network button and connect to your local WiFi network. If you you no longer see this AP and your leds show IP address, PianoLux is ready to be used.
+Simply access the web interface by IP or MDNS pianolux.local
 
 ## Read IP Address via LEDS & MDNS
 Read IP from LED strip(default data pin 18)
