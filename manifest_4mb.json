@@ -7,7 +7,7 @@
       "chipFamily": "ESP32-S2",
       "parts": [
         {
-          "path": "firmware/esp32s24mb.bin",
+          "path": "firmware/esp32s2_4mb.bin",
           "offset": 0
         }
       ]
