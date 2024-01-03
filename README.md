@@ -29,9 +29,7 @@ For support, questions, or suggestions, join our Discord Server:
 
 ## Installation
 Use Auto install page to automatically install PianoLux firmware on your board with one click.
-- ESP32, S2 4MB flash size supported
-- ESP32 S3 16MB flash size supported
-- ESP32 4MB flash size supported
+- ESP32,ESP32-S2 & ESP32-S3 with 4MB/8MB/16MB flash memory supported
 - Only Google Chrome and Edge are supported.
 
 [![Auto Install](https://img.shields.io/badge/Auto-%20Install-blue?style=flat-square)](https://serifpersia.github.io/pianolux-esp32/)
