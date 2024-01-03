@@ -7,7 +7,7 @@
       "chipFamily": "ESP32-S2",
       "parts": [
         {
-          "path": "firmwares_8mb/esp32s2_8mb.bin",
+          "path": "firmware/esp32s2_8mb.bin",
           "offset": 0
         }
       ]
@@ -16,7 +16,7 @@
       "chipFamily": "ESP32-S3",
       "parts": [
         {
-          "path": "firmwares_8mb/esp32s3_8mb.bin",
+          "path": "firmware/esp32s3_8mb.bin",
           "offset": 0
         }
       ]
@@ -25,7 +25,7 @@
       "chipFamily": "ESP32",
       "parts": [
         {
-          "path": "firmwares_8mb/esp32_8mb.bin",
+          "path": "firmware/esp32_8mb.bin",
           "offset": 0
         }
       ]
