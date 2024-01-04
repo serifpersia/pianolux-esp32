@@ -20,6 +20,9 @@
 #include <ESPmDNS.h>
 #include <ArduinoOTA.h>
 
+//BLE-MIDI Lib
+#include <BLEMidi.h>
+
 #include <ArduinoJson.h>
 #include <ESPAsyncWebServer.h>
 #include <WebSocketsServer.h>
@@ -342,6 +345,11 @@ void setup() {
     noteOff(note, velocity);
   });
 
+  //Init BLE-MIDI
+  BLEMidiClient.begin("PianoLux BLE-MIDI");  //
+  BLEMidiClient.setNoteOnCallback(BLE_onNoteOn);
+  BLEMidiClient.setNoteOffCallback(BLE_onNoteOff);
+
   // Read the initial GPIO pin configuration from the file
   ledPin = readGPIOConfig();
 
@@ -367,6 +375,9 @@ void loop() {
   sendIP();
 
   usbh_task();
+
+  //Handle BLE-MIDI
+  handleBLE_MIDI();
 
   currentTime = millis();
 
