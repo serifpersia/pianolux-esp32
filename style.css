@@ -1,15 +1,55 @@
 body {
-    margin: 0;
-    font-family: 'Arial', sans-serif;
-    background: #231f20;
     padding: 0;
     margin: 0;
+    background-color: #191919;
 }
 
 .logo {
     display: flex;
-    justify-content: center; /* Center horizontally */
-    align-items: center; /* Center vertically */
+    flex-direction: column; /* Display items vertically */
+    align-items: center;
+    padding-top: 20px;
+    margin-bottom: -15px;
+
+}
+
+/* Style for Piano text */
+h1 .piano-text {
+    color: white;
+    font-weight: lighter;
+}
+
+/* Style for Lux text */
+h1 .lux-text {
+    color: #fff65d;
+    font-family: "Comic Sans MS";
+}
+
+.piano-svg {
+    height: 100px;
+    width: 100px;
+    margin-bottom: -30px;
+}
+
+
+@media (min-width: 768px) {
+    .piano-svg {
+        width: 300px;
+        height: 300px;
+        margin-bottom: -100px;
+    }
+    .logo {
+        margin-bottom: -65px;
+
+    }
+    h1{
+        font-size: 100px;
+    }
+
+    .buttons button{
+        height: 100px;
+        font-size: 50px;
+    }
 }
 
 nav {
