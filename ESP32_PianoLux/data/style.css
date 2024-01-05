@@ -5,23 +5,31 @@ html{
 
 
 
-.logo
-{
+.logo {
     display: flex;
-    padding: 25px;
-    justify-content: left;
-    align-items: center; /* Add this line to center vertically */
+    flex-direction: column; /* Display items vertically */
+    align-items: center;
+    padding-top: 20px;
+    margin-bottom: -65px;
+
 }
 
-h1
-{
-    padding-left: 15px;
-    font-size: 50px;
+/* Style for Piano text */
+h1 .piano-text {
+    color: white;
+    font-weight: lighter;
 }
-.piano-svg
-{
+
+/* Style for Lux text */
+h1 .lux-text {
+    color: #fff65d;
+    font-family: "Comic Sans MS";
+}
+
+.piano-svg {
     height: 100px;
     width: 100px;
+    margin-bottom: -30px;
 }
 
 
@@ -34,6 +42,11 @@ h1
     .piano-svg {
         width: 300px;
         height: 300px;
+        margin-bottom: -100px;
+    }
+    .logo {
+        margin-bottom: -120px;
+
     }
     h1{
         font-size: 100px;
@@ -56,16 +69,15 @@ body, p {
 
 .navbar {
     background-color: #191919;
-    bottom: 0; /* Updated to bottom */
+    bottom: 0;
     width: 100%;
-    position: fixed; /* Updated to fixed */
+    position: fixed;
     display: flex;
     justify-content: center;
-    opacity: 1; /* Updated to 1 to make it initially visible */
+    opacity: 1;
     transition: opacity 0.3s ease-in-out;
     z-index: 20;
 }
-
 
 .controls-icon {
     display: flex;
