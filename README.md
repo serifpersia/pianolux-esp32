@@ -1,11 +1,14 @@
 <div align="center">
-   
-![githubpianolux](https://github.com/serifpersia/pianolux-esp32/assets/62844718/07f6d112-2015-4e35-8551-68effcefb60e)
+
+![pianolux_logo](https://github.com/serifpersia/pianolux-esp32/assets/62844718/41b64e47-2d2b-4114-b2ca-05d3ef084215)
+
+<h1><span class="piano-text" style="color: white;">PIANO</span><span class="lux-text" style="color: yellow;">Lux</span></h1>   
 
 [![Release](https://img.shields.io/github/release/serifpersia/pianolux-esp32.svg?style=flat-square)](https://github.com/serifpersia/pianolux-esp32/releases)
 [![License](https://img.shields.io/github/license/serifpersia/pianolux-esp32?color=blue&style=flat-square)](https://raw.githubusercontent.com/serifpersia/pianolux-esp32/master/LICENSE)
 [![Discord](https://img.shields.io/discord/1077195120950120458.svg?colorB=blue&label=discord&style=flat-square)](https://discord.gg/MAypyD7k86)
 </div>
+
 ## Demo
 <div align="center">
    
