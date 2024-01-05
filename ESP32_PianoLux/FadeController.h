@@ -8,7 +8,7 @@ class FadeController {
 
   public:
     FadeController();
-    void fade(int fadeRate);
+    void fade(uint8_t fadeRate);
 };
 
 #endif

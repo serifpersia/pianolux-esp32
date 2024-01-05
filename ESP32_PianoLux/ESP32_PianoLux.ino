@@ -18,7 +18,6 @@
 #include <WiFiManager.h>
 #include <AsyncElegantOTA.h>
 #include <ESPmDNS.h>
-#include <ArduinoOTA.h>
 
 //BLE-MIDI Lib
 #include <BLEMidi.h>
@@ -33,13 +32,6 @@
 //USB Lib
 #include <usb/usb_host.h>
 #include "usbhhelp.hpp"
-
-//MIDI
-//#define MIDIOUTTEST 1
-#if MIDIOUTTEST
-#include <elapsedMillis.h>
-elapsedMillis MIDIOutTimer;
-#endif
 
 //rtpMIDI
 #define NO_SESSION_NAME
@@ -60,11 +52,12 @@ WebSocketsServer webSocket(81);
 #define MAX_POWER_MILLIAMPS 450  // Define current limit
 #define MAX_EFFECTS 128
 
+
 #include "w2812-rmt.hpp"  // Include the custom ESP32RMT_WS2812B class
 ESP32RMT_WS2812B<GRB>* wsstrip;
 
 //Read LED Data Pin from config file from SPIFFS Storage
-int readGPIOConfig() {
+uint8_t readGPIOConfig() {
   File configFile = SPIFFS.open("/led_gpio_config.txt", "r");
   if (!configFile) {
     Serial.println("Failed to open config file.");
@@ -80,11 +73,11 @@ int readGPIOConfig() {
   Serial.println(gpioValue);
 
   // Convert the string to an integer
-  int mygpio = gpioValue.toInt();
+  uint8_t mygpio = gpioValue.toInt();
   return mygpio;
 }
 
-void updateGPIOConfig(int newGpio) {
+void updateGPIOConfig(uint8_t newGpio) {
   File configFile = SPIFFS.open("/led_gpio_config.txt", "w");
   if (!configFile) {
     Serial.println("Failed to open config file for writing.");
@@ -100,23 +93,23 @@ FadingRunEffect* effects[MAX_EFFECTS];
 FadeController* fadeCtrl = new FadeController();
 
 
-int DEFAULT_BRIGHTNESS = 255;
-int NUM_LEDS = 176;       // How many LEDs you want to control
-int STRIP_DIRECTION = 0;  // 0 - left-to-right
+uint8_t DEFAULT_BRIGHTNESS = 255;
+uint8_t NUM_LEDS = 176;       // How many LEDs you want to control
+uint8_t STRIP_DIRECTION = 0;  // 0 - left-to-right
 
-int generalFadeRate = 255;
-int numEffects = 0;
+uint8_t generalFadeRate = 255;
+uint8_t numEffects = 0;
 
-int lowestNote = 21;    // MIDI note A0
-int highestNote = 108;  // MIDI note C8 (adjust as needed)
-int useFix;
-int pianoScaleRatio;
+uint8_t lowestNote = 21;    // MIDI note A0
+uint8_t highestNote = 108;  // MIDI note C8 (adjust as needed)
+uint8_t useFix;
+uint8_t pianoScaleRatio;
 
-int getHueForPos(int pos) {
+uint8_t  getHueForPos(uint8_t pos) {
   return pos * 255 / NUM_LEDS;
 }
 
-int ledNum(int i) {
+uint8_t ledNum(uint8_t i) {
   return STRIP_DIRECTION == 0 ? i : NUM_LEDS - i;
 }
 
@@ -127,7 +120,7 @@ CRGB guideColor = CRGB::Black;
 boolean bgOn = false;
 boolean keysOn[MAX_NUM_LEDS];
 
-boolean isOnStrip(int pos) {
+boolean isOnStrip(uint8_t pos) {
   return pos >= 0 && pos < NUM_LEDS;
 }
 
@@ -136,23 +129,28 @@ uint8_t brightness = 255;
 uint8_t saturation = 255;
 uint8_t bgBrightness = 128;
 
+#define HUE_CHANGE_SPEED 1 // Adjust this value to control the speed of hue change
+
+uint8_t currentHue[MAX_NUM_LEDS] = {0}; // Array to store current hue value for each LED
+
+
 // Define split positions (percentage)
-int splitPosition = 50;  // Example: 50 means the split is in the middle
-int splitLeftMinPitch = 21;
-int splitRightMaxPitch = 108;
+uint8_t splitPosition = 50;  // Example: 50 means the split is in the middle
+uint8_t splitLeftMinPitch = 21;
+uint8_t splitRightMaxPitch = 108;
 
 // Define split colors
 CHSV splitLeftColor = CHSV(0, 255, 255);     // Red color
 CHSV splitRightColor = CHSV(160, 255, 255);  // Blue color
 
-int bgToggle;
-int fixToggle;
-int reverseToggle;
-int bgUpdateToggle = 1;
-int keySizeVal;
-int colorIndex;
-int ledCurrent = 450;
-int ledPin = 18;
+uint8_t bgToggle;
+uint8_t fixToggle;
+uint8_t reverseToggle;
+uint8_t bgUpdateToggle = 1;
+uint8_t keySizeVal;
+uint8_t colorIndex;
+uint16_t ledCurrent = 450;
+uint8_t ledPin = 18;
 
 unsigned long currentTime = 0;
 unsigned long previousTime = 0;
@@ -161,31 +159,31 @@ unsigned long previousFadeTime = 0;
 unsigned long interval = 20;      // General refresh interval in milliseconds
 unsigned long fadeInterval = 20;  // General fade interval in milliseconds
 
-const int MAX_VELOCITY = 128;
+const uint8_t MAX_VELOCITY = 127;
 
-const int COMMAND_SET_COLOR = 255;
-const int COMMAND_FADE_RATE = 254;
-const int COMMAND_ANIMATION = 253;
-const int COMMAND_BLACKOUT = 252;
-const int COMMAND_SPLASH = 251;
-const int COMMAND_SET_BRIGHTNESS = 250;
-const int COMMAND_KEY_OFF = 249;
-const int COMMAND_SPLASH_MAX_LENGTH = 248;
-const int COMMAND_SET_BG = 247;
-const int COMMAND_VELOCITY = 246;
-const int COMMAND_STRIP_DIRECTION = 245;
-const int COMMAND_SET_GUIDE = 244;
-const int COMMAND_SET_LED_VISUALIZER = 243;
+const uint8_t COMMAND_SET_COLOR = 255;
+const uint8_t COMMAND_FADE_RATE = 254;
+const uint8_t COMMAND_ANIMATION = 253;
+const uint8_t COMMAND_BLACKOUT = 252;
+const uint8_t COMMAND_SPLASH = 251;
+const uint8_t COMMAND_SET_BRIGHTNESS = 250;
+const uint8_t COMMAND_KEY_OFF = 249;
+const uint8_t COMMAND_SPLASH_MAX_LENGTH = 248;
+const uint8_t COMMAND_SET_BG = 247;
+const uint8_t COMMAND_VELOCITY = 246;
+const uint8_t COMMAND_STRIP_DIRECTION = 245;
+const uint8_t COMMAND_SET_GUIDE = 244;
+const uint8_t COMMAND_SET_LED_VISUALIZER = 243;
 
 
-int MODE = COMMAND_SET_COLOR;
+uint8_t MODE = COMMAND_SET_COLOR;
 
-int serverMode;
+uint8_t serverMode;
 
-int animationIndex;
+uint8_t animationIndex;
 
-int splashMaxLength = 8;
-int SPLASH_HEAD_FADE_RATE = 5;
+uint8_t splashMaxLength = 8;
+uint8_t SPLASH_HEAD_FADE_RATE = 5;
 
 CRGBPalette16 currentPalette;
 TBlendType currentBlending;
@@ -197,7 +195,7 @@ float distance(CRGB color1, CRGB color2) {
   return sqrt(pow(color1.r - color2.r, 2) + pow(color1.g - color2.g, 2) + pow(color1.b - color2.b, 2));
 }
 
-int8_t isConnected = 0;
+uint8_t isConnected = 0;
 
 APPLEMIDI_CREATE_DEFAULTSESSION_INSTANCE();
 
@@ -211,7 +209,7 @@ void midiTask(void* pvParameters) {
   }
 }
 void StartupAnimation() {
-  for (int i = 0; i < NUM_LEDS; i++) {
+  for (uint8_t i = 0; i < NUM_LEDS; i++) {
     leds[i] = CHSV(getHueForPos(i), 255, 255);
     FastLED.show();
     leds[i] = CHSV(0, 0, 0);
@@ -220,7 +218,7 @@ void StartupAnimation() {
 }
 
 bool apMode = true;  // Start in AP mode
-const int jumperPin = 10;
+const uint8_t jumperPin = 10;
 
 void startAP(WiFiManager& wifiManager) {
   if (!wifiManager.startConfigPortal("PianoLux AP")) {
@@ -300,25 +298,25 @@ void setup() {
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
 
-  // Initialize OTA for wireless code upload from Arduino IDE
-  ArduinoOTA.onStart([]() {
-    Serial.println("OTA Start");
-  });
-  ArduinoOTA.onEnd([]() {
-    Serial.println("\nOTA End");
-  });
-  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
-  });
-  ArduinoOTA.onError([](ota_error_t error) {
-    Serial.printf("OTA Error[%u]: ", error);
-    if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-    else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-    else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-    else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-    else if (error == OTA_END_ERROR) Serial.println("End Failed");
-  });
-  ArduinoOTA.begin();
+  // Read the initial GPIO pin configuration from the file
+  ledPin = readGPIOConfig();
+
+  wsstrip = new ESP32RMT_WS2812B<GRB>(ledPin);
+  FastLED.addLeds(wsstrip, leds, NUM_LEDS);  // define or create your buffer somewehere
+
+  FastLED.setMaxPowerInVoltsAndMilliamps(5, MAX_POWER_MILLIAMPS);  // set power limit
+  FastLED.setBrightness(DEFAULT_BRIGHTNESS);
+
+  StartupAnimation();
+  if (!apMode) {
+    setIPLeds();
+  }
+
+  //BLE-MIDI
+  BLEMidiClient.begin("PianoLux");
+  BLEMidiClient.enableDebugging();
+  BLEMidiClient.setNoteOnCallback(onNoteOn);
+  BLEMidiClient.setNoteOffCallback(onNoteOff);
 
   // Create the MIDI task
   xTaskCreatePinnedToCore(midiTask, "MIDITask", 2048, NULL, 1, &midiTaskHandle, 0);
@@ -345,58 +343,39 @@ void setup() {
     noteOff(note, velocity);
   });
 
-  //Init BLE-MIDI
-  BLEMidiClient.begin("PianoLux BLE-MIDI");  //
-  BLEMidiClient.setNoteOnCallback(BLE_onNoteOn);
-  BLEMidiClient.setNoteOffCallback(BLE_onNoteOff);
-
-  // Read the initial GPIO pin configuration from the file
-  ledPin = readGPIOConfig();
-
-  wsstrip = new ESP32RMT_WS2812B<GRB>(ledPin);
-  FastLED.addLeds(wsstrip, leds, NUM_LEDS);  // define or create your buffer somewehere
-
-  FastLED.setMaxPowerInVoltsAndMilliamps(5, MAX_POWER_MILLIAMPS);  // set power limit
-  FastLED.setBrightness(DEFAULT_BRIGHTNESS);
-
-  StartupAnimation();
-  if (!apMode) {
-    setIPLeds();
-  }
-
   usbh_setup(show_config_desc_full);  //init usb host for midi devices
 }
 
 void loop() {
-  ArduinoOTA.handle();
-  AsyncElegantOTA.loop();
-
-  webSocket.loop();  // Update function for the webSockets
-  sendIP();
-
-  usbh_task();
 
   //Handle BLE-MIDI
   handleBLE_MIDI();
 
-  currentTime = millis();
+  usbh_task();
 
-#ifdef MIDIOUTTEST
-  if (isMIDIReady && (MIDIOutTimer > 1000)) {
-    ESP_LOGI("", "MIDI send 4 bytes");
-    MIDIOut->num_bytes = 4;
-    memcpy(MIDIOut->data_buffer, "\x09\x90\x3c\x7a", 4);
-    err = usb_host_transfer_submit(MIDIOut);
-    if (err != ESP_OK) {
-      ESP_LOGI("", "usb_host_transfer_submit Out fail: %x", err);
-    }
-    MIDIOutTimer = 0;
+  AsyncElegantOTA.loop();
+  webSocket.loop();  // Update function for the webSockets
+
+  if (WiFi.status() == WL_CONNECTED) {
+    // Call the function when WiFi is connected
+    sendIP();
   }
-#endif
+
+  if (serverMode == 2) {
+    // Update hue for LEDs that are currently on
+    for (uint8_t i = 0; i < NUM_LEDS; i++) {
+      if (keysOn[i]) {
+        currentHue[i] = (currentHue[i] + HUE_CHANGE_SPEED) % 256;
+        controlLeds(i, currentHue[i], saturation, brightness);
+      }
+    }
+  }
+
+  currentTime = millis();
 
   //slowing it down with interval
   if (currentTime - previousTime >= interval) {
-    for (int i = 0; i < numEffects; i++) {
+    for (uint8_t i = 0; i < numEffects; i++) {
       if (effects[i]->finished()) {
         delete effects[i];
         removeEffect(effects[i]);
@@ -406,14 +385,12 @@ void loop() {
     }
     previousTime = currentTime;
   }
-
   if (currentTime - previousFadeTime >= fadeInterval) {
     if (numEffects > 0 || generalFadeRate > 0) {
       fadeCtrl->fade(generalFadeRate);
     }
     previousFadeTime = currentTime;
   }
-
   switch (MODE) {
     case COMMAND_ANIMATION:
       if (animationIndex == 7) {
@@ -433,17 +410,11 @@ void loop() {
         FillLEDsFromPaletteColors(startIndex);
       }
       break;
-    // Add more cases for additional modes or functionality here
-
-    default:
-      // Handle unknown mode or do nothing
-      break;
   }
-
   FastLED.show();
 }
 
-void controlLeds(int ledNo, int hueVal, int saturationVal, int brightnessVal) {
+void controlLeds(uint8_t ledNo, uint8_t hueVal, uint8_t saturationVal, uint8_t brightnessVal) {
   if (ledNo < 0 || ledNo >= NUM_LEDS) {
     Serial.println("Invalid LED index");
     return;
@@ -454,17 +425,17 @@ void controlLeds(int ledNo, int hueVal, int saturationVal, int brightnessVal) {
   FastLED.show();               // Update the LEDs with the new color
 }
 
-int mapMidiNoteToLED(int midiNote, int lowestMidiNote, int highestMidiNote, int endIndex) {
+uint8_t mapMidiNoteToLED(uint8_t midiNote, uint8_t lowestMidiNote, uint8_t highestMidiNote, uint8_t endIndex) {
 
   // Calculate the LED index using linear mapping
-  int startIndex = 0;
+  uint8_t startIndex = 0;
 
   // Define the threshold notes where the shifts will occur
-  int shiftThreshold1 = 57;  // MIDI note for A3
-  int shiftThreshold2 = 93;  // MIDI note for C7
+  uint8_t shiftThreshold1 = 57;  // MIDI note for A3
+  uint8_t shiftThreshold2 = 93;  // MIDI note for C7
 
   // Calculate the LED index using linear mapping
-  int ledIndex = map(midiNote, lowestMidiNote, highestMidiNote, startIndex, endIndex - 1);
+  uint8_t ledIndex = map(midiNote, lowestMidiNote, highestMidiNote, startIndex, endIndex - 1);
 
   // Check if the useFix is equal to 1
   if (useFix == 1) {
@@ -488,8 +459,12 @@ int mapMidiNoteToLED(int midiNote, int lowestMidiNote, int highestMidiNote, int 
   }
 }
 
+unsigned long previousNoteOnTime = 0;
+uint8_t previousRandomHue = 0;
+uint8_t firstNoteHue = 0;
+
 void noteOn(uint8_t note, uint8_t velocity) {
-  int ledIndex = mapMidiNoteToLED(note, lowestNote, highestNote, NUM_LEDS);  // Map MIDI note to LED index
+  uint8_t ledIndex = mapMidiNoteToLED(note, lowestNote, highestNote, NUM_LEDS);  // Map MIDI note to LED index
   keysOn[ledIndex] = true;
 
   if (serverMode == 0) {
@@ -497,11 +472,29 @@ void noteOn(uint8_t note, uint8_t velocity) {
   } else if (serverMode == 1) {
     CHSV hsv(hue, saturation, brightness);
     addEffect(new FadingRunEffect(splashMaxLength, ledIndex, hsv, SPLASH_HEAD_FADE_RATE, velocity));
-  } else if (serverMode == 2) {
-    hue = random(256);
-    controlLeds(ledIndex, hue, saturation, brightness);  // Both use the same index
+  } else   if (serverMode == 2) {
+    // Check time difference between the current note-on and the previous one
+    unsigned long currentTime = millis();
+    unsigned long timeDifference = currentTime - previousNoteOnTime;
+
+    // Assign the same hue as the first note within the chord time window
+    if (timeDifference <= 600) {  // Adjust this chord threshold as needed
+      currentHue[ledIndex] = firstNoteHue;
+    } else if (timeDifference <= 50) {  // Adjust this second threshold as needed
+      // Use a slightly different hue for notes close to the first note within the chord time window
+      currentHue[ledIndex] = firstNoteHue + 10; // Adjust the increment value as needed
+    } else {
+      // Generate a new random hue for this note-on event
+      uint8_t newRandomHue = random(256);
+      currentHue[ledIndex] = newRandomHue;
+
+      // Update the time and hue of the first note within the chord time window
+      previousNoteOnTime = currentTime;
+      firstNoteHue = newRandomHue;
+    }
+    controlLeds(ledIndex, currentHue[ledIndex], saturation, brightness);
   } else if (serverMode == 3) {
-    int hue, saturation, brightness;
+    uint8_t hue, saturation, brightness;
     setColorFromVelocity(velocity, hue, saturation, brightness);
     controlLeds(ledIndex, hue, saturation, brightness);
   }
@@ -522,12 +515,12 @@ void noteOn(uint8_t note, uint8_t velocity) {
 }
 
 void noteOff(uint8_t note, uint8_t velocity) {
-  int ledIndex = mapMidiNoteToLED(note, lowestNote, highestNote, NUM_LEDS);  // Map MIDI note to LED index
+  uint8_t ledIndex = mapMidiNoteToLED(note, lowestNote, highestNote, NUM_LEDS);  // Map MIDI note to LED index
   keysOn[ledIndex] = false;
   Serial.println("Note Off: " + String(note) + " mapped to LED: " + String(ledIndex));  // Debug print
 }
 
-void sliderAction(int sliderNumber, int value) {
+void sliderAction(uint8_t sliderNumber, uint8_t value) {
   if (sliderNumber == 1) {
     hue = value;
   } else if (sliderNumber == 2) {
@@ -549,7 +542,7 @@ void sliderAction(int sliderNumber, int value) {
 }
 
 //Change LED Mode
-void changeLEDModeAction(int serverMode) {
+void changeLEDModeAction(uint8_t serverMode) {
   blackout();
   generalFadeRate = 255;
 
@@ -579,11 +572,11 @@ void blackout() {
   MODE = COMMAND_BLACKOUT;
 }
 
-void setColorFromVelocity(int velocity, int& hue, int& saturation, int& brightness) {
-  static int previousVelocity = 0;
+void setColorFromVelocity(uint8_t velocity, uint8_t& hue, uint8_t& saturation, uint8_t& brightness) {
+  static uint8_t previousVelocity = 0;
 
   // Calculate the smoothed velocity as a weighted average
-  int smoothedVelocity = (velocity + previousVelocity * 3) / 4;
+  uint8_t smoothedVelocity = (velocity + previousVelocity * 3) / 4;
   previousVelocity = smoothedVelocity;
 
   // Map smoothed velocity to hue value (green is 0° and red is 120° in HSV color space)
@@ -612,10 +605,10 @@ void addEffect(FadingRunEffect* effect) {
 
 // Remove an effect
 void removeEffect(FadingRunEffect* effect) {
-  for (int i = 0; i < numEffects; i++) {
+  for (uint8_t i = 0; i < numEffects; i++) {
     if (effects[i] == effect) {
       // Shift the remaining effects down
-      for (int j = i; j < numEffects - 1; j++) {
+      for (uint8_t j = i; j < numEffects - 1; j++) {
         effects[j] = effects[j + 1];
       }
       numEffects--;
@@ -641,11 +634,11 @@ void setIPLeds() {
   CRGB whiteColor = CRGB(255, 255, 255);  // White
 
   // Define LED index and spacing
-  int ledIndex = 0;
-  int spacing = 1;
+  uint8_t ledIndex = 0;
+  uint8_t spacing = 1;
 
   // Loop through each character in the IP address
-  for (int i = 0; i < ipStr.length(); i++) {
+  for (uint8_t i = 0; i < ipStr.length(); i++) {
     char c = ipStr.charAt(i);
 
     if (c == '.') {
@@ -658,10 +651,10 @@ void setIPLeds() {
       ledIndex++;
     } else if (c >= '1' && c <= '9') {
       // Convert character to an integer
-      int number = c - '0';
+      uint8_t number = c - '0';
 
       // Display red LEDs for other numbers
-      for (int j = 0; j < number; j++) {
+      for (uint8_t j = 0; j < number; j++) {
         leds[ledIndex] = redColor;
         ledIndex++;
       }
@@ -679,7 +672,7 @@ void setIPLeds() {
 
 void sendIP() {
   if (Serial.available() > 0) {
-    int command = Serial.read();
+    uint8_t command = Serial.read();
     if (command == 255) {
       // Send the local IP address back to the client
       IPAddress localIP = WiFi.localIP();

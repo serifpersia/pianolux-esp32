@@ -1,24 +1,35 @@
-void handleBLE_MIDI()
+#include <Arduino.h>
+
+// Function to check if the BLE connection is stable
+bool isBLEConnectionStable()
 {
-  if (!BLEMidiClient.isConnected()) {
-    // If we are not already connected, we try te connect to the first BLE Midi device we find
-    int nDevices = BLEMidiClient.scan();
-    if (nDevices > 0) {
-      if (BLEMidiClient.connect(0)) {
-        Serial.println("Connection established");
-        Serial.print("Connected to MIDI device: ");
-      } else {
-        Serial.println("Connection failed");
-        delay(3000);  // We wait 3s before attempting a new connection
-      }
-    }
-  }
+  static unsigned long connectionStartTime = millis();
+  return (BLEMidiClient.isConnected() && (millis() - connectionStartTime > 30000));
 }
 
-void BLE_onNoteOn(uint8_t channel, uint8_t note, uint8_t velocity, uint16_t timestamp) {
+void onNoteOn(uint8_t channel, uint8_t note, uint8_t velocity, uint16_t timestamp) {
   noteOn(note, velocity);
 }
 
-void BLE_onNoteOff(uint8_t channel, uint8_t note, uint8_t velocity, uint16_t timestamp) {
+void onNoteOff(uint8_t channel, uint8_t note, uint8_t velocity, uint16_t timestamp) {
   noteOff(note, velocity);
+}
+
+void handleBLE_MIDI()
+{
+  // Check if BLE connection is lost or unstable
+  if (!BLEMidiClient.isConnected() || !isBLEConnectionStable()) {
+    Serial.println("Trying to connect to BLE MIDI Device...");
+
+    // Try to reconnect to the first BLE Midi device found
+    uint8_t nDevices = BLEMidiClient.scan();
+    if (nDevices > 0) {
+      if (BLEMidiClient.connect(0)) {
+        Serial.println("Connected!");
+      } else {
+        Serial.println("Connection failed");
+        delay(3000);  // Wait 3s before attempting a new connection
+      }
+    }
+  }
 }

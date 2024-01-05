@@ -7,23 +7,23 @@
 class FadingRunEffect {
 
   public:
-    FadingRunEffect(int effectLen, int startPosition, CHSV splashColor, int headFadeRate, int velocity);
+    FadingRunEffect(uint8_t effectLen, uint8_t startPosition, CHSV splashColor, uint8_t headFadeRate, uint8_t velocity);
     void nextStep();
     boolean finished();
-    int getSaturation(int velocity);
-    int getBrightness(int velocity);
-    void setHeadLED(int step);
-    int getSteps();
-    int adjustValue(int value, int lowerThreshold, int maxValue);
-    int calcOffset(int step, int velocity);
+    uint8_t getSaturation(uint8_t velocity);
+    uint8_t getBrightness(uint8_t velocity);
+    void setHeadLED(uint8_t step);
+    uint8_t getSteps();
+    uint8_t adjustValue(uint8_t value, uint8_t lowerThreshold, uint8_t maxValue);
+    uint8_t calcOffset(uint8_t step, uint8_t velocity);
 
   private:
-    int effectLen;
-    int startPosition;
-    int step;
+    uint8_t effectLen;
+    uint8_t startPosition;
+    uint8_t step;
     CHSV splashColor;
-    int headFadeRate;
-    int velocity;
+    uint8_t headFadeRate;
+    uint8_t velocity;
     unsigned long lastUpdate;
 };
 

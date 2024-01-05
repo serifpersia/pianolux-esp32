@@ -1,4 +1,4 @@
-int numConnectedClients = 0;
+uint8_t numConnectedClients = 0;
 bool inUse = false;
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length) {
@@ -39,22 +39,22 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
         Serial.println("Animation ID: ");
         Serial.print(animationIndex);
       } else if (action == "Hue") {
-        int value = doc["value"];
+        uint8_t value = doc["value"];
         sliderAction(1, value);
       } else if (action == "Saturation") {
-        int value = doc["value"];
+        uint8_t value = doc["value"];
         sliderAction(6, value);
       } else if (action == "Brightness") {
-        int value = doc["value"];
+        uint8_t value = doc["value"];
         sliderAction(2, value);
       } else if (action == "Fade") {
-        int value = doc["value"];
+        uint8_t value = doc["value"];
         sliderAction(3, value);
       } else if (action == "Splash") {
-        int value = doc["value"];
+        uint8_t value = doc["value"];
         sliderAction(4, value);
       } else if (action == "Background") {
-        int value = doc["value"];
+        uint8_t value = doc["value"];
         sliderAction(5, value);
       } else if (action == "CurrentAction") {
         ledCurrent = doc["value"];
@@ -95,7 +95,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
             break;
         }
       } else if (action == "LedScaleRatioAction") {
-        int value = doc["value"];
+        uint8_t value = doc["value"];
         pianoScaleRatio = value;
       } else if (action == "FixAction") {
         fixToggle = doc["value"];
@@ -124,10 +124,10 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
       } else if (action == "Split") {
         splitPosition = doc["value"];
       } else if (action == "SetSplitAction") {
-        int splitIndex = doc["index"];
-        int splitHue = doc["hue"];
-        int splitSaturation = doc["saturation"];
-        int splitBrightness = doc["brightness"];
+        uint8_t splitIndex = doc["index"];
+        uint8_t splitHue = doc["hue"];
+        uint8_t splitSaturation = doc["saturation"];
+        uint8_t splitBrightness = doc["brightness"];
         if (splitIndex == 0) {
           // Handle left split
           splitLeftColor = CHSV(splitHue, splitSaturation, splitBrightness);

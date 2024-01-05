@@ -1,11 +1,11 @@
 bool HueChange; // Boolean to control hue change
 
-int snakePosition = random(MAX_NUM_LEDS);
-int snakeLength = 4;
-int foodPosition = -1;
+uint8_t snakePosition = random(MAX_NUM_LEDS);
+uint8_t snakeLength = 4;
+uint8_t foodPosition = -1;
 bool startSnake = true;
 
-void Animatons(int selectedAnimation) {
+void Animatons(uint8_t selectedAnimation) {
   //Animation(temp name_1)
   if (selectedAnimation == 0) {
     currentPalette = RainbowColors_p;
@@ -35,7 +35,7 @@ void Animatons(int selectedAnimation) {
 void FillLEDsFromPaletteColors(uint8_t colorIndex) {
   uint8_t brightness = 255;
 
-  for (int i = 0; i < NUM_LEDS; ++i) {
+  for (uint8_t i = 0; i < NUM_LEDS; ++i) {
     leds[i] = ColorFromPalette(currentPalette, colorIndex, brightness, currentBlending);
     colorIndex += 3;
   }
@@ -56,7 +56,7 @@ void sineWave() {
 }
 
 void sparkleDots() {
-  int sparkleHue;
+  uint8_t sparkleHue;
 
   if (HueChange) {
     EVERY_N_MILLISECONDS(20) {
@@ -68,7 +68,7 @@ void sparkleDots() {
 
   // random colored speckles that blink in and fade smoothly
   fadeToBlackBy(leds, NUM_LEDS, 10);
-  int pos = random16(NUM_LEDS);
+  uint8_t pos = random16(NUM_LEDS);
 
   leds[pos] += CHSV(sparkleHue, 255, 255);
 
@@ -87,8 +87,8 @@ void Snake() {
 
 void updateLEDs() {
   fill_solid(leds, NUM_LEDS, CRGB::Black);
-  for (int i = 0; i < snakeLength; i++) {
-    int brightness = map(i, 0, snakeLength - 1, 255, 0);
+  for (uint8_t i = 0; i < snakeLength; i++) {
+    uint8_t brightness = map(i, 0, snakeLength - 1, 255, 0);
     CRGB color = CRGB::Red;
     color.nscale8(calculateBrightness(i, snakeLength));
     leds[(snakePosition - i + NUM_LEDS) % NUM_LEDS] = color;
@@ -96,7 +96,7 @@ void updateLEDs() {
   leds[foodPosition] = CRGB::Orange;
 }
 
-uint8_t calculateBrightness(int index, int snakeLength) {
+uint8_t calculateBrightness(uint8_t index, uint8_t snakeLength) {
   // Calculate the brightness gradient based on the position of the LED in the snake
   // Here, we use a simple linear gradient from full brightness to off (0) over the length of the snake
   return map(index, 0, snakeLength - 1, 255, 0);
@@ -121,8 +121,8 @@ void spawnFood() {
   }
 }
 
-bool isFoodOnSnake(int position) {
-  for (int i = 0; i < snakeLength; i++) {
+bool isFoodOnSnake(uint8_t position) {
+  for (uint8_t i = 0; i < snakeLength; i++) {
     if ((snakePosition - i + NUM_LEDS) % NUM_LEDS == position) {
       return true;
     }
