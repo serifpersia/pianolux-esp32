@@ -31,10 +31,10 @@ For support, questions, or suggestions, join our Discord Server:
 - *88/76 Keys need 176 LEDs of 144 LEDs/m density, so more than 1m of strip is needed. Get a 2m strip and cut the excess (after the 176th LED).
 
 ## Modes Of Operation
-- Default: First time install Portal AP, after WiFi Network configure ESP32 board starts in STA_MODE(uses local network configured for connection)
-- AP: Connecting pin 12 to GND pin sets ESP32 board to be used in Access Point mode, WiFi devices connect directly to this non-password protected WiFi AP
-PianoLux web interface can be accessed using 192.168.1.1 IP Address after connecting to the AP WiFi\
--Portal AP: Connecting pin 10 to GND pin sets ESP32 to be back into setup WiFiManager Captive Portal, generally useful for deleting setup network and setting new network.
+- Default: First time install Portal AP, after WiFi Network configure ESP32 board starts in STA_MODE(uses local network configured for connection).
+- AP: Connecting pin 12 to GND pin sets ESP32 board to be used in Access Point mode, WiFi devices connect directly to this non-password protected WiFi AP. 
+PianoLux web interface can be accessed using 192.168.1.1 IP Address after connecting to the AP WiFi.
+- Portal AP: Connecting pin 10 to GND pin sets ESP32 to be back into setup WiFiManager Captive Portal, generally useful for deleting setup network and setting new network.
 Make sure you disconnect jumper wire to use default mode after finishing re configuring your network setup using this Portal AP mode!
 
 ## Installation
