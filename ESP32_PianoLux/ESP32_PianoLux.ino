@@ -217,18 +217,35 @@ void StartupAnimation() {
   FastLED.show();
 }
 
-bool apMode = true;  // Start in AP mode
-const uint8_t jumperPin = 10;
+bool startPortal = true;  // Start WiFi Manager Captive Portal
 
-void startAP(WiFiManager& wifiManager) {
-  if (!wifiManager.startConfigPortal("PianoLux AP")) {
+const uint8_t wmJumperPin = 10;  // Jumper pin for WiFi Manager Captive Portal
+const uint8_t apJumperPin = 12;      // Jumper pin for AP mode
+
+IPAddress apIP(192, 168, 1, 1);
+IPAddress netMsk(255, 255, 255, 0);
+
+void startWmPortal(WiFiManager& wifiManager) {
+  if (!wifiManager.startConfigPortal("PianoLux SAP")) {
     ESP.restart();
   }
 }
 
+
+void startAP() {
+  WiFi.mode(WIFI_AP);
+
+  // Set custom IP for AP mode
+  WiFi.softAPConfig(apIP, apIP, netMsk);
+
+  // Start ESP32 in AP mode
+  WiFi.softAP("PianoLux AP");
+}
+
+
 void startSTA(WiFiManager& wifiManager) {
   WiFi.mode(WIFI_STA);
-  apMode = false;
+  startPortal = false;
 
   // Start WiFi Manager for configuring STA mode
 
@@ -250,17 +267,20 @@ void setup() {
 
   Serial.begin(115200);
 
-  pinMode(jumperPin, INPUT_PULLUP);
+  pinMode(wmJumperPin, INPUT_PULLUP);
+  pinMode(apJumperPin, INPUT_PULLUP);
 
   // Create WiFiManager object inside setup
   WiFiManager wifiManager;
 
-  // Check the state of the jumper wire
-  if (digitalRead(jumperPin) == LOW) {
-    // Jumper wire is connected, use WiFi Manager in AP mode
-    startAP(wifiManager);
+  if (digitalRead(wmJumperPin) == LOW) {
+    // wmJumperPin is pulled to GND, use WiFi Manager Captive Portal
+    startWmPortal(wifiManager);
+  } else if (digitalRead(apJumperPin) == LOW) {
+    // apJumperPin is pulled to GND, use AP mode
+    startAP();
   } else {
-    // Jumper wire is not connected, use WiFi Manager in STA mode
+    // None of the pins are grounded, STA mode
     startSTA(wifiManager);
   }
 
@@ -308,7 +328,7 @@ void setup() {
   FastLED.setBrightness(DEFAULT_BRIGHTNESS);
 
   StartupAnimation();
-  if (!apMode) {
+  if (!startPortal) {
     setIPLeds();
   }
 
