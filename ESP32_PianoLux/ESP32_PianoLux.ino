@@ -226,7 +226,7 @@ IPAddress apIP(192, 168, 1, 1);
 IPAddress netMsk(255, 255, 255, 0);
 
 void startWmPortal(WiFiManager& wifiManager) {
-  if (!wifiManager.startConfigPortal("PianoLux SAP")) {
+  if (!wifiManager.startConfigPortal("PianoLux Portal")) {
     ESP.restart();
   }
 }
@@ -257,7 +257,7 @@ void startSTA(WiFiManager& wifiManager) {
     ESP.restart();
   });
 
-  if (!wifiManager.autoConnect("PianoLux AP")) {
+  if (!wifiManager.autoConnect("PianoLux Portal")) {
     wifiManager.resetSettings();
     ESP.restart();
   }
