@@ -145,9 +145,15 @@ main {
     scroll-margin-block-start: 100px;
 }
 
+.toggle-control
+{
+    display: flex;
+    width: 100%;
+    padding-top: 20px;
+}
 
-.control {
-    padding-bottom: 30px;
+.toggle-control > .checkbox-wrapper-8 .tgl + .tgl-btn {
+    width: 10em;
 }
 
 label {
