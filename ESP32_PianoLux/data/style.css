@@ -3,8 +3,6 @@ html{
     scroll-behavior: smooth;
 }
 
-
-
 .logo {
     display: flex;
     flex-direction: column; /* Display items vertically */
@@ -156,13 +154,16 @@ main {
     width: 10em;
 }
 
+.control {
+    padding-bottom: 30px;
+}
+
 label {
     font-weight: bold;
     color: #fff;
     display: flex;
     padding-top: 15px;
     padding-bottom: 15px;
-
 }
 
 input[type="range"] {
