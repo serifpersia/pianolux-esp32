@@ -106,7 +106,7 @@ This is more of a plug & play setup. Depending on whether your board has pre-sol
 To power esp32 and indirectly led strip you either have to use spare usb port labled COM in s3 case or use any available usb port on your esp32 board if your usb midi connetion is done with direct pins.
 As for more power leds should be powered from different 5v source with good amount of Amps(3A or 3000mA is optimal I wouldn't push it more) just keep in mind ground should be shared between two 5v sources, ideally
 you can power both led strip and esp32 from direct 5v pin but I'm not sure if ESP32 boards can handle those currents. I suggest keeping power setup simple from usb port you have free on your board. 
-USB MIDI Devices do not provide 5V so ESP32 can't be powered from USB MIDI device alone, in some cases you even have to provide 5v to USB MIDI devices that aren't selfpowered(MIDI conttrollers).
+USB MIDI Devices do not provide 5V so ESP32 can't be powered from USB MIDI device alone, in some cases you even have to provide 5v to USB MIDI devices that aren't selfpowered(MIDI controllers).
 
 ## Features
 ### LED Modes
