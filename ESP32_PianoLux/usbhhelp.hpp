@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+#if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S2 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
 const TickType_t HOST_EVENT_TIMEOUT = 1;
 const TickType_t CLIENT_EVENT_TIMEOUT = 1;
 
@@ -100,3 +101,4 @@ void usbh_task(void)
   if ((err != ESP_OK) && (err != ESP_ERR_TIMEOUT)) {
   }
 }
+#endif

@@ -12,30 +12,70 @@
 
 */
 
-//PianoLux
+// PianoLux
 
-//WIFI Libs
+//Chose correct board under board manager
+//If USB MIDI doesn't work replace s2 or s3 esp32 sdk with modified sdk
+//usb max transfer descriptor value changed from default 256 to 4096 byte
+//https://drive.google.com/drive/folders/1WlxvhdeabNDGIs6hM0zICGuerMvHKQSR?usp=sharing
+
+
+//Change board type that matches your ESP32
+//Change Partition Scheme under Tools to Minimal SPIFFS with OTA
+//before compile & upload
+//Change USB mode under Tools for S3 to USB-OTG
+//Default esp32 parameters can be found in config.cfg in data folder
+//Change the values & save before uploading sketch data
+//Upload sketch then sketch data use sketch data upload plugin
+//works only with 1.8.x versions of Arduino IDE
+//https://github.com/me-no-dev/arduino-esp32fs-plugin
+
+
+// Define the BOARD_TYPE variable
+#define BOARD_TYPE_ESP32    1
+#define BOARD_TYPE_ESP32S2  2
+#define BOARD_TYPE_ESP32S3  3
+
+// Define the actual board type (change this based on your board)
+#define CURRENT_BOARD_TYPE  3
+
+//DEV defines
+#define ARDUINO_OTA_YES 0
+#define ARDUINO_OTA_NO 1
+
+#define CURRENT_ARDUINO_OTA 1
+
+// WIFI Libs
 #include <WiFiManager.h>
 #include <AsyncElegantOTA.h>
 #include <ESPmDNS.h>
 
-//BLE-MIDI Lib
+#if CURRENT_ARDUINO_OTA == ARDUINO_OTA_YES
+#include <ArduinoOTA.h>
+#endif
+
+// BLE-MIDI Lib
+#if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
 #include <BLEMidi.h>
+#endif
 
 #include <ArduinoJson.h>
 #include <ESPAsyncWebServer.h>
 #include <WebSocketsServer.h>
 
-//ESP Storage Lib
+// ESP Storage Lib
 #include <SPIFFS.h>
 
-//USB Lib
+// USB Lib
+#if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S2 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
 #include <usb/usb_host.h>
 #include "usbhhelp.hpp"
+#endif
 
-//rtpMIDI
+// rtpMIDI
 #define NO_SESSION_NAME
 #include <AppleMIDI.h>
+
 
 //FastLED Lib
 #include <FastLED.h>
@@ -49,45 +89,13 @@ WebSocketsServer webSocket(81);
 // Constants for LED strip
 #define UPDATES_PER_SECOND 60
 #define MAX_NUM_LEDS 176         // How many LEDs do you want to control
-#define MAX_POWER_MILLIAMPS 450  // Define current limit
 #define MAX_EFFECTS 128
 
-
+//RMT LED STRIP INIT
 #include "w2812-rmt.hpp"  // Include the custom ESP32RMT_WS2812B class
-ESP32RMT_WS2812B<GRB>* wsstrip;
-
-//Read LED Data Pin from config file from SPIFFS Storage
-uint8_t readGPIOConfig() {
-  File configFile = SPIFFS.open("/led_gpio_config.txt", "r");
-  if (!configFile) {
-    Serial.println("Failed to open config file.");
-    return -1;  // Return an error value or a default GPIO pin.
-  }
-
-  // Read the GPIO pin number from the file
-  String gpioValue = configFile.readStringUntil('\n');
-  configFile.close();
-
-  // Print the contents of the file to the serial monitor
-  Serial.print("Read GPIO config: ");
-  Serial.println(gpioValue);
-
-  // Convert the string to an integer
-  uint8_t mygpio = gpioValue.toInt();
-  return mygpio;
-}
-
-void updateGPIOConfig(uint8_t newGpio) {
-  File configFile = SPIFFS.open("/led_gpio_config.txt", "w");
-  if (!configFile) {
-    Serial.println("Failed to open config file for writing.");
-    return;
-  }
-
-  // Write the new GPIO pin number to the file
-  configFile.println(newGpio);
-  configFile.close();
-}
+ESP32RMT_WS2812B<GRB>* wsstripGRB;
+ESP32RMT_WS2812B<RGB>* wsstripRGB;
+ESP32RMT_WS2812B<BRG>* wsstripBRG;
 
 FadingRunEffect* effects[MAX_EFFECTS];
 FadeController* fadeCtrl = new FadeController();
@@ -149,8 +157,10 @@ uint8_t reverseToggle;
 uint8_t bgUpdateToggle = 1;
 uint8_t keySizeVal;
 uint8_t colorIndex;
-uint16_t ledCurrent = 450;
-uint8_t ledPin = 18;
+
+uint8_t LED_PIN;
+uint8_t COLOR_ORDER;
+uint16_t LED_CURRENT = 450;
 
 unsigned long currentTime = 0;
 unsigned long previousTime = 0;
@@ -193,6 +203,82 @@ extern const TProgmemPalette16 myRedWhiteBluePalette_p PROGMEM;
 
 float distance(CRGB color1, CRGB color2) {
   return sqrt(pow(color1.r - color2.r, 2) + pow(color1.g - color2.g, 2) + pow(color1.b - color2.b, 2));
+}
+
+void loadConfig() {
+  File configFile = SPIFFS.open("/config.cfg", "r");
+  if (configFile) {
+    size_t size = configFile.size();
+    std::unique_ptr<char[]> buf(new char[size]);
+    configFile.readBytes(buf.get(), size);
+
+    DynamicJsonDocument doc(1024);
+    deserializeJson(doc, buf.get());
+
+    // Update configuration variables
+    LED_PIN = doc["LED_PIN"] | LED_PIN;
+    COLOR_ORDER = doc["COLOR_ORDER"] | COLOR_ORDER;
+    LED_CURRENT = doc["LED_CURRENT"] | LED_CURRENT;
+    // Add more variables as needed
+
+    configFile.close();
+  } else {
+    Serial.println("Failed to open config file for reading");
+  }
+}
+
+void updateConfigFile(const char* configKey, uint16_t newValue) {
+  DynamicJsonDocument doc(1024);
+
+  // Read the existing config file
+  File configFile = SPIFFS.open("/config.cfg", "r");
+  if (configFile) {
+    size_t size = configFile.size();
+    std::unique_ptr<char[]> buf(new char[size]);
+    configFile.readBytes(buf.get(), size);
+    configFile.close();
+
+    // Deserialize the JSON document
+    deserializeJson(doc, buf.get());
+
+    // Update the specified config key with the new value
+    doc[configKey] = newValue;
+
+    // Save the updated config file
+    File updatedConfigFile = SPIFFS.open("/config.cfg", "w");
+    if (updatedConfigFile) {
+      serializeJson(doc, updatedConfigFile);
+      updatedConfigFile.close();
+      Serial.println("Config file updated successfully");
+    } else {
+      Serial.println("Failed to open config file for writing");
+    }
+  } else {
+    Serial.println("Failed to open config file for reading");
+  }
+}
+
+void initializeLEDStrip(uint8_t colorMode) {
+  switch (colorMode) {
+    case 0:
+      wsstripGRB = new ESP32RMT_WS2812B<GRB>(LED_PIN);
+      FastLED.addLeds(wsstripGRB, leds, NUM_LEDS);
+      break;
+    case 1:
+      wsstripRGB = new ESP32RMT_WS2812B<RGB>(LED_PIN);
+      FastLED.addLeds(wsstripRGB, leds, NUM_LEDS);
+      break;
+    case 2:
+      wsstripBRG = new ESP32RMT_WS2812B<BRG>(LED_PIN);
+      FastLED.addLeds(wsstripBRG, leds, NUM_LEDS);
+      break;
+    // Add more cases if needed
+    default:
+      // Handle default case if colorMode is not 0, 1, or 2
+      break;
+  }
+  FastLED.setMaxPowerInVoltsAndMilliamps(5, LED_CURRENT);  // set power limit
+  FastLED.setBrightness(DEFAULT_BRIGHTNESS);
 }
 
 uint8_t isConnected = 0;
@@ -308,6 +394,48 @@ void setup() {
     Serial.println("Failed to mount SPIFFS file system");
   }
 
+#if CURRENT_ARDUINO_OTA == ARDUINO_OTA_YES
+
+  ArduinoOTA.setHostname("PianoLux-ESP32-OTA");
+
+  ArduinoOTA
+  .onStart([]() {
+    String type;
+    if (ArduinoOTA.getCommand() == U_FLASH)
+      type = "sketch";
+    else // U_SPIFFS
+      type = "filesystem";
+
+    // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+    Serial.println("Start updating " + type);
+  })
+  .onEnd([]() {
+    Serial.println("\nEnd");
+  })
+  .onProgress([](unsigned int progress, unsigned int total) {
+    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+  })
+  .onError([](ota_error_t error) {
+    Serial.printf("Error[%u]: ", error);
+    if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+    else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+    else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+    else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+    else if (error == OTA_END_ERROR) Serial.println("End Failed");
+  });
+
+  ArduinoOTA.begin();
+#endif
+
+  // Initialize SPIFFS
+  if (!SPIFFS.begin(true)) {
+    Serial.println("An error occurred while mounting SPIFFS");
+    return;
+  }
+
+  // Load configuration from file
+  loadConfig();
+
   AsyncElegantOTA.begin(&server);
 
   server.begin();
@@ -315,28 +443,24 @@ void setup() {
   // Add service to mDNS for HTTP
   MDNS.addService("http", "tcp", 80);
 
+  // Initialize LED strip based on the loaded configuration
+  initializeLEDStrip(COLOR_ORDER);
+
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
-
-  // Read the initial GPIO pin configuration from the file
-  ledPin = readGPIOConfig();
-
-  wsstrip = new ESP32RMT_WS2812B<GRB>(ledPin);
-  FastLED.addLeds(wsstrip, leds, NUM_LEDS);  // define or create your buffer somewehere
-
-  FastLED.setMaxPowerInVoltsAndMilliamps(5, MAX_POWER_MILLIAMPS);  // set power limit
-  FastLED.setBrightness(DEFAULT_BRIGHTNESS);
 
   StartupAnimation();
   if (!startPortal) {
     setIPLeds();
   }
 
-  //BLE-MIDI
+  // BLE-MIDI setup
+#if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
   BLEMidiClient.begin("PianoLux");
   BLEMidiClient.enableDebugging();
   BLEMidiClient.setNoteOnCallback(onNoteOn);
   BLEMidiClient.setNoteOffCallback(onNoteOff);
+#endif
 
   // Create the MIDI task
   xTaskCreatePinnedToCore(midiTask, "MIDITask", 2048, NULL, 1, &midiTaskHandle, 0);
@@ -363,15 +487,27 @@ void setup() {
     noteOff(note, velocity);
   });
 
-  usbh_setup(show_config_desc_full);  //init usb host for midi devices
+  // USB setup
+#if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S2 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
+  usbh_setup(show_config_desc_full);  // Init USB host for MIDI devices
+#endif
 }
 
 void loop() {
 
-  //Handle BLE-MIDI
+  // Handle BLE-MIDI
+#if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
   handleBLE_MIDI();
+#endif
 
+  // Handle USB
+#if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S2 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
   usbh_task();
+#endif
+
+#if CURRENT_ARDUINO_OTA == ARDUINO_OTA_YES
+  ArduinoOTA.handle();
+#endif
 
   AsyncElegantOTA.loop();
   webSocket.loop();  // Update function for the webSockets

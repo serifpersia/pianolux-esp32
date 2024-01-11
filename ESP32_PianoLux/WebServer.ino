@@ -57,14 +57,21 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
         uint8_t value = doc["value"];
         sliderAction(5, value);
       } else if (action == "CurrentAction") {
-        ledCurrent = doc["value"];
-        FastLED.setMaxPowerInVoltsAndMilliamps(5, ledCurrent);
+        LED_CURRENT = doc["value"];
+        FastLED.setMaxPowerInVoltsAndMilliamps(5, LED_CURRENT);
+        updateConfigFile("LED_CURRENT", LED_CURRENT);
       } else if (action == "LedDataPinAction") {
-        ledPin = doc["value"];
-        updateGPIOConfig(ledPin);
+        LED_PIN = doc["value"];
+        updateConfigFile("LED_PIN", LED_PIN);
         delay(3000);    // Debounce the button
         ESP.restart();  // Restart the ESP32
-      } else if (action == "PianoSizeAction") {
+      }
+      else if (action == "ChangeColorOrderAction") {
+        COLOR_ORDER = doc["colorOrder"];
+        updateConfigFile("COLOR_ORDER", COLOR_ORDER);
+        delay(1000);    // Debounce the button
+        ESP.restart();  // Restart the ESP32
+      }  else if (action == "PianoSizeAction") {
         keySizeVal = doc["value"];
 
         switch (keySizeVal) {
@@ -160,8 +167,9 @@ void sendValues() {
   doc["BG_TOGGLE"] = bgToggle;
   doc["REVERSE_TOGGLE"] = reverseToggle;
   doc["BGUPDATE_TOGGLE"] = bgUpdateToggle;
-  doc["CURRENT"] = ledCurrent;
-  doc["LEDPIN"] = ledPin;
+  doc["LED_CURRENT"] = LED_CURRENT;
+  doc["LED_PIN"] = LED_PIN;
+  doc["LED_COLOR_ORDER"] = COLOR_ORDER;
 
   // Serialize the JSON document to a string
   String jsonStr;

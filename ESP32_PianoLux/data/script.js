@@ -126,6 +126,7 @@ function updateUI(data) {
 
     updateDropdownList('selected-item-modes', data.MODES);
     updateDropdownList('selected-item-animations', data.ANIMATIONS);
+    updateDropdownList('selected-item-colorOrder', data.LED_COLOR_ORDER);
 
     updateControlValue('HUE', data.HUE, track, thumb, handleMove, 255);
     updateControlValue('SATURATION', data.SATURATION, saturationTrack, saturationThumb, handleSaturationMove, 255);
@@ -140,8 +141,8 @@ function updateUI(data) {
     updateToggles('cb3-8', data.REVERSE_TOGGLE);
     updateToggles('cb4-8', data.BGUPDATE_TOGGLE);
 
-    updateInputs('maxCurrent',data.CURRENT);
-    updateInputs('ledDataPin',data.LEDPIN);
+    updateInputs('maxCurrent',data.LED_CURRENT);
+    updateInputs('ledDataPin',data.LED_PIN);
 
 }
 
@@ -166,6 +167,17 @@ selectedItemAnimations.addEventListener('change', () => {
 
     // Send a WebSocket message for changing the animation
     sendData('ChangeAnimationAction', { animation: selectedAnimationId });
+});
+
+// DropdownList script for LED Strip Color Order
+const selectedItemColorOrder = document.querySelector('#selected-item-colorOrder');
+
+selectedItemColorOrder.addEventListener('change', () => {
+    const selectedColorOrderId = selectedItemColorOrder.value;
+    console.log('Selected Color Order ID:', selectedColorOrderId); // Debugging statement
+
+    // Send a WebSocket message for changing the animation
+    sendData('ChangeColorOrderAction', { colorOrder: selectedColorOrderId });
 });
 
 // Function to handle the end of the interaction

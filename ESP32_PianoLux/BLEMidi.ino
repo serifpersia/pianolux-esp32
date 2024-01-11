@@ -1,5 +1,5 @@
 #include <Arduino.h>
-
+#if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
 // Function to check if the BLE connection is stable
 bool isBLEConnectionStable()
 {
@@ -33,3 +33,4 @@ void handleBLE_MIDI()
     }
   }
 }
+#endif

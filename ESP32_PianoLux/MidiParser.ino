@@ -1,3 +1,4 @@
+#if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S2 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
 static void midi_transfer_cb(usb_transfer_t *transfer) {
   ESP_LOGI("", "midi_transfer_cb context: %d", transfer->context);
   if (Device_Handle == transfer->device_handle) {
@@ -70,3 +71,4 @@ static void midi_transfer_cb(usb_transfer_t *transfer) {
     }
   }
 }
+#endif

@@ -1,3 +1,4 @@
+#if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S2 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
 bool isMIDI = false;
 bool isMIDIReady = false;
 
@@ -90,3 +91,4 @@ void show_config_desc_full(const usb_config_desc_t *config_desc) {
     }
   }
 }
+#endif
