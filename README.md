@@ -29,6 +29,8 @@ For support, questions, or suggestions, join our Discord Server:
 - WS2812 5V 144/m
 - WS2812 5V 72/m (1:1 ratio)
 - *88/76 Keys need 176 LEDs of 144 LEDs/m density, so more than 1m of strip is needed. Get a 2m strip and cut the excess (after the 176th LED).
+- Any FastLED supported led strip with correct density(144/72) will work but you will have to modify the source code to do that, my releases support
+only WS2812 GRB 5V strips but I plan to let users decide type of strip in the future but as of right now its only WS2812!
 
 ## Modes Of Operation
 - Default: First time install Portal AP, after WiFi Network configure ESP32 board starts in STA_MODE(uses local network configured for connection).
