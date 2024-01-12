@@ -169,16 +169,66 @@ selectedItemAnimations.addEventListener('change', () => {
     sendData('ChangeAnimationAction', { animation: selectedAnimationId });
 });
 
-// DropdownList script for LED Strip Color Order
-const selectedItemColorOrder = document.querySelector('#selected-item-colorOrder');
+// DropdownList script for Color Preset
+const selectedItemPresetColors = document.querySelector('#selected-item-presetColors');
 
-selectedItemColorOrder.addEventListener('change', () => {
-    const selectedColorOrderId = selectedItemColorOrder.value;
-    console.log('Selected Color Order ID:', selectedColorOrderId); // Debugging statement
+selectedItemPresetColors.addEventListener('change', () => {
+    const selectedPresetColorId = selectedItemPresetColors.value;
+    console.log('Selected Preset Color ID:', selectedPresetColorId); // Debugging statement
 
-    // Send a WebSocket message for changing the animation
-    sendData('ChangeColorOrderAction', { colorOrder: selectedColorOrderId });
+    // Map preset IDs to HSB values
+    const presetColorsHSB = [
+        [0, 255, 255],   // Red
+        [90, 255, 255], // Green
+        [160, 255, 255], // Blue
+        [0, 0, 255],     // White
+        [35, 255, 255],  // Yellow
+        [10, 255, 255],  // Orange
+        [205, 255, 255],  // Purple
+        [240, 190, 255],    // Pink
+        [150, 150, 255], // Teal
+        [80, 255, 255],  // Lime
+        [130, 170, 255], // Cyan
+        [245, 255, 255], // Magenta
+        [252, 190, 255],   // Peach
+        [210, 200, 255],  // Lavender
+        [130, 150, 255],   // Turquoise
+        [22, 255, 255]   // Gold
+    ];
+
+    // Get HSB values based on the selected preset ID
+    const [hue, saturation, brightness] = presetColorsHSB[selectedPresetColorId];
+
+    // Log the HSB values before sending them through WebSocket messages
+    console.log('Sending HSB values:', { hue, saturation, brightness });
+
+    // Send WebSocket message for changing HSB values
+    sendData('ColorPresetAction', { colorPresetHue: hue, colorPresetSaturation: saturation});
+
+    // Update UI elements based on the selected preset
+    updateUIElements(hue, saturation);
+    handleEnd(selectedItemPresetColors);
+    updateBrightnessTrackGradient(hue);
+    updateSaturationTrackGradient(hue);
 });
+
+// Function to update UI elements based on the selected preset
+function updateUIElements(hue, saturation) {
+    // Mapping hue from the range of 0-255 to 0-360
+    const mappedHue = (hue / 255) * 360;
+
+    // Setting thumb position based on mapped hue
+    const newHuePosition = (mappedHue / 360) * (track.offsetWidth - thumb.offsetWidth);
+    thumb.style.left = newHuePosition + 'px';
+
+    // Setting saturation thumb position based on saturation value
+    const newSaturationPosition = (saturation / 255) * (saturationTrack.offsetWidth - saturationThumb.offsetWidth);
+    saturationThumb.style.left = newSaturationPosition + 'px';
+
+    // Setting background color using mapped hue
+    thumb.style.backgroundColor = `hsl(${mappedHue}, 100%, 50%)`;
+}
+
 
 // Function to handle the end of the interaction
 function handleEnd(inputElement) {
@@ -1301,7 +1351,7 @@ ledDataPinInput.addEventListener("input", function() {
             ledDataPinInput.value = enteredValue;
         }
 
-        alert("ESP will now restart. Reload the webpage after few seconds!");
+        alert("ESP32 will now restart. Refresh the webpage after 3 seconds!");
         // Send the action and entered value to the socket
         sendData('LedDataPinAction', { value: enteredValue });
         console.log('Sending:', 'LedDataPinAction', enteredValue);

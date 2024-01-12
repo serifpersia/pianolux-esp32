@@ -71,9 +71,13 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
         updateConfigFile("COLOR_ORDER", COLOR_ORDER);
         delay(1000);    // Debounce the button
         ESP.restart();  // Restart the ESP32
-      }  else if (action == "PianoSizeAction") {
+      }
+      else if (action == "ColorPresetAction") {
+        hue = doc["colorPresetHue"];
+        saturation = doc["colorPresetSaturation"];
+      }
+      else if (action == "PianoSizeAction") {
         keySizeVal = doc["value"];
-
         switch (keySizeVal) {
           case 0:
             NUM_LEDS = 176;

@@ -73,119 +73,141 @@
                         <option value="9">Snake</option>
                     </select>
                 </div>
-                <div class="controls">
-                    <label for="SplitColorUpdate">Update Split Colors</label>
-                    <div class="colorControls">
-                        <button id="SETLEFTSPLIT">Set Left Split</button>
-                        <button id="SETRIGHTSPLIT">Set Right Split</button>
+                <section class="card" id="customize">
+                    <div class="control">
+                        <label for="selected-item-presetColors">Color Presets:</label>
+                        <select id="selected-item-presetColors">
+                            <option value="0">Red</option>
+                            <option value="1">Green</option>
+                            <option value="2">Blue</option>
+                            <option value="3">White</option>
+                            <option value="4">Yellow</option>
+                            <option value="5">Orange</option>
+                            <option value="6">Purple</option>
+                            <option value="7">Pink</option>
+                            <option value="8">Teal</option>
+                            <option value="9">Lime</option>
+                            <option value="10">Cyan</option>
+                            <option value="11">Magenta</option>
+                            <option value="12">Peach</option>
+                            <option value="13">Lavender</option>
+                            <option value="14">Turquoise</option>
+                            <option value="15">Gold</option>
+                        </select>
                     </div>
-                </div>
-                <div class="toggle-control">
-                    <div class="checkbox-wrapper-8">
-                        <input type="checkbox" id="cb4-8" class="tgl tgl-skewed">
-                        <label for="cb4-8" data-tg-on="ON" data-tg-off="Update BG" class="tgl-btn"></label>
-                    </div>
-                </div>
-                <div class="control">
-                    <label for="HUE">Hue</label>
-                    <div class="hue-slider">
-                        <div class="track"></div>
-                        <div class="thumb"></div>
-                        <input type="hidden" id="HUE" name="hue" min="0" max="255" value="0">
-                    </div>
-                </div>
-                <div class="control">
-                    <label for="SATURATION">Saturation</label>
-                    <div class="saturation-slider">
-                        <div class="track"></div>
-                        <div class="thumb"></div>
-                        <input type="hidden" id="SATURATION" name="saturation" min="0" max="255" value="255">
-                    </div>
-                </div>
-                <div class="control">
-                    <label for="BRIGHTNESS">Brightness</label>
-                    <div class="brightness-slider">
-                        <div class="track"></div>
-                        <div class="thumb"></div>
-                        <input type="hidden" id="BRIGHTNESS" name="brighntess" min="0" max="255" value="255">
-                    </div>
-                </div> 
-                <div class="control">
-                    <label for="FADE">Fade</label>
-                    <div class="fade-slider">
-                        <div class="track"></div>
-                        <div class="thumb"></div>
-                        <input type="hidden" id="FADE" name="fade" min="0" max="255" value="255">
-                    </div>
-                </div>
-                <div class="control">
-                    <label for="SPLASH">Splash Length</label>
-                    <div class="splash-slider">
-                        <div class="track"></div>
-                        <div class="thumb"></div>
-                        <input type="hidden" id="SPLASH" name="splash" min="0" max="16" value="8">
-                    </div>
-                </div>
-                <div class="control">
-                    <label for="BG">Background Light</label>
-                    <div class="bg-slider">
-                        <div class="track"></div>
-                        <div class="thumb"></div>
-                        <input type="hidden" id="BG" name="bg" min="0" max="255" value="128">
-                    </div>
-                </div>
-            </section>
-            <section class="card" id="custom-settings">
-                <div class="control">
-                    <label for="maxCurrent">Max Current in mA:</label>
-                    <input type="number" id="maxCurrent" name="maxCurrent" min="450" max="10000" value="450">
-                </div>
-                <div class="control">
-                    <label for="ledDataPin">LED Strip Data Pin:</label>
-                    <input type="number" id="ledDataPin" name="ledDataPin" min="0" max="100" value="18">
-                </div>
-                <div class="control">
-                    <label for="selected-item-colorOrder">LED Strip Color Order:</label>
-                    <select id="selected-item-colorOrder">
-                        <option value="0">GRB</option>
-                        <option value="1">RGB</option>
-                        <option value="2">BRG</option>
-                    </select>
-                </div>
-                <div class="buttons">
-                    <button id="PianoSize">88 Keys</button>
-                    <button id="LEDScaleRatio">1:2</button>
-                </div>
-                <div class="control">
-                    <label for="SPLIT">Split Control</label>
-                    <div class="split-slider">
-                        <div class="track"></div>
-                        <div class="thumb"></div>
-                        <input type="hidden" id="SPLIT" name="split" value="50" step="1" min="0" max="100"/>
-                    </div>
-                </div>
-                <div id="pianoKeysVisuals"></div>
-                <div class="control">
-                    <div class="toggles">
-                        <div class="checkbox-wrapper-8">
-                            <input type="checkbox" id="cb1-8" class="tgl tgl-skewed">
-                            <label for="cb1-8" data-tg-on="ON" data-tg-off="FX LED" class="tgl-btn"></label>
-                        </div>
-                        <div class="checkbox-wrapper-8">
-                            <input type="checkbox" id="cb2-8" class="tgl tgl-skewed">
-                            <label for="cb2-8" data-tg-on="ON" data-tg-off="BG LED" class="tgl-btn"></label>
-                        </div>
-                        <div class="checkbox-wrapper-8">
-                            <input type="checkbox" id="cb3-8" class="tgl tgl-skewed">
-                            <label for="cb3-8" data-tg-on="ON" data-tg-off="RV LED" class="tgl-btn"></label>
+                    <div class="controls">
+                        <label for="SplitColorUpdate">Update Split Colors</label>
+                        <div class="colorControls">
+                            <button id="SETLEFTSPLIT">Set Left Split</button>
+                            <button id="SETRIGHTSPLIT">Set Right Split</button>
                         </div>
                     </div>
-                </div>
-            </section>
-        </main>
-        <footer>
-            <p>&copy; 2023 serifpersia</p>
-        </footer>
-        <script src="script.js"></script>
-    </body>
-</html>
+                    <div class="toggle-control">
+                        <div class="checkbox-wrapper-8">
+                            <input type="checkbox" id="cb4-8" class="tgl tgl-skewed">
+                            <label for="cb4-8" data-tg-on="Update BG ON" data-tg-off="Update BG" class="tgl-btn"></label>
+                        </div>
+                    </div>
+                    <div class="control">
+                        <label for="HUE">Hue</label>
+                        <div class="hue-slider">
+                            <div class="track"></div>
+                            <div class="thumb"></div>
+                            <input type="hidden" id="HUE" name="hue" min="0" max="255" value="0">
+                        </div>
+                    </div>
+                    <div class="control">
+                        <label for="SATURATION">Saturation</label>
+                        <div class="saturation-slider">
+                            <div class="track"></div>
+                            <div class="thumb"></div>
+                            <input type="hidden" id="SATURATION" name="saturation" min="0" max="255" value="255">
+                        </div>
+                    </div>
+                    <div class="control">
+                        <label for="BRIGHTNESS">Brightness</label>
+                        <div class="brightness-slider">
+                            <div class="track"></div>
+                            <div class="thumb"></div>
+                            <input type="hidden" id="BRIGHTNESS" name="brighntess" min="0" max="255" value="255">
+                        </div>
+                    </div> 
+                    <div class="control">
+                        <label for="FADE">Fade</label>
+                        <div class="fade-slider">
+                            <div class="track"></div>
+                            <div class="thumb"></div>
+                            <input type="hidden" id="FADE" name="fade" min="0" max="255" value="255">
+                        </div>
+                    </div>
+                    <div class="control">
+                        <label for="SPLASH">Splash Length</label>
+                        <div class="splash-slider">
+                            <div class="track"></div>
+                            <div class="thumb"></div>
+                            <input type="hidden" id="SPLASH" name="splash" min="0" max="16" value="8">
+                        </div>
+                    </div>
+                    <div class="control">
+                        <label for="BG">Background Light</label>
+                        <div class="bg-slider">
+                            <div class="track"></div>
+                            <div class="thumb"></div>
+                            <input type="hidden" id="BG" name="bg" min="0" max="255" value="128">
+                        </div>
+                    </div>
+                </section>
+                <section class="card" id="custom-settings">
+                    <div class="control">
+                        <label for="maxCurrent">Max Current in mA:</label>
+                        <input type="number" id="maxCurrent" name="maxCurrent" min="450" max="10000" value="450">
+                    </div>
+                    <div class="control">
+                        <label for="ledDataPin">LED Strip Data Pin:</label>
+                        <input type="number" id="ledDataPin" name="ledDataPin" min="0" max="100" value="18">
+                    </div>
+                    <div class="control">
+                        <label for="selected-item-colorOrder">LED Strip Color Order:</label>
+                        <select id="selected-item-colorOrder">
+                            <option value="0">GRB</option>
+                            <option value="1">RGB</option>
+                            <option value="2">BRG</option>
+                        </select>
+                    </div>
+                    <div class="buttons">
+                        <button id="PianoSize">88 Keys</button>
+                        <button id="LEDScaleRatio">1:2</button>
+                    </div>
+                    <div class="control">
+                        <label for="SPLIT">Split Control</label>
+                        <div class="split-slider">
+                            <div class="track"></div>
+                            <div class="thumb"></div>
+                            <input type="hidden" id="SPLIT" name="split" value="50" step="1" min="0" max="100"/>
+                        </div>
+                    </div>
+                    <div id="pianoKeysVisuals"></div>
+                    <div class="control">
+                        <div class="toggles">
+                            <div class="checkbox-wrapper-8">
+                                <input type="checkbox" id="cb1-8" class="tgl tgl-skewed">
+                                <label for="cb1-8" data-tg-on="ON" data-tg-off="FX LED" class="tgl-btn"></label>
+                            </div>
+                            <div class="checkbox-wrapper-8">
+                                <input type="checkbox" id="cb2-8" class="tgl tgl-skewed">
+                                <label for="cb2-8" data-tg-on="ON" data-tg-off="BG LED" class="tgl-btn"></label>
+                            </div>
+                            <div class="checkbox-wrapper-8">
+                                <input type="checkbox" id="cb3-8" class="tgl tgl-skewed">
+                                <label for="cb3-8" data-tg-on="ON" data-tg-off="RV LED" class="tgl-btn"></label>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                </main>
+            <footer>
+                <p>&copy; 2023 serifpersia</p>
+            </footer>
+            <script src="script.js"></script>
+            </body>
+        </html>
