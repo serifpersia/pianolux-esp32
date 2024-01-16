@@ -97,7 +97,12 @@ This project supports MIDI over a local network, enabling the use of MIDI device
 ![MIDI Setup](https://github.com/serifpersia/pianolux-esp32/assets/62844718/607b969f-22e1-47f6-ab7a-4f76f3074b41)
 
 ### Hardware
-To get started with PianoLux on the ESP platform, you have two options:
+To get started with PianoLux on the ESP platform, you have few options:
+TLDR: 
+- Any WiFi capable ESP32 board for connecting usb midi devices with mobile phone's usb port with usb otg adapter in AP or Default mode
+- Any Bluetooth capable ESP32 board for connecting with bluetooth capable pianos(most portable - but very experimental)
+- Any USB OTG capable ESP32 single or dual port (S2 & S3 - S3 is prefered) Clone S3 dev boards are recommended but official devkit dual port boards will also work depending on your midi device
+
 
 #### Option 1: ESP32-S2 Single or Dual USB Port Dev Board
 - Create a DIY USB OTG/Female USB cable.
@@ -114,10 +119,14 @@ To get started with PianoLux on the ESP platform, you have two options:
 
 ![Option 1 Setup](https://github.com/serifpersia/pianolux-esp32/assets/62844718/cea8ebeb-09c5-46e9-a028-67c5447ad0f3)
 #### Option 2: ESP32-S3 Dual USB Port Dev Board
-This is more of a plug & play setup. Depending on whether your board has pre-soldered pin headers and USB-OTG pads soldered, you have to bridge the USB-OTG pads.
+This is more of a plug & play setup. Depending on whether your board has pre-soldered pin headers and USB-OTG pads soldered, you might have to bridge the USB-OTG pads.
 
 ![Option 2 Setup](https://github.com/serifpersia/pianolux-esp32/assets/62844718/a089640f-113e-47b1-8c88-8e38e4728295)
 
+#### Option 3: ESP32-S3 Dual USB Port Dev Board
+Use Bluetooth or rtpMIDI for MIDI source. You can use PianoLux in AP mode with midi app and any wifi capable esp32 board. Follow pictures above on how to connect your usb piano to your android phone.(Users on iOS might need to search for similar midi app).
+rtpMIDI can be used in Default mode as well but AP mode gives you direct connection between mobile device and esp32 skipping router of your local network but it might work as well in default mode as well. 
+Bluetooth connection is an option as well, start pairing on your bluetooth capable piano and esp32 will connect to it automatically. 
 ## Power
 To power esp32 and indirectly led strip you either have to use spare usb port labled COM in s3 case or use any available usb port on your esp32 board if your usb midi connetion is done with direct pins.
 As for more power leds should be powered from different 5v source with good amount of Amps(3A or 3000mA is optimal I wouldn't push it more) just keep in mind ground should be shared between two 5v sources, ideally
