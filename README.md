@@ -39,7 +39,7 @@ PianoLux web interface can be accessed using 192.168.1.1 IP Address after connec
 phone usb port via usb otg adapter if you decided to go with non usb midi supported boards(esp32). On Android you can use MIDI Connector - RTP, USB, BLE App to route usb midi input as output rtpMIDI as midi input source for esp32
 *Make sure your android phone doesn't have battery saving mode enabled - this disables the MIDI app to be able to run in the background!
 
-<img src="https://github.com/serifpersia/pianolux-esp32/assets/62844718/4e9fa5a5-c09a-4808-a2b9-5f6a52dc5d0e" height="500">
+<img src="https://github.com/serifpersia/pianolux-esp32/assets/62844718/4e9fa5a5-c09a-4808-a2b9-5f6a52dc5d0e" height="250">
 
 <div align="center">
 
