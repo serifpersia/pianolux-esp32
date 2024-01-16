@@ -37,8 +37,11 @@ only WS281x, default color order is GRB but you can change to different one to m
 - AP: Connecting pin 12 to GND pin sets ESP32 board to be used in Access Point mode, WiFi devices connect directly to this non-password protected WiFi AP. 
 PianoLux web interface can be accessed using 192.168.1.1 IP Address after connecting to the AP WiFi. Useful if you want to have direct wifi connection to esp32 as well as connecting usb midi device to android
 phone usb port via usb otg adapter if you decided to go with non usb midi supported boards(esp32). On Android you can use MIDI Connector - RTP, USB, BLE App to route usb midi input as output rtpMIDI as midi input source for esp32
- ![image](https://github.com/serifpersia/pianolux-esp32/assets/62844718/2fa1c7fd-1e3f-4aae-abac-5bfdeff42df5)
 
+<div align="center">
+
+ ![image](https://github.com/serifpersia/pianolux-esp32/assets/62844718/2fa1c7fd-1e3f-4aae-abac-5bfdeff42df5)
+</div>
 
 - Portal AP: Connecting pin 10 to GND pin sets ESP32 to be back into setup WiFiManager Captive Portal, generally useful for deleting setup network and setting new network.
 Make sure you disconnect jumper wire to use default mode after finishing re configuring your network setup using this Portal AP mode!
