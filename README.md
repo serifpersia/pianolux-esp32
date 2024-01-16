@@ -23,7 +23,7 @@ For support, questions, or suggestions, join our Discord Server:
 - ESP32-S2 dev board
 - ESP32-S3 dev board
 - *Any WiFi capable ESP32 board can be used with MIDI over network
-- Bluetooth MIDI currently supported on ESPS3 & ESP32
+- Bluetooth MIDI currently supported on ESP32-S3 & ESP32
 
 ## Supported LED Strips
 - WS2812 5V 144/m
