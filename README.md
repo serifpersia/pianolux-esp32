@@ -41,12 +41,14 @@ phone usb port via usb otg adapter if you decided to go with non usb midi suppor
 
 <img src="https://github.com/serifpersia/pianolux-esp32/assets/62844718/4e9fa5a5-c09a-4808-a2b9-5f6a52dc5d0e">
 
+
 <div align="center">
 
 <img src="https://github.com/serifpersia/pianolux-esp32/assets/62844718/65f7321c-9c0a-4a3f-9370-e6db886d17d9" width="250" height="500">
 <img src="https://github.com/serifpersia/pianolux-esp32/assets/62844718/cebbcff7-d8e3-4621-95f4-b1699955ad33" width="250" height="500">
 <img src="https://github.com/serifpersia/pianolux-esp32/assets/62844718/3cff762c-fb89-444a-bc70-bbda4edd98bf" width="250" height="500">
 </div>
+
 
 - Portal AP: Connecting pin 10 to GND pin sets ESP32 to be back into setup WiFiManager Captive Portal, generally useful for deleting setup network and setting new network.
 Make sure you disconnect jumper wire to use default mode after finishing re configuring your network setup using this Portal AP mode!
