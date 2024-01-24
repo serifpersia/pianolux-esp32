@@ -305,8 +305,8 @@ void StartupAnimation() {
 
 bool startPortal = true;  // Start WiFi Manager Captive Portal
 
-const uint8_t wmJumperPin = 10;  // Jumper pin for WiFi Manager Captive Portal
-const uint8_t apJumperPin = 12;      // Jumper pin for AP mode
+const uint8_t wmJumperPin = 15;  // Jumper pin for WiFi Manager Captive Portal
+const uint8_t apJumperPin = 16;      // Jumper pin for AP mode
 
 IPAddress apIP(192, 168, 1, 1);
 IPAddress netMsk(255, 255, 255, 0);
