@@ -308,29 +308,19 @@ bool startPortal = true;  // Start WiFi Manager Captive Portal
 const uint8_t wmJumperPin = 15;  // Jumper pin for WiFi Manager Captive Portal
 const uint8_t apJumperPin = 16;      // Jumper pin for AP mode
 
-IPAddress apIP(192, 168, 1, 1);
-IPAddress netMsk(255, 255, 255, 0);
-
 void startWmPortal(WiFiManager& wifiManager) {
   if (!wifiManager.startConfigPortal("PianoLux Portal")) {
     ESP.restart();
   }
 }
 
-
 void startAP() {
-  WiFi.mode(WIFI_AP);
-
-  // Set custom IP for AP mode
-  WiFi.softAPConfig(apIP, apIP, netMsk);
-
   // Start ESP32 in AP mode
   WiFi.softAP("PianoLux AP");
 }
 
-
 void startSTA(WiFiManager& wifiManager) {
-  WiFi.mode(WIFI_STA);
+  
   startPortal = false;
 
   // Start WiFi Manager for configuring STA mode
