@@ -54,11 +54,6 @@
 #include <ArduinoOTA.h>
 #endif
 
-// BLE-MIDI Lib
-#if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
-#include <BLEMidi.h>
-#endif
-
 #include <ArduinoJson.h>
 #include <ESPAsyncWebServer.h>
 #include <WebSocketsServer.h>
@@ -320,7 +315,7 @@ void startAP() {
 }
 
 void startSTA(WiFiManager& wifiManager) {
-  
+
   startPortal = false;
 
   // Start WiFi Manager for configuring STA mode
@@ -444,14 +439,6 @@ void setup() {
     setIPLeds();
   }
 
-  // BLE-MIDI setup
-#if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
-  BLEMidiClient.begin("PianoLux");
-  BLEMidiClient.enableDebugging();
-  BLEMidiClient.setNoteOnCallback(onNoteOn);
-  BLEMidiClient.setNoteOffCallback(onNoteOff);
-#endif
-
   // Create the MIDI task
   xTaskCreatePinnedToCore(midiTask, "MIDITask", 2048, NULL, 1, &midiTaskHandle, 0);
   MIDI.begin();
@@ -484,12 +471,7 @@ void setup() {
 }
 
 void loop() {
-
-  // Handle BLE-MIDI
-#if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
-  handleBLE_MIDI();
-#endif
-
+  
   // Handle USB
 #if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S2 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
   usbh_task();
