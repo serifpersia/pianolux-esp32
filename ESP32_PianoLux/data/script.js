@@ -140,6 +140,7 @@ function updateUI(data) {
     updateToggles('cb2-8', data.BG_TOGGLE);
     updateToggles('cb3-8', data.REVERSE_TOGGLE);
     updateToggles('cb4-8', data.BGUPDATE_TOGGLE);
+    updateToggles('cb5-8', data.BLE_ON_STATE_TOGGLE);
 
     updateInputs('maxCurrent',data.LED_CURRENT);
     updateInputs('ledDataPin',data.LED_PIN);
@@ -168,6 +169,23 @@ selectedItemAnimations.addEventListener('change', () => {
     // Send a WebSocket message for changing the animation
     sendData('ChangeAnimationAction', { animation: selectedAnimationId });
 });
+
+// DropdownList script for LED Strip Color Order
+const selectedItemColorOrder = document.querySelector('#selected-item-colorOrder');
+
+selectedItemColorOrder.addEventListener('change', () => {
+    const selectedColorOrderId = selectedItemColorOrder.value;
+    console.log('Selected Color Order ID:', selectedColorOrderId); // Debugging statement
+
+    // Send a WebSocket message for changing the animation
+    sendData('ChangeColorOrderAction', { colorOrder: selectedColorOrderId });
+
+    // Refresh the page after 2 seconds
+    setTimeout(() => {
+        location.reload();
+    }, 3500);
+});
+
 
 // DropdownList script for Color Preset
 const selectedItemPresetColors = document.querySelector('#selected-item-presetColors');
@@ -1099,7 +1117,6 @@ function addButtonHSBListener(controlId, actionName, index) {
 addButtonHSBListener('SETLEFTSPLIT', 'SetSplitAction', 0);  // Left split
 addButtonHSBListener('SETRIGHTSPLIT', 'SetSplitAction', 1);  // Right split
 
-
 function createButtonListener(button, values, index, actionName) {
     button.addEventListener("click", function () {
         index = (index + 1) % values.length;
@@ -1115,6 +1132,16 @@ function createButtonListener(button, values, index, actionName) {
         console.log('Sending:', actionName + index); // Debugging
     });
 }
+
+function simpleActionButton(button, actionName) {
+    button.addEventListener("click", function () {
+        sendData(actionName);
+        console.log('Sending:', actionName); // Debugging
+    });
+}
+
+const scanBluetoothButton = document.getElementById("ScanBluetooth");
+simpleActionButton(scanBluetoothButton,'ScanBluetoothAction')
 
 // Function to update highlight rectangles based on the button state
 function updateHighlightRectangles(sizeIndex) {
@@ -1175,11 +1202,13 @@ const cb2Checkbox1 = document.getElementById('cb1-8');
 const cb2Checkbox2 = document.getElementById('cb2-8');
 const cb2Checkbox3 = document.getElementById('cb3-8');
 const cb2Checkbox4 = document.getElementById('cb4-8');
+const cb2Checkbox5 = document.getElementById('cb5-8');
 
 createCheckboxListener(cb2Checkbox1, 'FixAction');
 createCheckboxListener(cb2Checkbox2, 'BGAction');
 createCheckboxListener(cb2Checkbox3, 'DirectionAction');
-createCheckboxListener(cb2Checkbox4, 'BGUpdateAction');
+createCheckboxListener(cb2Checkbox4, 'BGUpdateAction'); 
+createCheckboxListener(cb2Checkbox5, 'StartStopBluetoothAction');
 
 
 const fileLink = document.getElementById('fileLink');
@@ -1351,12 +1380,20 @@ ledDataPinInput.addEventListener("input", function() {
             ledDataPinInput.value = enteredValue;
         }
 
-        alert("ESP32 will now restart. Refresh the webpage after 3 seconds!");
+        // Display alert after updating the input value
+        alert("ESP32 will now restart.");
+
         // Send the action and entered value to the socket
         sendData('LedDataPinAction', { value: enteredValue });
         console.log('Sending:', 'LedDataPinAction', enteredValue);
+
+        // Refresh the page after 2 seconds
+        setTimeout(function() {
+            location.reload();
+        }, 3500);
     }, typingTimeout);
 });
+
 
 // Call the init function when the window loads
 window.onload = function (event) {

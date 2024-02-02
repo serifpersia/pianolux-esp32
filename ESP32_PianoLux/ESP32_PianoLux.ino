@@ -50,6 +50,11 @@
 #include <AsyncElegantOTA.h>
 #include <ESPmDNS.h>
 
+// BLE-MIDI Lib
+#if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
+#include <BLEMidi.h>
+#endif
+
 #if CURRENT_ARDUINO_OTA == ARDUINO_OTA_YES
 #include <ArduinoOTA.h>
 #endif
@@ -126,6 +131,10 @@ boolean keysOn[MAX_NUM_LEDS];
 boolean isOnStrip(uint8_t pos) {
   return pos >= 0 && pos < NUM_LEDS;
 }
+
+#if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
+boolean bleMIDIStarted = false;
+#endif
 
 uint8_t hue = 0;
 uint8_t brightness = 255;
@@ -471,7 +480,7 @@ void setup() {
 }
 
 void loop() {
-  
+
   // Handle USB
 #if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S2 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
   usbh_task();
