@@ -61,19 +61,9 @@ Use Auto install page to automatically install PianoLux firmware on your board w
 [![Auto Install](https://img.shields.io/badge/Auto-%20Install-blue?style=flat-square)](https://serifpersia.github.io/pianolux-esp32/)
 
 Manual Installation
-
-1. Install Arduino IDE and necessary libraries.
-   - Import the ESP32 Arduino core, follow [these instructions](https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html).
-   - Clone the project, extract the zip, for quick(less libraries to import) install use barebones sketch.
-
-2. Libraries found in Arduino IDE Library Manager:
-   - FastLED
-   - WiFiManager
-   - AsyncElegantOTA
-
-3. Libraries that need manual zip installation:
-   - [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer)
-   - [AsyncTCP](https://github.com/me-no-dev/AsyncTCP)
+- Install Arduino IDE 1.8.x and esp32 arduino core sdk(join discord server to get gdrive links for custom modified sdk's for esp32 s2/s3 if usb midi device doesn't work out of the box)
+- Install needed libraries and plugins and use barebones or main ino code. You can use install_libs.bat for installing all libraries and sketch data upload plugin only on windows for now.
+- *before uploading select port, select board type in board manager in Arduino IDE, if main ino code is used change partition scheme to minimal SPIFFS 1.9MB APP 190kb spiffs if board is esp32 for s3 s3 leave it at default 4MB
   
 ## Setup
 After auto or manual installation. Connect to ESP32's Access Point WiFi. If your WiFi capable device didn't redirect you to WiFiManager's captive portal,
