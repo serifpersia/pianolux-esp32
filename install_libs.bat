@@ -58,7 +58,7 @@ powershell -command "Expand-Archive -Path ArduinoJson.zip -DestinationPath %ARDU
 
 rem Install WebSockets library
 echo Installing WebSockets library...
-powershell -command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/fburel/ESP32-Websocket/archive/refs/heads/master.zip', 'WebSockets.zip')"
+powershell -command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/Links2004/arduinoWebSockets/archive/refs/heads/master.zip', 'WebSockets.zip')"
 powershell -command "Expand-Archive -Path WebSockets.zip -DestinationPath %ARDUINO_LIB_DIR% -Force"
 
 rem Install NimBLE-Arduino library
