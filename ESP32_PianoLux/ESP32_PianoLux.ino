@@ -31,6 +31,8 @@
 //https://github.com/me-no-dev/arduino-esp32fs-plugin
 
 
+String firmwareVersion = "PianoLux 1.6";
+
 // Define the BOARD_TYPE variable
 #define BOARD_TYPE_ESP32    1
 #define BOARD_TYPE_ESP32S2  2
@@ -493,11 +495,6 @@ void loop() {
   AsyncElegantOTA.loop();
   webSocket.loop();  // Update function for the webSockets
 
-  if (WiFi.status() == WL_CONNECTED) {
-    // Call the function when WiFi is connected
-    sendIP();
-  }
-
   if (serverMode == 2) {
     // Update hue for LEDs that are currently on
     for (uint8_t i = 0; i < NUM_LEDS; i++) {
@@ -805,15 +802,4 @@ void setIPLeds() {
   // Show the entire IP address
   generalFadeRate = 0;
   FastLED.show();
-}
-
-void sendIP() {
-  if (Serial.available() > 0) {
-    uint8_t command = Serial.read();
-    if (command == 255) {
-      // Send the local IP address back to the client
-      IPAddress localIP = WiFi.localIP();
-      Serial.println(localIP);
-    }
-  }
 }

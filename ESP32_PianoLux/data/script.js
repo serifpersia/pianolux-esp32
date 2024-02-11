@@ -93,7 +93,6 @@ function handleScroll() {
 // Add an event listener for the scroll event
 window.addEventListener('scroll', handleScroll);
 
-
 function updateUI(data) {
     function updateControlValue(controlId, dataValue, maxTrack, thumb, handleMoveFunction, factor) {
         if (dataValue !== undefined) {
@@ -1393,6 +1392,65 @@ ledDataPinInput.addEventListener("input", function() {
         }, 3500);
     }, typingTimeout);
 });
+
+function showESP32Info() {
+    // Send request to read ESP32 info
+    sendData('ReadESP32Info');
+
+    // Create the popup container
+    const popup = document.createElement('div');
+    popup.id = 'popup';
+    popup.style.position = 'fixed';
+    popup.style.top = '50%';
+    popup.style.width = '75%';
+    popup.style.left = '50%';
+    popup.style.transform = 'translate(-50%, -50%)';
+    popup.style.backgroundColor = '#fff';
+    popup.style.padding = '15px';
+    popup.style.borderRadius = '20px'; // Rounded corners
+    popup.style.zIndex = '9999';
+    document.body.appendChild(popup);
+
+    // Create close button
+    const closeButton = document.createElement('button');
+    closeButton.innerText = 'Close';
+    closeButton.style.backgroundColor = '#006AFF';
+    closeButton.style.color = '#fff';
+    closeButton.style.borderRadius = '15px'; // Button border radius
+    closeButton.style.fontSize = '30px';
+    closeButton.onclick = function() {
+        document.body.removeChild(popup);
+    };
+    // Create device info element
+    const deviceInfoElement = document.createElement('p');
+    deviceInfoElement.id = 'deviceInfo';
+    deviceInfoElement.style.color = '#000'; // Black text color
+    deviceInfoElement.style.fontSize = '18px';
+
+
+    // Event listener to handle updates from the server
+    Socket.addEventListener('message', function (event) {
+        var data = JSON.parse(event.data);
+        console.log('Received esp32 data from the server:', data);
+
+        // Populate device info element with detailed data
+        deviceInfoElement.innerHTML = `
+<p>Firmware Version: ${data.FirmwareVersion}</p>
+<p>Chip Model: ${data.ChipModel}</p>
+<p>SSID: ${data.SSID}</p>
+<p>IP Address: ${data.IPAddress}</p>
+<p>MAC Address: ${data.MACAddress}</p>
+<p>Temperature: ${data.Temperature}</p>
+<p>Uptime: ${data.Uptime}</p>
+`;
+        // Append elements to the popup
+        popup.appendChild(deviceInfoElement);
+        popup.appendChild(closeButton);
+
+        // Show the popup
+        popup.style.display = 'block';
+    });
+}
 
 
 // Call the init function when the window loads

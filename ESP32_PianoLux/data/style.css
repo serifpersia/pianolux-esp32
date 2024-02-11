@@ -64,7 +64,6 @@ body, p {
     margin: 0;
     padding: 0;
 }
-
 .navbar {
     background-color: #191919;
     bottom: 0;
@@ -110,6 +109,16 @@ body, p {
     background-color: #006AFF;
 }
 
+.info-icon {
+    display: flex;
+    padding: 15px;
+    height: 55px;
+}
+
+.info-icon:active {
+    /* Change the background color when the icon is hovered or clicked */
+    background-color: #006AFF;
+}
 
 #prg{
     opacity: 0%;
@@ -138,8 +147,6 @@ main {
 
 /* Add card styling to sections */
 .card {
-    //  background-color: #323232;
-    //  border-radius: 35px;
     scroll-margin-block-start: 100px;
 }
 
@@ -149,7 +156,7 @@ main {
 }
 
 .toggle-control > .checkbox-wrapper-8 .tgl + .tgl-btn {
-    width: 10em;
+    width: 100%;
 }
 
 .control {
@@ -484,58 +491,23 @@ input[type="number"]::-webkit-outer-spin-button {
     display: flex;
 }
 button {
-    --border-radius: 15px;
-    --border-width: 4px;
-    appearance: none;
-    position: relative;
-    border: 0;
-    background-color: #191919;
+    margin-right: 5px;
+    margin-top: 15px;
+    width: 100%;
+    height: 50px;;
+    z-index: 2;
+    background-color: #46494b;
+    color: #fff;
     font-size: 18px;
     font-weight: bold;
-    color: #fff;
-    z-index: 2;
-    animation-play-state: running;
-    width: 100%;
-    height: 55px;
-    margin-right: 5px;
-    margin-top: 10px;
-    outline: none; /* Add this line to hide the focus outline */
-}
-
-button::after {
-    --m-i: linear-gradient(#000, #000);
-    --m-o: content-box, padding-box;
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    padding: var(--border-width);
-    border-radius: var(--border-radius);
-    background-image: conic-gradient(
-        white,white
-    );
-    -webkit-mask-image: var(--m-i), var(--m-i);
-    mask-image: var(--m-i), var(--m-i);
-    -webkit-mask-origin: var(--m-o);
-    mask-origin: var(--m-o);
-    -webkit-mask-clip: var(--m-o);
-    mask-composite: exclude;
-    -webkit-mask-composite: destination-out;
-    filter: hue-rotate(0);
+    border-radius: 15px;
+    border: none;
+    cursor = 'pointer';
 }
 
 button:active {
     color: red;
 }
-
-button,
-button::after {
-    box-sizing: border-box;
-}
-
-
 
 .checkbox-wrapper-8 .tgl {
     display: none;
@@ -548,7 +520,7 @@ button::after {
     overflow: hidden;
     transform: skew(0);
     background: #46494b;
-    border-radius: 25px;
+    border-radius: 15px;
     margin-right: 10px;
 }
 .checkbox-wrapper-8 .tgl-skewed + .tgl-btn:after,
@@ -618,5 +590,9 @@ footer {
     color: #cccccc;
     text-align: center;
     font-size: 25px;
-    padding: 15px;
+}
+.footer-link {
+    color: #cccccc;
+    text-decoration: none; /* Remove underline if you want */
+    padding-bottom: 40px;
 }

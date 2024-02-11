@@ -157,9 +157,13 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
         scan_BLE_MIDI();
 #endif
       }
+      else if (action == "ReadESP32Info") {
+        sendESP32Info();
+      }
       else if (action == "RequestValues") {
         sendValues();
       }
+
       break;
   }
 }
@@ -196,5 +200,43 @@ void sendValues() {
 
   // Send the JSON data to all connected clients
   Serial.println("Sending Data To Clients");
+  webSocket.broadcastTXT(jsonStr);
+}
+
+// Read the temperature
+float readTemperature() {
+  // Read the temperature from the internal sensor
+  float temperatureFloat = temperatureRead();
+  uint8_t  temperature = (uint8_t)temperatureFloat; // Cast to intege
+  return temperature;
+}
+
+void sendESP32Info() {
+  // Create a JSON document to hold the ESP32 information
+  StaticJsonDocument<512> doc;
+
+  doc["FirmwareVersion"] = firmwareVersion;
+
+  // Populate device information
+  doc["ChipModel"] = ESP.getChipModel();
+
+  // Get network details
+  doc["SSID"] = WiFi.SSID(); // Include SSID name in the information
+  doc["IPAddress"] = WiFi.localIP().toString();
+  doc["MACAddress"] = WiFi.macAddress();
+  doc["Temperature"] = String(readTemperature()) + " °C";
+
+  unsigned long totalSeconds = millis() / 1000;
+  unsigned long hours = totalSeconds / 3600;
+  unsigned long minutes = (totalSeconds % 3600) / 60;
+  unsigned long seconds = totalSeconds % 60;
+  doc["Uptime"] = String(hours) + " hours, " + String(minutes) + " minutes, " + String(seconds) + " seconds";
+
+  // Serialize the JSON document to a string
+  String jsonStr;
+  serializeJson(doc, jsonStr);
+
+  // Send the JSON data to all connected clients
+  Serial.println("Sending ESP32 Info To Clients");
   webSocket.broadcastTXT(jsonStr);
 }
