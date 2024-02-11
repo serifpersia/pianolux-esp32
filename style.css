@@ -145,7 +145,7 @@ button:hover {
     background-color: #2980b9; /* Darker blue background color on hover */
 }
 
-#viewIP {
+#ViewESP32 {
     padding: 8px;
     background-color: green; /* Blue background color for the link */
     color: #ffffff; /* Light text color for the link */
@@ -154,7 +154,7 @@ button:hover {
     border-radius: 5px;
 }
 
-#viewIP:hover {
+#ViewESP32:hover {
     background-color: red; /* Darker blue background color on hover */
 }
 
