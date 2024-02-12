@@ -1289,10 +1289,32 @@ ledDataPinInput.addEventListener("input", function() {
 });
 
 function showUpdateMenu() {
+    // Define handleMessage function here
+    function handleMessage(event) {
+        var data = JSON.parse(event.data);
+
+        // Send a request to fetch the latest release tag from the GitHub repository
+        fetchLatestReleaseTag(data)
+            .then(latestReleaseTag => {
+            // Assuming data.FirmwareVersion holds the firmware version
+            const firmwareVersion = data.FirmwareVersion;
+
+            // Compare the firmware version with the latest release tag
+            if (firmwareVersion === latestReleaseTag) {
+                window.alert(`ESP32 Board Firmware ${firmwareVersion} matches with latest PianoLux Firmware ${latestReleaseTag} version. No need to update!`);
+            } else {
+                window.alert(`ESP32 Board Firmware ${firmwareVersion} doesn't match with latest PianoLux ${latestReleaseTag} Firmware. Please download firmware and filesystem files to update to the latest version (Use Download and Update buttons!)`);
+            }
+        })
+            .catch(error => {
+            console.error('Error fetching latest release tag:', error);
+            window.alert('Error fetching latest release tag. Please try again later.');
+        });
+    }
+
     // Create the popup container
     const popup = document.createElement('div');
     popup.id = 'popup';
-    document.body.appendChild(popup);
     document.body.appendChild(popup);
 
     // Create the div for select elements
@@ -1342,6 +1364,8 @@ function showUpdateMenu() {
     closeButton.id = 'closeButton';
     closeButton.innerText = 'Close';
     closeButton.onclick = function() {
+        // Remove the event listener when the close button is clicked
+        Socket.removeEventListener('message', handleMessage);
         document.body.removeChild(popup);
     };
 
@@ -1356,28 +1380,7 @@ function showUpdateMenu() {
         sendData('ReadESP32Info');
 
         // Event listener to handle updates from the server
-        Socket.addEventListener('message', function (event) {
-            var data = JSON.parse(event.data);
-            console.log('Received esp32 data from the server:', data);
-
-            // Send a request to fetch the latest release tag from the GitHub repository
-            fetchLatestReleaseTag(data)
-                .then(latestReleaseTag => {
-                // Assuming data.FirmwareVersion holds the firmware version
-                const firmwareVersion = data.FirmwareVersion;
-
-                // Compare the firmware version with the latest release tag
-                if (firmwareVersion === latestReleaseTag) {
-                    window.alert(`ESP32 Board Firmware ${firmwareVersion} matches with latest PianoLux Firmware ${latestReleaseTag} version. No need to update!`);
-                } else {
-                    window.alert(`ESP32 Board Firmware ${firmwareVersion} doesn't match with latest PianoLux ${latestReleaseTag} Firmware. Please download firmware and filesystem files to update to latest version (Use Download and Update buttons!)`);
-                }
-            })
-                .catch(error => {
-                console.error('Error fetching latest release tag:', error);
-                window.alert('Error fetching latest release tag. Please try again later.');
-            });
-        });
+        Socket.addEventListener('message', handleMessage);
     });
 
     // Add event listeners for the "Download" and "Update" buttons
@@ -1441,6 +1444,8 @@ font-weight: 600;
 
     document.head.appendChild(style);
 }
+
+
 
 // Function to fetch the latest release tag from the GitHub repository
 function fetchLatestReleaseTag() {
@@ -1513,16 +1518,17 @@ function showESP32Info() {
     const closeButton = document.createElement('button');
     closeButton.innerText = 'Close';
     closeButton.onclick = function() {
+        // Remove the event listener when the close button is clicked
+        Socket.removeEventListener('message', handleMessage);
         document.body.removeChild(popup);
     };
 
     // Create device info element
     const deviceInfoElement = document.createElement('div');
 
-    // Event listener to handle updates from the server
-    Socket.addEventListener('message', function (event) {
+    // Define the function to handle messages
+    function handleMessage(event) {
         var data = JSON.parse(event.data);
-        console.log('Received esp32 data from the server:', data);
 
         // Populate device info element with detailed data
         deviceInfoElement.innerHTML = `
@@ -1539,7 +1545,10 @@ function showESP32Info() {
         // Append elements to the popup
         popup.appendChild(deviceInfoElement);
         popup.appendChild(closeButton);
-    });
+    }
+
+    // Event listener to handle updates from the server
+    Socket.addEventListener('message', handleMessage);
 
     // Add CSS styles
     const style = document.createElement('style');
@@ -1583,6 +1592,7 @@ color: #333;
 `;
     document.head.appendChild(style);
 }
+
 
 // Call the init function when the window loads
 window.onload = function (event) {
