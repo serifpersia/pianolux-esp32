@@ -31,7 +31,7 @@
 //https://github.com/me-no-dev/arduino-esp32fs-plugin
 
 
-String firmwareVersion = "PianoLux 1.6";
+String firmwareVersion = "v1.6";
 
 // Define the BOARD_TYPE variable
 #define BOARD_TYPE_ESP32    1

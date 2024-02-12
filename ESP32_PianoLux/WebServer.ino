@@ -216,6 +216,7 @@ void sendESP32Info() {
   StaticJsonDocument<512> doc;
 
   doc["FirmwareVersion"] = firmwareVersion;
+  doc["FirmwareBuildDate"] = __DATE__;
 
   // Populate device information
   doc["ChipModel"] = ESP.getChipModel();

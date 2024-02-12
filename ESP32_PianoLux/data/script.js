@@ -1209,111 +1209,6 @@ createCheckboxListener(cb2Checkbox3, 'DirectionAction');
 createCheckboxListener(cb2Checkbox4, 'BGUpdateAction'); 
 createCheckboxListener(cb2Checkbox5, 'StartStopBluetoothAction');
 
-
-const fileLink = document.getElementById('fileLink');
-const confirmationDialog = document.getElementById('confirmationDialog');
-const DownloadOTAUpdatesButton = document.getElementById('Update');
-const UploadOTAButton = document.getElementById('Download');
-const CancelButton = document.getElementById('Cancel');
-const boardSelect = document.getElementById('boardSelect');
-const binarySelect = document.getElementById('binarySelect');
-
-let isDialogOpen = false;
-
-// Add event listeners for the "Local," "Online," and "Cancel" buttons outside the fileLink event listener.
-DownloadOTAUpdatesButton.addEventListener('click', () => {
-    // If the custom "Local" button is clicked, proceed with the code for local upload.
-    confirmationDialog.style.display = 'none';
-    isDialogOpen = false;
-
-    doOTA();
-});
-
-UploadOTAButton.addEventListener('click', () => {
-    // If the custom "Online" button is clicked, fetch and handle the binary file.
-    const selectedBoard = boardSelect.value;
-    const selectedBinary = binarySelect.value;
-
-    if (selectedBoard && selectedBinary) {
-        // Now you have both the selected board and binary type.
-        // You can call the fetchAssetsList function with these values.
-        fetchAssetsList(selectedBoard, selectedBinary);
-    } else {
-        console.error('Please select both board and binary type.');
-    }
-
-    confirmationDialog.style.display = 'none';
-    isDialogOpen = false;
-});
-
-
-CancelButton.addEventListener('click', () => {
-    // If the custom "Cancel" button is clicked, close the dialog without proceeding.
-    confirmationDialog.style.display = 'none';
-    isDialogOpen = false;
-});
-
-fileLink.addEventListener('click', () => {
-    if (!isDialogOpen) {
-        // Display the custom dialog.
-        confirmationDialog.style.display = 'block';
-        isDialogOpen = true;
-    }
-});
-
-function downloadFile(url, fileName) {
-    // Create an anchor element for triggering the download
-    const anchor = document.createElement('a');
-    anchor.href = url;
-    anchor.download = fileName;
-
-    // Trigger a click event on the anchor to start the download
-    anchor.click();
-    alert('Delete downloaded files after you upload them to ESP32 board!');
-}
-
-function fetchAssetsList(board, fileType) {
-    const githubApiUrl = `https://api.github.com/repos/serifpersia/pianolux-esp32/releases/latest`;
-
-    fetch(githubApiUrl)
-        .then(response => response.json())
-        .then(data => {
-        const assets = data.assets;
-
-        if (assets.length > 0) {
-            console.log('Available assets in the latest release:');
-            assets.forEach(asset => {
-                console.log(asset.name);
-            });
-
-            // Construct the binary file name based on the board and fileType
-            const binaryFileName = `${board}_${fileType}.bin`;
-            const binaryFile = assets.find(asset => asset.name === binaryFileName);
-
-            if (binaryFile) {
-                console.log(`Fetched binary file: ${binaryFile.name}`);
-
-                // Use the downloadFile function to download the binary file
-                downloadFile(binaryFile.browser_download_url, binaryFile.name);
-            } else {
-                console.error(`Binary file ${binaryFileName} not found.`);
-            }
-        } else {
-            console.error('No assets found in the latest release.');
-        }
-    })
-        .catch(error => {
-        console.error('Error fetching release assets:', error);
-        alert('No files found on Github Repository!');
-    });
-}
-
-
-function doOTA() {
-    window.location.href = '/update'; // This will change the URL to '/update'
-
-}
-
 const maxCurrentInput = document.getElementById("maxCurrent");
 let typingTimer;
 const typingTimeout = 2000; // Adjust the timeout value as needed
@@ -1393,6 +1288,218 @@ ledDataPinInput.addEventListener("input", function() {
     }, typingTimeout);
 });
 
+function showUpdateMenu() {
+    // Create the popup container
+    const popup = document.createElement('div');
+    popup.id = 'popup';
+    document.body.appendChild(popup);
+    document.body.appendChild(popup);
+
+    // Create the div for select elements
+    const selectDiv = document.createElement('div');
+    selectDiv.id = 'selectDiv';
+    popup.appendChild(selectDiv);
+
+    // Create select elements
+    const boardSelect = document.createElement('select');
+    boardSelect.id = 'boardSelect';
+    boardSelect.innerHTML = `
+<option value="esp32s3">ESP32-S3</option>
+<option value="esp32s2">ESP32-S2</option>
+<option value="esp32">ESP32</option>
+`;
+
+    const binarySelect = document.createElement('select');
+    binarySelect.id = 'binarySelect';
+    binarySelect.innerHTML = `
+<option value="firmware">Firmware</option>
+<option value="filesystem">Filesystem</option>
+`;
+
+    selectDiv.appendChild(boardSelect);
+    selectDiv.appendChild(binarySelect);
+
+    // Create the div for buttons
+    const buttonDiv = document.createElement('div');
+    buttonDiv.id = 'buttonDiv';
+    popup.appendChild(buttonDiv);
+
+    // Create buttons
+    const downloadButton = document.createElement('button');
+    downloadButton.id = 'Download';
+    downloadButton.innerText = 'Download';
+
+    const updateButton = document.createElement('button');
+    updateButton.id = 'Update';
+    updateButton.innerText = 'Update';
+
+    const checkforUpdatesButton = document.createElement('button');
+    checkforUpdatesButton.id = 'checkforUpdatesButton';
+    checkforUpdatesButton.innerText = 'Check For Updates';
+
+    // Create close button
+    const closeButton = document.createElement('button');
+    closeButton.id = 'closeButton';
+    closeButton.innerText = 'Close';
+    closeButton.onclick = function() {
+        document.body.removeChild(popup);
+    };
+
+    buttonDiv.appendChild(checkforUpdatesButton);
+    buttonDiv.appendChild(downloadButton);
+    buttonDiv.appendChild(updateButton);
+    buttonDiv.appendChild(closeButton);
+
+    checkforUpdatesButton.addEventListener('click', () => {
+        console.log('Checking for updates...');
+
+        sendData('ReadESP32Info');
+
+        // Event listener to handle updates from the server
+        Socket.addEventListener('message', function (event) {
+            var data = JSON.parse(event.data);
+            console.log('Received esp32 data from the server:', data);
+
+            // Send a request to fetch the latest release tag from the GitHub repository
+            fetchLatestReleaseTag(data)
+                .then(latestReleaseTag => {
+                // Assuming data.FirmwareVersion holds the firmware version
+                const firmwareVersion = data.FirmwareVersion;
+
+                // Compare the firmware version with the latest release tag
+                if (firmwareVersion === latestReleaseTag) {
+                    window.alert(`ESP32 Board Firmware ${firmwareVersion} matches with latest PianoLux Firmware ${latestReleaseTag} version. No need to update!`);
+                } else {
+                    window.alert(`ESP32 Board Firmware ${firmwareVersion} doesn't match with latest PianoLux ${latestReleaseTag} Firmware. Please download firmware and filesystem files to update to latest version (Use Download and Update buttons!)`);
+                }
+            })
+                .catch(error => {
+                console.error('Error fetching latest release tag:', error);
+                window.alert('Error fetching latest release tag. Please try again later.');
+            });
+        });
+    });
+
+    // Add event listeners for the "Download" and "Update" buttons
+    downloadButton.addEventListener('click', () => {
+        const selectedBoard = boardSelect.value;
+        const selectedBinary = binarySelect.value;
+
+        if (selectedBoard && selectedBinary) {
+            fetchAssetsList(selectedBoard, selectedBinary);
+        } else {
+            console.error('Please select both board and binary type.');
+        }
+    });
+
+    updateButton.addEventListener('click', () => {
+        doOTA();
+    });
+
+    // Add CSS styles
+    const style = document.createElement('style');
+    style.innerHTML = `
+#popup {
+position: fixed;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+width: 80%; /* Set width to 80% of the screen */
+max-width: 400px; /* Limit maximum width for better readability */
+background-color: #ffffff;
+padding: 20px;
+border-radius: 12px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+z-index: 100; /* Keep the highest index */
+}
+
+#selectDiv select {
+margin-top: 15px;
+border: none;
+background: #24A0ED;
+border-radius: 20px;
+height: auto;
+font-size: 18px;
+font-weight: 600;
+}
+
+#buttonDiv button {
+background: #24A0ED;
+border: none;
+border-radius: 20px;
+font-size: 18px;
+font-weight: 600;
+}
+
+#closeButton {
+background: #24A0ED;
+border-radius: 20px;
+font-size: 18px;
+font-weight: 600;
+}
+`;
+
+    document.head.appendChild(style);
+}
+
+// Function to fetch the latest release tag from the GitHub repository
+function fetchLatestReleaseTag() {
+    const githubRepoUrl = 'https://api.github.com/repos/serifpersia/pianolux-esp32/releases/latest';
+
+    return fetch(githubRepoUrl)
+        .then(response => response.json())
+        .then(data => {
+        const latestReleaseTag = data.tag_name;
+        return latestReleaseTag;
+    });
+}
+
+function fetchAssetsList(board, fileType) {
+    const githubApiUrl = `https://api.github.com/repos/serifpersia/pianolux-esp32/releases/latest`;
+
+    fetch(githubApiUrl)
+        .then(response => response.json())
+        .then(data => {
+        const assets = data.assets;
+
+        if (assets.length > 0) {
+            console.log('Available assets in the latest release:');
+            assets.forEach(asset => {
+                console.log(asset.name);
+            });
+
+            const binaryFileName = `${board}_${fileType}.bin`;
+            const binaryFile = assets.find(asset => asset.name === binaryFileName);
+
+            if (binaryFile) {
+                console.log(`Fetched binary file: ${binaryFile.name}`);
+                downloadFile(binaryFile.browser_download_url, binaryFile.name);
+            } else {
+                console.error(`Binary file ${binaryFileName} not found.`);
+            }
+        } else {
+            console.error('No assets found in the latest release.');
+        }
+    })
+        .catch(error => {
+        console.error('Error fetching release assets:', error);
+        alert('No files found on Github Repository!');
+    });
+}
+
+function downloadFile(url, fileName) {
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = fileName;
+    anchor.click();
+    alert('Delete downloaded files after you upload them to ESP32 board!');
+}
+
+function doOTA() {
+    window.location.href = '/update';
+}
+
+
 function showESP32Info() {
     // Send request to read ESP32 info
     sendData('ReadESP32Info');
@@ -1400,33 +1507,17 @@ function showESP32Info() {
     // Create the popup container
     const popup = document.createElement('div');
     popup.id = 'popup';
-    popup.style.position = 'fixed';
-    popup.style.top = '50%';
-    popup.style.width = '75%';
-    popup.style.left = '50%';
-    popup.style.transform = 'translate(-50%, -50%)';
-    popup.style.backgroundColor = '#fff';
-    popup.style.padding = '15px';
-    popup.style.borderRadius = '20px'; // Rounded corners
-    popup.style.zIndex = '9999';
     document.body.appendChild(popup);
 
     // Create close button
     const closeButton = document.createElement('button');
     closeButton.innerText = 'Close';
-    closeButton.style.backgroundColor = '#006AFF';
-    closeButton.style.color = '#fff';
-    closeButton.style.borderRadius = '15px'; // Button border radius
-    closeButton.style.fontSize = '30px';
     closeButton.onclick = function() {
         document.body.removeChild(popup);
     };
-    // Create device info element
-    const deviceInfoElement = document.createElement('p');
-    deviceInfoElement.id = 'deviceInfo';
-    deviceInfoElement.style.color = '#000'; // Black text color
-    deviceInfoElement.style.fontSize = '18px';
 
+    // Create device info element
+    const deviceInfoElement = document.createElement('div');
 
     // Event listener to handle updates from the server
     Socket.addEventListener('message', function (event) {
@@ -1435,23 +1526,63 @@ function showESP32Info() {
 
         // Populate device info element with detailed data
         deviceInfoElement.innerHTML = `
-<p>Firmware Version: ${data.FirmwareVersion}</p>
+<p>Firmware Version: PianoLux ${data.FirmwareVersion}</p>
+<p>Firmware Build Date: ${data.FirmwareBuildDate}</p>
 <p>Chip Model: ${data.ChipModel}</p>
 <p>SSID: ${data.SSID}</p>
 <p>IP Address: ${data.IPAddress}</p>
 <p>MAC Address: ${data.MACAddress}</p>
-<p>Temperature: ${data.Temperature}</p>
+<p>MDNS hostname: <a href="http://pianolux.local">pianolux.local</a></p>
+<p>CPU Temperature: ${parseInt(data.Temperature).toFixed(0)} C</p>
 <p>Uptime: ${data.Uptime}</p>
 `;
         // Append elements to the popup
         popup.appendChild(deviceInfoElement);
         popup.appendChild(closeButton);
-
-        // Show the popup
-        popup.style.display = 'block';
     });
+
+    // Add CSS styles
+    const style = document.createElement('style');
+    style.innerHTML = `
+#popup {
+position: fixed;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+width: 75%; /* Set width to 80% of the screen */
+background-color: #fff;
+padding: 20px;
+border-radius: 10px;
+box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+z-index: 10; /* Keep the highest index */
 }
 
+#popup a {
+color: #007BFF; /* Blue color for the link */
+text-decoration: none; /* Remove underline */
+transition: color 0.3s ease; /* Smooth color transition */
+}
+
+#popup button {
+background-color: #24A0ED;
+color: #fff;
+border: none;
+border-radius: 5px;
+padding: 10px 20px;
+cursor: pointer;
+font-size: 16px;
+margin-top: 10px;
+font-weight: normal;
+}
+
+#popup p {
+font-size: 16px;
+margin-bottom: 10px;
+color: #333;
+}
+`;
+    document.head.appendChild(style);
+}
 
 // Call the init function when the window loads
 window.onload = function (event) {

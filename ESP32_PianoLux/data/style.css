@@ -84,7 +84,7 @@ body, p {
 
 .controls-icon:active {
     /* Change the background color when the icon is hovered or clicked */
-    background-color: #006AFF;
+    background-color: #007BFF;
 }
 
 .mode-settings-icon {
@@ -95,7 +95,7 @@ body, p {
 
 .mode-settings-icon:active {
     /* Change the background color when the icon is hovered or clicked */
-    background-color: #006AFF;
+    background-color: #007BFF;
 }
 
 .upload-icon {
@@ -117,7 +117,7 @@ body, p {
 
 .info-icon:active {
     /* Change the background color when the icon is hovered or clicked */
-    background-color: #006AFF;
+    background-color: #007BFF;
 }
 
 #prg{
