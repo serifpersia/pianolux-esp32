@@ -8,7 +8,7 @@
   Failure to comply with these terms would constitute a violation of the project's
   MIT license under which PianoLux is released.
 
-  Copyright © 2023 Serif Rami, also known as serifpersia.
+  Copyright © 2023-2024 Serif Rami, also known as serifpersia.
 
 */
 
