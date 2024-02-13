@@ -75,6 +75,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
       else if (action == "ColorPresetAction") {
         hue = doc["colorPresetHue"];
         saturation = doc["colorPresetSaturation"];
+        COLOR_PRESET = doc["colorPresetID"];
       }
       else if (action == "PianoSizeAction") {
         keySizeVal = doc["value"];
@@ -172,9 +173,8 @@ void sendValues() {
   // Create a JSON document to hold the current state
   StaticJsonDocument<400> doc;
 
-  doc["MODES"] = serverMode;
-  doc["ANIMATIONS"] = animationIndex;
-  doc["COLORS"] = colorIndex;
+  doc["MODE"] = serverMode;
+  doc["ANIMATION"] = animationIndex;
   doc["HUE"] = hue;
   doc["SATURATION"] = saturation;
   doc["BRIGHTNESS"] = DEFAULT_BRIGHTNESS;
@@ -188,6 +188,7 @@ void sendValues() {
   doc["BGUPDATE_TOGGLE"] = bgUpdateToggle;
   doc["LED_CURRENT"] = LED_CURRENT;
   doc["LED_PIN"] = LED_PIN;
+  doc["LED_COLOR_PRESET"] = COLOR_PRESET;
   doc["LED_COLOR_ORDER"] = COLOR_ORDER;
 
 #if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3

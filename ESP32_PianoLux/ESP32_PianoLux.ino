@@ -162,9 +162,9 @@ uint8_t fixToggle;
 uint8_t reverseToggle;
 uint8_t bgUpdateToggle = 1;
 uint8_t keySizeVal;
-uint8_t colorIndex;
 
 uint8_t LED_PIN;
+uint8_t COLOR_PRESET;
 uint8_t COLOR_ORDER;
 uint16_t LED_CURRENT = 450;
 
