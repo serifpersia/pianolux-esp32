@@ -238,30 +238,29 @@ selectedItemColorOrder.addEventListener("change", () => {
 const selectedItemPresetColors = document.querySelector(
   "#selected-item-presetColors"
 );
+// Map preset IDs to HSB values
+const presetColorsHSB = [
+  [0, 255, 255], // Red
+  [90, 255, 255], // Green
+  [160, 255, 255], // Blue
+  [0, 0, 255], // White
+  [35, 255, 255], // Yellow
+  [10, 255, 255], // Orange
+  [205, 255, 255], // Purple
+  [240, 190, 255], // Pink
+  [150, 150, 255], // Teal
+  [80, 255, 255], // Lime
+  [130, 170, 255], // Cyan
+  [245, 255, 255], // Magenta
+  [252, 190, 255], // Peach
+  [210, 200, 255], // Lavender
+  [130, 150, 255], // Turquoise
+  [22, 255, 255] // Gold
+];
 
 selectedItemPresetColors.addEventListener("change", () => {
   const selectedPresetColorId = selectedItemPresetColors.value;
   console.log("Selected Preset Color ID:", selectedPresetColorId); // Debugging statement
-
-  // Map preset IDs to HSB values
-  const presetColorsHSB = [
-    [0, 255, 255], // Red
-    [90, 255, 255], // Green
-    [160, 255, 255], // Blue
-    [0, 0, 255], // White
-    [35, 255, 255], // Yellow
-    [10, 255, 255], // Orange
-    [205, 255, 255], // Purple
-    [240, 190, 255], // Pink
-    [150, 150, 255], // Teal
-    [80, 255, 255], // Lime
-    [130, 170, 255], // Cyan
-    [245, 255, 255], // Magenta
-    [252, 190, 255], // Peach
-    [210, 200, 255], // Lavender
-    [130, 150, 255], // Turquoise
-    [22, 255, 255] // Gold
-  ];
 
   // Get HSB values based on the selected preset ID
   const [hue, saturation, brightness] = presetColorsHSB[selectedPresetColorId];
@@ -350,10 +349,21 @@ function handleMove(xPosition) {
   thumb.style.backgroundColor = `hsl(${hue}, 100%, 50%)`;
 
   // Set Color Preset to Custom
-  const selectedItemPresetColors = document.querySelector(
-    "#selected-item-presetColors"
-  );
-  selectedItemPresetColors.value = 16;
+  let foundMatchingHue = false;
+
+  // Check if mapped hue matches any preset hue
+  for (let i = 0; i < presetColorsHSB.length; i++) {
+    const presetHue = presetColorsHSB[i][0];
+    if (presetHue === mappedHue) {
+      foundMatchingHue = true;
+      break;
+    }
+  }
+
+  if (!foundMatchingHue) {
+    console.log("HSB doesn't match, setting ColorPreset to Custom!");
+    selectedItemPresetColors.value = 16; // Set the value to 16
+  }
 }
 
 // Mouse drag
@@ -453,10 +463,21 @@ function handleSaturationMove(xPosition) {
   updateSaturationTrackGradient(hueValueInput.value);
 
   // Set Color Preset to Custom
-  const selectedItemPresetColors = document.querySelector(
-    "#selected-item-presetColors"
-  );
-  selectedItemPresetColors.value = 16;
+  let foundMatchingSaturation = false;
+
+  // Check if saturation matches any preset saturation
+  for (let i = 0; i < presetColorsHSB.length; i++) {
+    const presetSaturation = presetColorsHSB[i][1];
+    if (presetSaturation === saturation) {
+      foundMatchingSaturation = true;
+      break;
+    }
+  }
+
+  if (!foundMatchingSaturation) {
+    console.log("HSB doesn't match, setting ColorPreset to Custom!");
+    selectedItemPresetColors.value = 16; // Set the value to 16
+  }
 }
 
 // Mouse drag
@@ -565,12 +586,6 @@ function handleBrightnessMove(xPosition) {
 
   // Update the brightness value in the hidden input
   brightnessValueInput.value = brightness;
-
-  // Set Color Preset to Custom
-  const selectedItemPresetColors = document.querySelector(
-    "#selected-item-presetColors"
-  );
-  selectedItemPresetColors.value = 16;
 }
 
 // Update the brightness slider's track gradient when the hue slider value changes
