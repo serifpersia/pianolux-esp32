@@ -7,7 +7,8 @@ html {
   display: flex;
   flex-direction: column; /* Display items vertically */
   align-items: center;
-  padding-top: 20px;
+  padding-bottom: 35px;
+  padding-top: 25px;
   margin-bottom: -65px;
 }
 
@@ -584,5 +585,5 @@ footer {
 .footer-link {
   color: #cccccc;
   text-decoration: none; /* Remove underline if you want */
-  padding-bottom: 40px;
+  padding-bottom: 35px;
 }
