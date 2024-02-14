@@ -553,13 +553,6 @@ button:active {
   padding-top: 15px;
 }
 
-/* Style for the custom dialog */
-.custom-dialog {
-  display: none;
-  position: relative;
-  z-index: 1000;
-}
-
 select {
   padding: 15px;
   border-radius: 15px; /* Round the corners */
