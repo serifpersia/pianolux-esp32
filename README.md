@@ -65,7 +65,8 @@ Manual Installation
 - Install needed libraries and plugins and use barebones or main ino code. You can use install_libs.bat for installing all libraries and sketch data upload plugin only on windows for now.
 - *before uploading select port, select board type in board manager in Arduino IDE, if main ino code is used change partition scheme to minimal SPIFFS 1.9MB APP 190kb spiffs if board is esp32 for s3 s3 leave it at default 4MB
 - Use barebones sketch to get to Elegant OTA page to use firmware and filesystem files
-- *release bins are only to be used for updating withing the PianoLux menus. For advance users esptool can be used to flash merged bin from auto install branch at 0x0 offest or the release bins look at the offests used in creating merged firmware here [merge commands file](https://github.com/serifpersia/pianolux-esp32/blob/auto-install-page/esp32%20merge%20commands.txt)
+- *release bins are only to be used for updating withing the PianoLux menus. For advance users esptool can be used to flash merged bin from auto install branch at 0x0 offest or the release bins look at the offests used in creating merged firmware here [merge commands file](https://github.com/serifpersia/pianolux-esp32/blob/auto-install-page/esp32%20merge%20commands.txt) filesystem file is spiffs parition and firmware file is main app parition in commands file called PianoLux. Construct proper flash command for your board and use correct files. Or you could just use auto install page :).
+
 ## Setup
 After auto or manual installation. Connect to ESP32's Access Point WiFi. If your WiFi capable device didn't redirect you to WiFiManager's captive portal,
 go to it manually by typing 192.168.4.1
