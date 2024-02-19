@@ -2,7 +2,8 @@ var Socket;
 
 // Function to initialize WebSocket
 function init() {
-  Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
+  //Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
+  Socket = new WebSocket("ws://" + "192.168.1.6" + ":81/");
 
   // Add error event handler
   Socket.addEventListener("error", function(error) {
@@ -1687,6 +1688,108 @@ function doOTA() {
   window.location.href = "/update";
 }
 
+const themes = ["Dark", "Light"];
+let themeIndex = 0;
+const themeSelectorButton = document.getElementById("ThemeSelect");
+
+themeSelectorButton.addEventListener("click", function() {
+  themeIndex = (themeIndex + 1) % themes.length;
+  themeSelectorButton.textContent = themes[themeIndex];
+  document.body.classList.toggle("light-theme", themeIndex === 1);
+  document.body.classList.toggle("dark-theme", themeIndex === 0);
+});
+
+const showLogsToggleCheckbox = document.getElementById("cb6-8");
+let popup; // declare popup variable outside the event listener
+const maxMessages = 2;
+const messages = [];
+
+function updatePopup(message) {
+  messages.push(message);
+  if (messages.length > maxMessages) {
+    messages.shift(); // Remove the oldest message
+  }
+
+  const popupContent = messages.map(msg => `${msg}`).join("<br>");
+
+  // Update popup content
+  popup.innerHTML = popupContent;
+}
+
+showLogsToggleCheckbox.addEventListener("click", function() {
+  if (showLogsToggleCheckbox.checked) {
+    console.log("The checkbox is checked: true");
+
+    sendData("ReadESP32Logs");
+
+    // Create the popup container
+    popup = document.createElement("div");
+    popup.id = "popup";
+    document.body.appendChild(popup);
+
+    // Add CSS styles
+    const style = document.createElement("style");
+    style.innerHTML = `
+#popup {
+position: fixed;
+top: 10%;
+left: 50%;
+transform: translate(-50%, -50%);
+width: 80%; /* Set width to 80% of the screen */
+background-color: #000;
+padding: 15px;
+border: 2px solid gray; /* Add green border */
+border-radius: 15px;
+box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+z-index: 10; /* Keep the highest index */
+color: #00ff00; /* Green text */
+font-family: monospace; /* Use monospace font */
+}
+`;
+    document.head.appendChild(style);
+
+    // Function to handle messages received from WebSocket
+    function handleMessage(event) {
+      const data = JSON.parse(event.data);
+      const message = data.LOG_MESSAGE; // Assuming the message is contained in the LOG_MESSAGE property
+
+      if (message !== undefined) {
+        updatePopup(message); // Update popup content with received message
+      }
+    }
+
+    // Event listener to handle updates from the server
+    Socket.addEventListener("message", handleMessage);
+
+    // Create the clear button directly below the terminal
+    const clearButton = document.createElement("button");
+    clearButton.id = "clearButton";
+    clearButton.textContent = "Clear";
+    clearButton.style.position = "fixed";
+    clearButton.style.width = "auto";
+    clearButton.style.background = "#24A0ED";
+    clearButton.style.fontSize = "15px";
+    clearButton.style.fontWeight = "#300";
+    clearButton.style.top = "calc(10% + 15px + 15px)"; // Adjust the top position accordingly
+    clearButton.style.left = "87%";
+    clearButton.style.transform = "translateX(-50%)";
+    clearButton.style.zIndex = "10"; // Higher than the terminal popup
+    clearButton.addEventListener("click", function() {
+      messages.length = 0; // Clear the messages array
+      popup.innerHTML = ""; // Clear the terminal content
+    });
+    document.body.appendChild(clearButton);
+  } else {
+    console.log("The checkbox is not checked: false");
+    document.body.removeChild(popup);
+    const clearButton = document.getElementById("clearButton");
+    if (clearButton) {
+      document.body.removeChild(clearButton);
+    }
+    Socket.removeEventListener("message", handleMessage);
+  }
+});
+
 function showESP32Info() {
   // Send request to read ESP32 info
   sendData("ReadESP32Info");
@@ -1774,6 +1877,12 @@ color: #333;
 `;
   document.head.appendChild(style);
 }
+
+// Get the current year
+var currentYear = new Date().getFullYear();
+
+// Update the content of the footer with the current year
+document.getElementById("currentYear").innerHTML += " " + currentYear;
 
 // Call the init function when the window loads
 window.onload = function(event) {

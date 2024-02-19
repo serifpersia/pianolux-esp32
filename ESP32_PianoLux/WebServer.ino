@@ -58,6 +58,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
         sliderAction(5, value);
       } else if (action == "CurrentAction") {
         LED_CURRENT = doc["value"];
+        sendESP32Log(String(LED_CURRENT));
         FastLED.setMaxPowerInVoltsAndMilliamps(5, LED_CURRENT);
         updateConfigFile("LED_CURRENT", LED_CURRENT);
       } else if (action == "LedDataPinAction") {
@@ -161,12 +162,30 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
       else if (action == "ReadESP32Info") {
         sendESP32Info();
       }
+      else if (action == "ReadESP32Logs") {
+        sendESP32Info();
+      }
       else if (action == "RequestValues") {
         sendValues();
       }
 
       break;
   }
+}
+
+void sendESP32Log(String logMessage)
+{
+  StaticJsonDocument<400> doc;
+
+  doc["LOG_MESSAGE"] = logMessage;
+
+  // Serialize the JSON document to a string
+  String jsonStr;
+  serializeJson(doc, jsonStr);
+
+  // Send the JSON data to all connected clients
+  Serial.println("Sending Data To Clients");
+  webSocket.broadcastTXT(jsonStr);
 }
 
 void sendValues() {

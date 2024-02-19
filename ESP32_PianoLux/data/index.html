@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-        <title>PianoLux - ESP32</title>
+        <title>PianoLux</title>
         <link rel="stylesheet" type="text/css" href="style.css">
     </head>
     <body>
@@ -156,6 +156,19 @@
             <section class="card" id="custom-settings">
                 <h2>Customize Settings</h2>
                 <div class="control">
+                    <label>Use Dark / Light Theme:</label>
+                    <button id="ThemeSelect">Dark</button>
+                </div>
+                <div class="control">
+                    <label>Show Logs:</label>
+                    <div class="toggle-control">
+                        <div class="checkbox-wrapper-8">
+                            <input type="checkbox" id="cb6-8" class="tgl tgl-skewed">
+                            <label for="cb6-8" data-tg-on="Logs Shown" data-tg-off="Logs Hidden" class="tgl-btn"></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="control">
                     <label for="maxCurrent">Max Current in mA:</label>
                     <input type="number" id="maxCurrent" name="maxCurrent" value="450">
                 </div>
@@ -223,7 +236,7 @@
             </section>
         </main>
         <footer>
-            <p><a href="https://linktr.ee/serifpersia" target="_blank" class="footer-link">linktr.ee/serifpersia<br>&copy; 2023-2024 PianoLux</a></p>
+            <p><a href="https://linktr.ee/serifpersia" target="_blank" class="footer-link" id="currentYear">&copy; PianoLux</a></p>
         </footer>
         <script src="script.js"></script>
     </body>

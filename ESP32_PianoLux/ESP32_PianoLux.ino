@@ -39,7 +39,7 @@ String firmwareVersion = "v1.6";
 #define BOARD_TYPE_ESP32S3  3
 
 // Define the actual board type (change this based on your board)
-#define CURRENT_BOARD_TYPE  3
+#define CURRENT_BOARD_TYPE  2
 
 //DEV defines
 #define ARDUINO_OTA_YES 0
@@ -470,9 +470,11 @@ void setup() {
 
   MIDI.setHandleNoteOn([](byte channel, byte note, byte velocity) {
     noteOn(note, velocity);
+    sendESP32Log("RTP MIDI IN: NOTE ON: Channel: " + String(channel) + " Pitch: " + String(note) + " Velocity: " + String(velocity));
   });
   MIDI.setHandleNoteOff([](byte channel, byte note, byte velocity) {
     noteOff(note, velocity);
+    sendESP32Log("RTP MIDI IN: NOTE OFF: Channel: " + String(channel) + " Pitch: " + String(note) + " Velocity: " + String(velocity));
   });
 
   // USB setup
