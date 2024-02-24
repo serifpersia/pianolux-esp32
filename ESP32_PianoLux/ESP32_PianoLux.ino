@@ -39,7 +39,7 @@ String firmwareVersion = "v1.6";
 #define BOARD_TYPE_ESP32S3  3
 
 // Define the actual board type (change this based on your board)
-#define CURRENT_BOARD_TYPE  2
+#define CURRENT_BOARD_TYPE  3
 
 //DEV defines
 #define ARDUINO_OTA_YES 0
