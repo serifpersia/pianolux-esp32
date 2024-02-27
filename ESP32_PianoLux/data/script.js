@@ -1688,17 +1688,6 @@ function doOTA() {
   window.location.href = "/update";
 }
 
-const themes = ["Dark", "Light"];
-let themeIndex = 0;
-const themeSelectorButton = document.getElementById("ThemeSelect");
-
-themeSelectorButton.addEventListener("click", function() {
-  themeIndex = (themeIndex + 1) % themes.length;
-  themeSelectorButton.textContent = themes[themeIndex];
-  document.body.classList.toggle("light-theme", themeIndex === 1);
-  document.body.classList.toggle("dark-theme", themeIndex === 0);
-});
-
 const showLogsToggleCheckbox = document.getElementById("cb6-8");
 let popup; // declare popup variable outside the event listener
 const maxMessages = 2;

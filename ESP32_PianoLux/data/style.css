@@ -1,13 +1,3 @@
-:root {
-  --main-bg-color-light: #fafafa;
-  --main-bg-color-dark: #191919;
-  --button-bg-color-light: lightgray;
-  --button-bg-color-dark: #46494b;
-  --button-text-color-light: #000;
-  --button-text-color-dark: #fff;
-}
-
-/* Reset some default styles for cross-browser consistency */
 html {
   scroll-behavior: smooth;
 }
@@ -147,14 +137,6 @@ h2 {
 
 main {
   padding: 30px;
-}
-
-body.light-theme main {
-  background: var(--main-bg-color-light);
-}
-
-body.dark-theme main {
-  background: var(--main-bg-color-dark);
 }
 
 /* Add card styling to sections */
@@ -498,16 +480,6 @@ input[type="number"] {
 }
 .buttons {
   display: flex;
-}
-
-body.light-theme button {
-  background: var(--button-bg-color-light);
-  color: var(--button-text-color-light);
-}
-
-body.dark-theme button {
-  background: var(--button-bg-color-dark);
-  color: var(--button-text-color-dark);
 }
 
 button {
