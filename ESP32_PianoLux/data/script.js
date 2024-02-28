@@ -2,8 +2,7 @@ var Socket;
 
 // Function to initialize WebSocket
 function init() {
-  //Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
-  Socket = new WebSocket("ws://" + "192.168.1.6" + ":81/");
+  Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
 
   // Add error event handler
   Socket.addEventListener("error", function(error) {
@@ -186,7 +185,6 @@ function updateUI(data) {
   updateToggles("cb2-8", data.BG_TOGGLE);
   updateToggles("cb3-8", data.REVERSE_TOGGLE);
   updateToggles("cb4-8", data.BGUPDATE_TOGGLE);
-  updateToggles("cb5-8", data.BLE_ON_STATE_TOGGLE);
 
   updateInputs("maxCurrent", data.LED_CURRENT);
   updateInputs("ledDataPin", data.LED_PIN);
@@ -1384,7 +1382,6 @@ createCheckboxListener(cb2Checkbox1, "FixAction");
 createCheckboxListener(cb2Checkbox2, "BGAction");
 createCheckboxListener(cb2Checkbox3, "DirectionAction");
 createCheckboxListener(cb2Checkbox4, "BGUpdateAction");
-createCheckboxListener(cb2Checkbox5, "StartStopBluetoothAction");
 
 const maxCurrentInput = document.getElementById("maxCurrent");
 let typingTimer;
@@ -1690,12 +1687,22 @@ function doOTA() {
 
 const showLogsToggleCheckbox = document.getElementById("cb6-8");
 let popup; // declare popup variable outside the event listener
-const maxMessages = 2;
+const maxMessages = 26; // Maximum messages to store in history
 const messages = [];
+let scrollTimeout; // To track the timeout for auto-scrolling
 
 function updatePopup(message) {
+  const isAtBottom = popup.scrollHeight - popup.clientHeight <= popup.scrollTop + 1;
+
   messages.push(message);
-  if (messages.length > maxMessages) {
+  const isOverLimit = messages.length > maxMessages;
+
+  if (isOverLimit && !isAtBottom) {
+    // If over limit and not at bottom, do not shift messages yet
+    return;
+  }
+
+  if (isOverLimit) {
     messages.shift(); // Remove the oldest message
   }
 
@@ -1703,6 +1710,11 @@ function updatePopup(message) {
 
   // Update popup content
   popup.innerHTML = popupContent;
+
+  if (isAtBottom) {
+    // If at bottom, auto-scroll
+    popup.scrollTop = popup.scrollHeight - popup.clientHeight;
+  }
 }
 
 showLogsToggleCheckbox.addEventListener("click", function() {
@@ -1714,25 +1726,27 @@ showLogsToggleCheckbox.addEventListener("click", function() {
     // Create the popup container
     popup = document.createElement("div");
     popup.id = "popup";
+    popup.style.height = "45px"; // Set a fixed height for the popup
+    popup.style.overflowY = "auto"; // Enable vertical scrolling
     document.body.appendChild(popup);
 
     // Add CSS styles
     const style = document.createElement("style");
     style.innerHTML = `
 #popup {
-position: fixed;
-top: 10%;
-left: 50%;
-transform: translate(-50%, -50%);
-width: 80%; /* Set width to 80% of the screen */
-background-color: #000;
-padding: 15px;
-border: 2px solid gray; /* Add green border */
-border-radius: 15px;
-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-z-index: 10; /* Keep the highest index */
-color: #00ff00; /* Green text */
-font-family: monospace; /* Use monospace font */
+  position: fixed;
+  top: 10%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%; /* Set width to 80% of the screen */
+  background-color: #000;
+  padding: 15px;
+  border: 2px solid gray; /* Add green border */
+  border-radius: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 10; /* Keep the highest index */
+  color: #00ff00; /* Green text */
+  font-family: monospace; /* Use monospace font */
 }
 `;
     document.head.appendChild(style);
@@ -1749,6 +1763,17 @@ font-family: monospace; /* Use monospace font */
 
     // Event listener to handle updates from the server
     Socket.addEventListener("message", handleMessage);
+
+    // Event listener for scroll event
+    popup.addEventListener("scroll", function() {
+      // Clear previous scroll timeout
+      clearTimeout(scrollTimeout);
+
+      // Set a new timeout to enable auto-scroll after 1.5 seconds
+      scrollTimeout = setTimeout(function() {
+        popup.scrollTop = popup.scrollHeight - popup.clientHeight;
+      }, 2500);
+    });
 
     // Create the clear button directly below the terminal
     const clearButton = document.createElement("button");
@@ -1778,6 +1803,7 @@ font-family: monospace; /* Use monospace font */
     Socket.removeEventListener("message", handleMessage);
   }
 });
+
 
 function showESP32Info() {
   // Send request to read ESP32 info

@@ -58,7 +58,6 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
         sliderAction(5, value);
       } else if (action == "CurrentAction") {
         LED_CURRENT = doc["value"];
-        sendESP32Log(String(LED_CURRENT));
         FastLED.setMaxPowerInVoltsAndMilliamps(5, LED_CURRENT);
         updateConfigFile("LED_CURRENT", LED_CURRENT);
       } else if (action == "LedDataPinAction") {
@@ -148,11 +147,6 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
           // Handle right split
           splitRightColor = CHSV(splitHue, splitSaturation, splitBrightness);
         }
-      } else if (action == "StartStopBluetoothAction") {
-#if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
-        bleMIDIStarted = doc["value"];
-        control_BLE_MIDIClient();
-#endif
       }
       else if (action == "ScanBluetoothAction") {
 #if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
@@ -168,7 +162,6 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
       else if (action == "RequestValues") {
         sendValues();
       }
-
       break;
   }
 }
@@ -209,10 +202,6 @@ void sendValues() {
   doc["LED_PIN"] = LED_PIN;
   doc["LED_COLOR_PRESET"] = COLOR_PRESET;
   doc["LED_COLOR_ORDER"] = COLOR_ORDER;
-
-#if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
-  doc["BLE_ON_STATE_TOGGLE"] = bleMIDIStarted;
-#endif
 
   // Serialize the JSON document to a string
   String jsonStr;

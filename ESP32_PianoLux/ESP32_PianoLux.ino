@@ -14,24 +14,28 @@
 
 // PianoLux
 
-//Chose correct board under board manager
-//If USB MIDI doesn't work replace s2 or s3 esp32 sdk with modified sdk
-//usb max transfer descriptor value changed from default 256 to 4096 byte
-//https://drive.google.com/drive/folders/1WlxvhdeabNDGIs6hM0zICGuerMvHKQSR?usp=sharing
+//install ESP32 arduino core sdk to be able to compile and upload code to esp32 boards
+//Use my modified sdks for esp32 s2/s3 to have modified USB Descriptor value from 256 to 4096
+//to support all USB MIDI devices! (replace the esp32s2 or s3 sdk folders in
+// Arduino15\packages\esp32\hardware\esp32\2.0.14\tools\sdk
+//link: https://drive.google.com/drive/folders/1WlxvhdeabNDGIs6hM0zICGuerMvHKQSR?usp=sharing
 
+//Download libs needed use the install_lib.bat script to do it
+//automatically or look into that file and download zips from the links
+//and extract to your Arduino/libraries folder(ESP32PartitionTool in Arduino/tools(create tools folder
+//if you don't have it already)
+//Restart Arduino IDE and select correct board
+// change CURRENT_BOARD_TYPE to match your board type default 3 ESP32 S3 board is selected!
+//Under Tools>Partition schemes select HUGE App/NO OTA/1MB SPIFFS this lets Arduino IDE know that
+//you want to use custom partitions.csv file included in the sketch folder
+//Change LED Strip Data pin from default pin 18 to some other pin your led strip is connected
+//on your esp32 board, you can find this in config.cfg file in sketch location/data directory
+//Press Upload button, after sketch upload go to Tools > ESP32 Partition Tool
+//press import csv and import partiitions.csv located in sketch directory
+//press Flash SPIFFS and after SPIFFS(website data) is uploaded you are ready to
+//setup PianoLux on your ESP32 board
 
-//Change board type that matches your ESP32
-//Change Partition Scheme under Tools to Minimal SPIFFS with OTA
-//before compile & upload
-//Change USB mode under Tools for S3 to USB-OTG
-//Default esp32 parameters can be found in config.cfg in data folder
-//Change the values & save before uploading sketch data
-//Upload sketch then sketch data use sketch data upload plugin
-//works only with 1.8.x versions of Arduino IDE
-//https://github.com/me-no-dev/arduino-esp32fs-plugin
-
-
-String firmwareVersion = "v1.6";
+String firmwareVersion = "v1.7";
 
 // Define the BOARD_TYPE variable
 #define BOARD_TYPE_ESP32    1
@@ -133,10 +137,6 @@ boolean keysOn[MAX_NUM_LEDS];
 boolean isOnStrip(uint8_t pos) {
   return pos >= 0 && pos < NUM_LEDS;
 }
-
-#if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
-boolean bleMIDIStarted = false;
-#endif
 
 uint8_t hue = 0;
 uint8_t brightness = 255;
@@ -476,6 +476,13 @@ void setup() {
     noteOff(note, velocity);
     sendESP32Log("RTP MIDI IN: NOTE OFF: Channel: " + String(channel) + " Pitch: " + String(note) + " Velocity: " + String(velocity));
   });
+
+#if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
+  BLEMidiClient.begin("PianoLux-BLE");
+  //BLEMidiClient.enableDebugging();
+  BLEMidiClient.setNoteOnCallback(BLE_onNoteOn);
+  BLEMidiClient.setNoteOffCallback(BLE_onNoteOff);
+#endif
 
   // USB setup
 #if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S2 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
