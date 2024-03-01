@@ -26,16 +26,16 @@
 //if you don't have it already)
 //Restart Arduino IDE and select correct board
 // change CURRENT_BOARD_TYPE to match your board type default 3 ESP32 S3 board is selected!
-//Under Tools>Partition schemes select HUGE App/NO OTA/1MB LittleFS this lets Arduino IDE know that
+//Under Tools>Partition schemes select HUGE App/NO OTA/1MB SPIFFS this lets Arduino IDE know that
 //you want to use custom partitions.csv file included in the sketch folder
 //Change LED Strip Data pin from default pin 18 to some other pin your led strip is connected
 //on your esp32 board, you can find this in config.cfg file in sketch location/data directory
 //Press Upload button, after sketch upload go to Tools > ESP32 Partition Tool
 //press import csv and import partiitions.csv located in sketch directory
-//press Flash LittleFS and after LittleFS(website data) is uploaded you are ready to
+//Select LittleFS as Filesystem and press SPIFFS button, click Yes to confirm you want to upload SPIFFS data
 //setup PianoLux on your ESP32 board
 
-String firmwareVersion = "v1.7";
+String firmwareVersion = "v1.8";
 
 // Define the BOARD_TYPE variable
 #define BOARD_TYPE_ESP32    1
