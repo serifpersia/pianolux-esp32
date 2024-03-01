@@ -1,27 +1,27 @@
 esp32
-./esptool.exe --chip esp32 merge_bin -o esp32_4mb.bin --flash_mode dio --flash_freq 40m --flash_size 4MB 0x1000 ESP32_PianoLux.ino.bootloader.bin 0x8000 ESP32_PianoLux.ino.partitions.bin 0xe000 boot.bin 0x10000 ESP32_PianoLux.ino.bin 0x3d0000 ESP32_PianoLux.spiffs.bin
+./esptool.exe --chip esp32 merge_bin -o esp32_4mb.bin --flash_mode dio --flash_freq 40m --flash_size 4MB 0x1000 ESP32_PianoLux.ino.bootloader.bin 0x8000 ESP32_PianoLux.ino.partitions.bin 0xe000 boot.bin 0x10000 ESP32_PianoLux.ino.bin 0x350000 ESP32_PianoLux.spiffs.bin
 
 esp32
-./esptool.exe --chip esp32 merge_bin -o esp32_8mb.bin --flash_mode dio --flash_freq 40m --flash_size 8MB 0x1000 ESP32_PianoLux.ino.bootloader.bin 0x8000 ESP32_PianoLux.ino.partitions.bin 0xe000 boot.bin 0x10000 ESP32_PianoLux.ino.bin 0x3d0000 ESP32_PianoLux.spiffs.bin
+./esptool.exe --chip esp32 merge_bin -o esp32_8mb.bin --flash_mode dio --flash_freq 40m --flash_size 8MB 0x1000 ESP32_PianoLux.ino.bootloader.bin 0x8000 ESP32_PianoLux.ino.partitions.bin 0xe000 boot.bin 0x10000 ESP32_PianoLux.ino.bin 0x350000 ESP32_PianoLux.spiffs.bin
 
 esp32
-./esptool.exe --chip esp32 merge_bin -o esp32_16mb.bin --flash_mode dio --flash_freq 40m --flash_size 16MB 0x1000 ESP32_PianoLux.ino.bootloader.bin 0x8000 ESP32_PianoLux.ino.partitions.bin 0xe000 boot.bin 0x10000 ESP32_PianoLux.ino.bin 0x3d0000 ESP32_PianoLux.spiffs.bin
+./esptool.exe --chip esp32 merge_bin -o esp32_16mb.bin --flash_mode dio --flash_freq 40m --flash_size 16MB 0x1000 ESP32_PianoLux.ino.bootloader.bin 0x8000 ESP32_PianoLux.ino.partitions.bin 0xe000 boot.bin 0x10000 ESP32_PianoLux.ino.bin 0x350000 ESP32_PianoLux.spiffs.bin
 
 
 esp32 s2
-./esptool.exe --chip esp32s2 merge_bin -o esp32s2_4mb.bin --flash_mode dio --flash_freq 40m --flash_size 4MB 0x1000 ESP32_PianoLux.ino.bootloader.bin 0x8000 ESP32_PianoLux.ino.partitions.bin 0xe000 boot.bin 0x10000 ESP32_PianoLux.ino.bin 0x3d0000 ESP32_PianoLux.spiffs.bin
+./esptool.exe --chip esp32s2 merge_bin -o esp32s2_4mb.bin --flash_mode dio --flash_freq 40m --flash_size 4MB 0x1000 ESP32_PianoLux.ino.bootloader.bin 0x8000 ESP32_PianoLux.ino.partitions.bin 0xe000 boot.bin 0x10000 ESP32_PianoLux.ino.bin 0x350000 ESP32_PianoLux.spiffs.bin
 
 esp32 s2
-./esptool.exe --chip esp32s2 merge_bin -o esp32s2_8mb.bin --flash_mode dio --flash_freq 40m --flash_size 8MB 0x1000 ESP32_PianoLux.ino.bootloader.bin 0x8000 ESP32_PianoLux.ino.partitions.bin 0xe000 boot.bin 0x10000 ESP32_PianoLux.ino.bin 0x3d0000 ESP32_PianoLux.spiffs.bin
+./esptool.exe --chip esp32s2 merge_bin -o esp32s2_8mb.bin --flash_mode dio --flash_freq 40m --flash_size 8MB 0x1000 ESP32_PianoLux.ino.bootloader.bin 0x8000 ESP32_PianoLux.ino.partitions.bin 0xe000 boot.bin 0x10000 ESP32_PianoLux.ino.bin 0x350000 ESP32_PianoLux.spiffs.bin
 
 esp32 s2
-./esptool.exe --chip esp32s2 merge_bin -o esp32s2_16mb.bin --flash_mode dio --flash_freq 40m --flash_size 16MB 0x1000 ESP32_PianoLux.ino.bootloader.bin 0x8000 ESP32_PianoLux.ino.partitions.bin 0xe000 boot.bin 0x10000 ESP32_PianoLux.ino.bin 0x3d0000 ESP32_PianoLux.spiffs.bin
+./esptool.exe --chip esp32s2 merge_bin -o esp32s2_16mb.bin --flash_mode dio --flash_freq 40m --flash_size 16MB 0x1000 ESP32_PianoLux.ino.bootloader.bin 0x8000 ESP32_PianoLux.ino.partitions.bin 0xe000 boot.bin 0x10000 ESP32_PianoLux.ino.bin 0x350000 ESP32_PianoLux.spiffs.bin
 
 esp32 s3
-./esptool.exe --chip esp32s3 merge_bin -o esp32s3_4mb.bin --flash_mode dio --flash_freq 40m --flash_size 4MB 0x0 ESP32_PianoLux.ino.bootloader.bin 0x8000 ESP32_PianoLux.ino.partitions.bin 0xe000 boot.bin 0x10000 ESP32_PianoLux.ino.bin 0x3d0000 ESP32_PianoLux.spiffs.bin
+./esptool.exe --chip esp32s3 merge_bin -o esp32s3_4mb.bin --flash_mode dio --flash_freq 40m --flash_size 4MB 0x0 ESP32_PianoLux.ino.bootloader.bin 0x8000 ESP32_PianoLux.ino.partitions.bin 0xe000 boot.bin 0x10000 ESP32_PianoLux.ino.bin 0x350000 ESP32_PianoLux.spiffs.bin
 
 esp32 s3
-./esptool.exe --chip esp32s3 merge_bin -o esp32s3_8mb.bin --flash_mode dio --flash_freq 40m --flash_size 8MB 0x0 ESP32_PianoLux.ino.bootloader.bin 0x8000 ESP32_PianoLux.ino.partitions.bin 0xe000 boot.bin 0x10000 ESP32_PianoLux.ino.bin 0x3d0000 ESP32_PianoLux.spiffs.bin
+./esptool.exe --chip esp32s3 merge_bin -o esp32s3_8mb.bin --flash_mode dio --flash_freq 40m --flash_size 8MB 0x0 ESP32_PianoLux.ino.bootloader.bin 0x8000 ESP32_PianoLux.ino.partitions.bin 0xe000 boot.bin 0x10000 ESP32_PianoLux.ino.bin 0x350000 ESP32_PianoLux.spiffs.bin
 
 esp32 s3
-./esptool.exe --chip esp32s3 merge_bin -o esp32s3_16mb.bin --flash_mode dio --flash_freq 40m --flash_size 16MB 0x0 ESP32_PianoLux.ino.bootloader.bin 0x8000 ESP32_PianoLux.ino.partitions.bin 0xe000 boot.bin 0x10000 ESP32_PianoLux.ino.bin 0x3d0000 ESP32_PianoLux.spiffs.bin
+./esptool.exe --chip esp32s3 merge_bin -o esp32s3_16mb.bin --flash_mode dio --flash_freq 40m --flash_size 16MB 0x0 ESP32_PianoLux.ino.bootloader.bin 0x8000 ESP32_PianoLux.ino.partitions.bin 0xe000 boot.bin 0x10000 ESP32_PianoLux.ino.bin 0x350000 ESP32_PianoLux.spiffs.bin
