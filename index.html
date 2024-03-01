@@ -5,22 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PianoLux</title>
     <link rel="stylesheet" type="text/css" href="style.css">
-    <style>
-        /* Add custom styles for the last modified label */
-        .last-modified {
-            color: white;
-        }
-    </style>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            var lastModified = document.lastModified;
-            var lastModifiedLabel = document.createElement("span");
-            lastModifiedLabel.textContent = "Last modified: " + lastModified;
-            lastModifiedLabel.classList.add("last-modified"); // Add the class for styling
-            var header = document.querySelector("header");
-            header.appendChild(lastModifiedLabel);
-        });
-    </script>
 </head>
 <body>
     <header>
