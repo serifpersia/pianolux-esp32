@@ -26,13 +26,13 @@
 //if you don't have it already)
 //Restart Arduino IDE and select correct board
 // change CURRENT_BOARD_TYPE to match your board type default 3 ESP32 S3 board is selected!
-//Under Tools>Partition schemes select HUGE App/NO OTA/1MB SPIFFS this lets Arduino IDE know that
+//Under Tools>Partition schemes select HUGE App/NO OTA/1MB LittleFS this lets Arduino IDE know that
 //you want to use custom partitions.csv file included in the sketch folder
 //Change LED Strip Data pin from default pin 18 to some other pin your led strip is connected
 //on your esp32 board, you can find this in config.cfg file in sketch location/data directory
 //Press Upload button, after sketch upload go to Tools > ESP32 Partition Tool
 //press import csv and import partiitions.csv located in sketch directory
-//press Flash SPIFFS and after SPIFFS(website data) is uploaded you are ready to
+//press Flash LittleFS and after LittleFS(website data) is uploaded you are ready to
 //setup PianoLux on your ESP32 board
 
 String firmwareVersion = "v1.7";
@@ -70,7 +70,7 @@ String firmwareVersion = "v1.7";
 #include <WebSocketsServer.h>
 
 // ESP Storage Lib
-#include <SPIFFS.h>
+#include <LittleFS.h>
 
 // USB Lib
 #if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S2 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
@@ -212,7 +212,7 @@ float distance(CRGB color1, CRGB color2) {
 }
 
 void loadConfig() {
-  File configFile = SPIFFS.open("/config.cfg", "r");
+  File configFile = LittleFS.open("/config.cfg", "r");
   if (configFile) {
     size_t size = configFile.size();
     std::unique_ptr<char[]> buf(new char[size]);
@@ -237,7 +237,7 @@ void updateConfigFile(const char* configKey, uint16_t newValue) {
   DynamicJsonDocument doc(1024);
 
   // Read the existing config file
-  File configFile = SPIFFS.open("/config.cfg", "r");
+  File configFile = LittleFS.open("/config.cfg", "r");
   if (configFile) {
     size_t size = configFile.size();
     std::unique_ptr<char[]> buf(new char[size]);
@@ -251,7 +251,7 @@ void updateConfigFile(const char* configKey, uint16_t newValue) {
     doc[configKey] = newValue;
 
     // Save the updated config file
-    File updatedConfigFile = SPIFFS.open("/config.cfg", "w");
+    File updatedConfigFile = LittleFS.open("/config.cfg", "w");
     if (updatedConfigFile) {
       serializeJson(doc, updatedConfigFile);
       updatedConfigFile.close();
@@ -376,18 +376,18 @@ void setup() {
     Serial.println("MDNS Responder Started!");
   }
 
-  // Serve HTML from ESP32 SPIFFS data directory
-  if (SPIFFS.begin()) {
-    server.serveStatic("/", SPIFFS, "/");
+  // Serve HTML from ESP32 LittleFS data directory
+  if (LittleFS.begin()) {
+    server.serveStatic("/", LittleFS, "/");
     server.onNotFound([](AsyncWebServerRequest * request) {
       if (request->url() == "/") {
-        request->send(SPIFFS, "/index.html", "text/html");
+        request->send(LittleFS, "/index.html", "text/html");
       } else {
         request->send(404, "text/plain", "Not Found");
       }
     });
   } else {
-    Serial.println("Failed to mount SPIFFS file system");
+    Serial.println("Failed to mount LittleFS file system");
   }
 
 #if CURRENT_ARDUINO_OTA == ARDUINO_OTA_YES
@@ -399,10 +399,10 @@ void setup() {
     String type;
     if (ArduinoOTA.getCommand() == U_FLASH)
       type = "sketch";
-    else // U_SPIFFS
+    else // U_LittleFS
       type = "filesystem";
 
-    // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+    // NOTE: if updating LittleFS this would be the place to unmount LittleFS using LittleFS.end()
     Serial.println("Start updating " + type);
   })
   .onEnd([]() {
@@ -423,9 +423,9 @@ void setup() {
   ArduinoOTA.begin();
 #endif
 
-  // Initialize SPIFFS
-  if (!SPIFFS.begin(true)) {
-    Serial.println("An error occurred while mounting SPIFFS");
+  // Initialize LittleFS
+  if (!LittleFS.begin(true)) {
+    Serial.println("An error occurred while mounting LittleFS");
     return;
   }
 
