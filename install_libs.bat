@@ -48,7 +48,7 @@ powershell -command "Expand-Archive -Path ESP32-BLE-MIDI.zip -DestinationPath %A
 
 rem Install ESP32PartitionTool plugin
 echo Installing ESP32PartitionTool plugin...
-powershell -command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/serifpersia/esp32partitiontool/releases/download/v1.3/ESP32PartitionTool.zip', 'ESP32PartitionTool.zip')"
+powershell -command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/serifpersia/esp32partitiontool/releases/download/v1.2/ESP32PartitionTool.zip', 'ESP32PartitionTool.zip')"
 powershell -command "Expand-Archive -Path ESP32PartitionTool.zip -DestinationPath %ARDUINO_TOOLS_DIR% -Force"
 
 rem Install ESPAsyncWebServer library
