@@ -109,8 +109,6 @@ TLDR:
     - White Wire - GND Pin
     - Green Wire - Data Pin (default 18
 
-* Some boards need to have usb otg pads soldered to get usb midi to work, some boards need in/out pad soldered to change 5v ESP32 pin from voltage in to voltage out so leds work, some need both or none of these changes all depends on your board
-
 ![Option 1 Setup](https://github.com/serifpersia/pianolux-esp32/assets/62844718/cea8ebeb-09c5-46e9-a028-67c5447ad0f3)
 #### Option 2: ESP32-S3 Dual USB Port Dev Board
 This is more of a plug & play setup. Depending on whether your board has pre-soldered pin headers and USB-OTG pads soldered, you might have to bridge the USB-OTG pads.
@@ -121,6 +119,8 @@ This is more of a plug & play setup. Depending on whether your board has pre-sol
 Use Bluetooth or rtpMIDI for MIDI source. You can use PianoLux in AP mode with midi app and any wifi capable esp32 board. Follow pictures above on how to connect your usb piano to your android phone.(Users on iOS might need to search for similar midi app).
 rtpMIDI can be used in Default mode as well but AP mode gives you direct connection between mobile device and esp32 skipping router of your local network but it might work as well in default mode as well. 
 Bluetooth connection is an option as well, start pairing on your bluetooth capable piano and esp32 will connect to it automatically. 
+
+* Some boards need to have usb otg pads soldered to get usb midi to work, some boards need in/out pad soldered to change 5v ESP32 pin from voltage in to voltage out so leds work, some need both or none of these changes all depends on your board
 
 ## Power
 To power esp32 and indirectly led strip you either have to use spare usb port labled COM in s3 case or use any available usb port on your esp32 board if your usb midi connetion is done with direct pins.
