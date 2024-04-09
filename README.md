@@ -107,7 +107,9 @@ TLDR:
   - LED STRIP - ESP32-S2 Board Pins:
     - Red Wire - 5v Pin
     - White Wire - GND Pin
-    - Green Wire - Data Pin (default 18)
+    - Green Wire - Data Pin (default 18
+
+* Some boards need to have usb otg pads soldered to get usb midi to work, some boards need in/out pad soldered to change 5v ESP32 pin from voltage in to voltage out so leds work, some need both or none of these changes all depends on your board
 
 ![Option 1 Setup](https://github.com/serifpersia/pianolux-esp32/assets/62844718/cea8ebeb-09c5-46e9-a028-67c5447ad0f3)
 #### Option 2: ESP32-S3 Dual USB Port Dev Board
