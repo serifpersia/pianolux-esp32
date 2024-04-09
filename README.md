@@ -119,11 +119,20 @@ This is more of a plug & play setup. Depending on whether your board has pre-sol
 Use Bluetooth or rtpMIDI for MIDI source. You can use PianoLux in AP mode with midi app and any wifi capable esp32 board. Follow pictures above on how to connect your usb piano to your android phone.(Users on iOS might need to search for similar midi app).
 rtpMIDI can be used in Default mode as well but AP mode gives you direct connection between mobile device and esp32 skipping router of your local network but it might work as well in default mode as well. 
 Bluetooth connection is an option as well, start pairing on your bluetooth capable piano and esp32 will connect to it automatically. 
+
 ## Power
 To power esp32 and indirectly led strip you either have to use spare usb port labled COM in s3 case or use any available usb port on your esp32 board if your usb midi connetion is done with direct pins.
 As for more power leds should be powered from different 5v source with good amount of Amps(3A or 3000mA is optimal I wouldn't push it more) just keep in mind ground should be shared between two 5v sources, ideally
 you can power both led strip and esp32 from direct 5v pin but I'm not sure if ESP32 boards can handle those currents. I suggest keeping power setup simple from usb port you have free on your board. 
 USB MIDI Devices do not provide 5V so ESP32 can't be powered from USB MIDI device alone, in some cases you even have to provide 5v to USB MIDI devices that aren't selfpowered(MIDI controllers).
+
+ External 5v powered strip diagram:
+
+![external power](https://github.com/serifpersia/pianolux-esp32/assets/62844718/4b7a0d24-09e3-4252-ab6c-ae2e0a037703)
+
+ ESP32 5v powered strip diagram:
+
+![esp32_power](https://github.com/serifpersia/pianolux-esp32/assets/62844718/48fb640a-4978-4075-a410-ca09adc8e80e)
 
 ## Features
 ### LED Modes
