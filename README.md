@@ -21,7 +21,7 @@ For support, questions, or suggestions, join our Discord Server:
 [![Discord Server](https://discordapp.com/api/guilds/1077195120950120458/widget.png?style=banner2)](https://discord.gg/MAypyD7k86)
 ## Supported Boards
 - ESP32-S2 dev board
-- ESP32-S3 dev board
+- ESP32-S3 dev board YD clone boards of ESP32 S3 if you want to use usb host otg port on it!
 - *Any WiFi capable ESP32 board can be used with MIDI over network
 - Bluetooth MIDI currently supported on ESP32-S3 & ESP32
 
