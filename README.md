@@ -81,6 +81,10 @@ You can also access the web interface of PianoLux by using MDNS hostname by typi
 MDNS might work depending on your network and devices. 
 Most should be able to connect but you can always use IP route instead
 
+## Updates
+- Currently OTA updates(Filesystem breaks PianoLux installation on all esp32 board variants probable cause is OTA library that perhaps doesn't support non default partition scheme have to investigate that) so updating via update interface of PianoLux is not working with current state of the Project. Will tackle this and see if I can find I fix if not OTA updates will be removed
+
+
 ![278872118-91beaa8e-c168-46cb-b048-daac8cc76df6](https://github.com/serifpersia/pianolux-esp32/assets/62844718/3bd11a11-d939-49d8-b532-466c98aa4975)
 
 ## MIDI over Local Network
