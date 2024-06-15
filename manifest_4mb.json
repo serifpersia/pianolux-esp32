@@ -1,6 +1,6 @@
 {
   "name": "PianoLux",
-  "version": "1.8",
+  "version": "1.9",
   "home_assistant_domain": "pianolux",
   "builds": [
     {
