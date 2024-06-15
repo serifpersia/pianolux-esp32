@@ -345,9 +345,48 @@ void startSTA(WiFiManager& wifiManager) {
   }
 }
 
-void setup() {
+bool handleFileRead(AsyncWebServerRequest *request) {
+  String path = request->url();
+  Serial.println("Request for file: " + path);
+  if (path.endsWith("/")) {
+    path += "index.html";
+  }
 
+  String contentType = getContentType(path);
+  if (!LittleFS.exists(path)) {
+    Serial.println("File not found: " + path);
+    return false;
+  }
+
+  // Open the file for reading
+  File file = LittleFS.open(path, "r");
+  if (!file) {
+    Serial.println("Failed to open file: " + path);
+    return false;
+  }
+
+  // Send the file content to the client
+  request->send(LittleFS, path, contentType);
+
+  Serial.println("File served: " + path);
+  return true;
+}
+
+String getContentType(String filename) {
+  if (filename.endsWith(".html")) return "text/html";
+  if (filename.endsWith(".css"))  return "text/css";
+  if (filename.endsWith(".js"))   return "application/javascript";
+  if (filename.endsWith(".ico"))  return "image/x-icon";
+  return "text/plain";
+}
+
+void setup() {
+  // Start Serial at 115200 baud rate
   Serial.begin(115200);
+  while (!Serial) {
+    // Wait for Serial to be ready
+  }
+  Serial.println("Serial started at 115200");
 
   pinMode(wmJumperPin, INPUT_PULLUP);
   pinMode(apJumperPin, INPUT_PULLUP);
@@ -376,19 +415,19 @@ void setup() {
     Serial.println("MDNS Responder Started!");
   }
 
-  // Serve HTML from ESP32 LittleFS data directory
-  if (LittleFS.begin()) {
-    server.serveStatic("/", LittleFS, "/");
-    server.onNotFound([](AsyncWebServerRequest * request) {
-      if (request->url() == "/") {
-        request->send(LittleFS, "/index.html", "text/html");
-      } else {
-        request->send(404, "text/plain", "Not Found");
-      }
-    });
-  } else {
-    Serial.println("Failed to mount LittleFS file system");
+  // Initialize LittleFS
+  if (!LittleFS.begin()) {
+    Serial.println("An error occurred while mounting LittleFS");
+    return;
   }
+  Serial.println("LittleFS mounted successfully");
+
+  // Route for serving static files
+  server.onNotFound([](AsyncWebServerRequest * request) {
+    if (!handleFileRead(request)) {
+      request->send(404, "text/html", "<html><body><h1>No website files found on ESP32</h1></body></html>");
+    }
+  });
 
 #if CURRENT_ARDUINO_OTA == ARDUINO_OTA_YES
 
@@ -422,12 +461,6 @@ void setup() {
 
   ArduinoOTA.begin();
 #endif
-
-  // Initialize LittleFS
-  if (!LittleFS.begin(true)) {
-    Serial.println("An error occurred while mounting LittleFS");
-    return;
-  }
 
   // Load configuration from file
   loadConfig();
