@@ -35,14 +35,14 @@
 //Select LittleFS as Filesystem and press SPIFFS button, click Yes to confirm you want to upload SPIFFS data
 //setup PianoLux on your ESP32 board
 
-String firmwareVersion = "v1.8";
+String firmwareVersion = "v1.9";
 
 // Define the BOARD_TYPE variable
 #define BOARD_TYPE_ESP32    1
 #define BOARD_TYPE_ESP32S2  2
 #define BOARD_TYPE_ESP32S3  3
 
-// Define the actual board type (change this based on your board)
+// Define the actual board type (change this based on your board(ESP32-1,ESP32 S2-2,ESP32 S3-3)
 #define CURRENT_BOARD_TYPE  3
 
 //DEV defines
@@ -297,7 +297,7 @@ TaskHandle_t midiTaskHandle = NULL;
 void midiTask(void* pvParameters) {
   while (1) {
     MIDI.read();                   // Handle MIDI messages
-    vTaskDelay(pdMS_TO_TICKS(1));  // Adjust the delay as needed
+    vTaskDelay(pdMS_TO_TICKS(10));  // Adjust the delay as needed
   }
 }
 void StartupAnimation() {
@@ -450,8 +450,14 @@ void setup() {
     setIPLeds();
   }
 
+  // Determine core assignment based on board type
+  BaseType_t coreToUse = 0; // Default to core 0 for other board types
+#if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
+  coreToUse = 1; // Use core 1 for BOARD_TYPE_2
+#endif
+
   // Create the MIDI task
-  xTaskCreatePinnedToCore(midiTask, "MIDITask", 2048, NULL, 1, &midiTaskHandle, 0);
+  xTaskCreatePinnedToCore(midiTask, "MIDITask", 2048, NULL, 1, &midiTaskHandle, coreToUse);
   MIDI.begin();
 
   AppleMIDI.setHandleConnected([](const APPLEMIDI_NAMESPACE::ssrc_t& ssrc, const char* name) {
