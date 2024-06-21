@@ -14,26 +14,30 @@
 
 // PianoLux
 
-//install ESP32 arduino core sdk to be able to compile and upload code to esp32 boards
-//Use my modified sdks for esp32 s2/s3 to have modified USB Descriptor value from 256 to 4096
-//to support all USB MIDI devices! (replace the esp32s2 or s3 sdk folders in
+// Install ESP32 arduino core sdk to be able to compile and upload code to esp32 boards
+// Use my modified sdks for esp32 s2/s3 to have modified USB Descriptor value from 256 to 4096
+// to support all USB MIDI devices! (replace the esp32s2 or s3 sdk folders in
 // Arduino15\packages\esp32\hardware\esp32\2.0.14\tools\sdk
-//link: https://drive.google.com/drive/folders/1WlxvhdeabNDGIs6hM0zICGuerMvHKQSR?usp=sharing
+// link: https://drive.google.com/drive/folders/1WlxvhdeabNDGIs6hM0zICGuerMvHKQSR?usp=sharing.
 
-//Download libs needed use the install_lib.bat script to do it
-//automatically or look into that file and download zips from the links
-//and extract to your Arduino/libraries folder(ESP32PartitionTool in Arduino/tools(create tools folder
-//if you don't have it already)
-//Restart Arduino IDE and select correct board
-// change CURRENT_BOARD_TYPE to match your board type default 3 ESP32 S3 board is selected!
-//Under Tools>Partition schemes select HUGE App/NO OTA/1MB SPIFFS this lets Arduino IDE know that
-//you want to use custom partitions.csv file included in the sketch folder
-//Change LED Strip Data pin from default pin 18 to some other pin your led strip is connected
-//on your esp32 board, you can find this in config.cfg file in sketch location/data directory
-//Press Upload button, after sketch upload go to Tools > ESP32 Partition Tool
-//press import csv and import partiitions.csv located in sketch directory
-//Select LittleFS as Filesystem and press SPIFFS button, click Yes to confirm you want to upload SPIFFS data
-//setup PianoLux on your ESP32 board
+// Download libs needed use the install_lib.bat script to do it
+// automatically or look into that file and download zips from the links
+// and extract to your Arduino/libraries folder(ESP32PartitionTool in Arduino/tools(create tools folder
+// if you don't have it already).
+
+// Restart Arduino IDE  if its open and select correct esp32 dev board.
+
+// Change CURRENT_BOARD_TYPE to match your board, default board selected is ESP32 S3, CURRENT_BOARD_TYPE 3.
+// Under Tools>Partition schemes select HUGE App/NO OTA/1MB SPIFFS, this lets Arduino IDE know that
+// you want to use custom partitions.csv file included in the sketch folder.
+
+// Change LED Strip Data pin from default pin 18 to some other pin your led strip is connected
+// on your esp32 board, you can find this in config.cfg file in sketch location/data directory.
+
+// Open ESP32PartitionTool, select LittleFS under SPIFFS section and press Merge binary & Upload.
+// Once completed, connect your WiFi device(phone/laptop/PC with WiFi) to PianoLux Portal AP WiFi and set ESP32 to your local router network.
+// Once this AP is no longer visible your ESP32 should show you your IP, you might need to recconect the board or press reset button to see it.
+// Connect to PianoLux web interface via ip the link should look like http://192.168.1.32/ or use pianolux.local http://pianolux.local/.
 
 String firmwareVersion = "v1.9";
 
