@@ -16,9 +16,13 @@
 </div>
 
 **PianoLux ESP32** is a straightforward web-based interface for controlling a WS2812 5V LED Strip with a USB MIDI Piano.Supports USB,Bluetooth & Wifi MIDI source. You can easily configure effects, colors, and parameters through a locally hosted web server on the ESP32 board.
-For support, questions, or suggestions, join our Discord Server:
+
+## Join Our Community
+
+Be part of the PianoLux Discord Server Community where you can connect with fellow users, ask questions, and share your experiences:
 
 [![Discord Server](https://discordapp.com/api/guilds/1077195120950120458/widget.png?style=banner2)](https://discord.gg/MAypyD7k86)
+
 ## Supported Boards
 - ESP32-S2 dev board
 - ESP32-S3 dev board YD clone boards of ESP32 S3 if you want to use usb host otg port on it!
