@@ -128,7 +128,7 @@ uint8_t  getHueForPos(uint8_t pos) {
 }
 
 uint8_t ledNum(uint8_t i) {
-  return STRIP_DIRECTION == 0 ? i : NUM_LEDS - i;
+  return STRIP_DIRECTION == 0 ? i : (NUM_LEDS - 1) - i;
 }
 
 CRGB leds[MAX_NUM_LEDS];
