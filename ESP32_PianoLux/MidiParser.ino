@@ -1,4 +1,4 @@
-#if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S2 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
+#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
 static void midi_transfer_cb(usb_transfer_t *transfer) {
   ESP_LOGI("", "midi_transfer_cb context: %d", transfer->context);
   if (Device_Handle == transfer->device_handle) {
@@ -20,8 +20,8 @@ static void midi_transfer_cb(usb_transfer_t *transfer) {
         char midiString[50];  // Adjust the size as needed
         snprintf(midiString, sizeof(midiString), "Ch%d %s Channel: %d Value: %d",
                  cableNumber, (statusByte >= 0x80 && statusByte < 0x90) ? "Note Off" : (statusByte >= 0x90 && statusByte < 0xA0) ? "Note On"
-                                                                                     : (statusByte >= 0xB0 && statusByte < 0xC0) ? "Control Change"
-                                                                                                                                 : "Other",
+                 : (statusByte >= 0xB0 && statusByte < 0xC0) ? "Control Change"
+                 : "Other",
                  channel, value);
 
         // Execute noteOn, noteOff, or process CC message based on the MIDI statusByte

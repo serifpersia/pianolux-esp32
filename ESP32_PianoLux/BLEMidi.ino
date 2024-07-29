@@ -1,4 +1,4 @@
-#if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
+#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32
 void scan_BLE_MIDI()
 {
   if (!BLEMidiClient.isConnected()) {

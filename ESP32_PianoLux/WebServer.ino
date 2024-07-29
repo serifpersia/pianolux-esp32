@@ -18,7 +18,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
 
     case WStype_TEXT:
       // Parse the JSON message
-      StaticJsonDocument<200> doc;
+      JsonDocument doc;
       DeserializationError error = deserializeJson(doc, payload);
 
       if (error) {
@@ -149,7 +149,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
         }
       }
       else if (action == "ScanBluetoothAction") {
-#if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
+#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32
         scan_BLE_MIDI();
 #endif
       }
@@ -166,9 +166,8 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
   }
 }
 
-void sendESP32Log(String logMessage)
-{
-  StaticJsonDocument<400> doc;
+void sendESP32Log(String logMessage) {
+  JsonDocument doc;
 
   doc["LOG_MESSAGE"] = logMessage;
 
@@ -182,8 +181,7 @@ void sendESP32Log(String logMessage)
 }
 
 void sendValues() {
-  // Create a JSON document to hold the current state
-  StaticJsonDocument<400> doc;
+  JsonDocument doc;
 
   doc["MODE"] = serverMode;
   doc["ANIMATION"] = animationIndex;
@@ -222,7 +220,7 @@ float readTemperature() {
 
 void sendESP32Info() {
   // Create a JSON document to hold the ESP32 information
-  StaticJsonDocument<512> doc;
+  JsonDocument doc;
 
   doc["FirmwareVersion"] = firmwareVersion;
   doc["FirmwareBuildDate"] = __DATE__;

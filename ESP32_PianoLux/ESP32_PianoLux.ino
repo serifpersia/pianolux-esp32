@@ -27,7 +27,7 @@
 
 // Restart Arduino IDE  if its open and select correct esp32 dev board.
 
-// Change CURRENT_BOARD_TYPE to match your board, default board selected is ESP32 S3, CURRENT_BOARD_TYPE 3.
+// Change BOARD_TYPE to match your board, default board selected is ESP32S3
 // Under Tools>Partition schemes select HUGE App/NO OTA/1MB SPIFFS, this lets Arduino IDE know that
 // you want to use custom partitions.csv file included in the sketch folder.
 
@@ -41,53 +41,57 @@
 
 String firmwareVersion = "v1.10";
 
-// Define the BOARD_TYPE variable
-#define BOARD_TYPE_ESP32    1
-#define BOARD_TYPE_ESP32S2  2
-#define BOARD_TYPE_ESP32S3  3
+// Define board types with unique values
+#define ESP32    1
+#define ESP32S2  2
+#define ESP32S3  3
 
-// Define the actual board type (change this based on your board(ESP32-1,ESP32 S2-2,ESP32 S3-3)
-#define CURRENT_BOARD_TYPE  3
+// Define the actual board type (change this based on your board)
+#define BOARD_TYPE  ESP32S3 // select your board: ESP32, ESP32S2, or ESP32S3
 
-//DEV defines
-#define ARDUINO_OTA_YES 1
-#define ARDUINO_OTA_NO 0
+#if BOARD_TYPE == ESP32S3
+#include <BLEMidi.h>
+#include <usb/usb_host.h>
+#include "usbhhelp.hpp"
+#elif BOARD_TYPE == ESP32S2
+#include <usb/usb_host.h>
+#include "usbhhelp.hpp"
+#elif BOARD_TYPE == ESP32
+#include <BLEMidi.h>
+#else
+#error "Unsupported board type!"
+#endif
 
-#define CURRENT_ARDUINO_OTA 0
+// Define flags to choose libraries
+#define USE_ARDUINO_OTA 0 // Set to 1 to use ArduinoOTA, 0 to not use
+#define USE_ELEGANT_OTA 0 // Set to 1 to use ElegantOTA, 0 to not use
+
+#if USE_ARDUINO_OTA
+#include <ArduinoOTA.h>
+#elif USE_ELEGANT_OTA
+#include <ElegantOTA.h>
+#endif
 
 // WIFI Libs
 #include <WiFiManager.h>
-#include <AsyncElegantOTA.h>
 #include <ESPmDNS.h>
 
-// BLE-MIDI Lib
-#if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
-#include <BLEMidi.h>
-#endif
+#include <ElegantOTA.h>
 
-#if CURRENT_ARDUINO_OTA == ARDUINO_OTA_YES
-#include <ArduinoOTA.h>
-#endif
-
+#include <AsyncTCP.h>
 #include <ArduinoJson.h>
 #include <ESPAsyncWebServer.h>
 #include <WebSocketsServer.h>
 
-// ESP Storage Lib
+// ESP Storage Library
 #include <LittleFS.h>
-
-// USB Lib
-#if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S2 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
-#include <usb/usb_host.h>
-#include "usbhhelp.hpp"
-#endif
 
 // rtpMIDI
 #define NO_SESSION_NAME
 #include <AppleMIDI.h>
 
 
-//FastLED Lib
+//FastLED Library
 #include <FastLED.h>
 #include "FadingRunEffect.h"
 #include "FadeController.h"
@@ -98,11 +102,12 @@ WebSocketsServer webSocket(81);
 
 // Constants for LED strip
 #define UPDATES_PER_SECOND 60
-#define MAX_NUM_LEDS 176         // How many LEDs do you want to control
+#define MAX_NUM_LEDS 176    // How many LEDs do you want to control
 #define MAX_EFFECTS 128
 
 //RMT LED STRIP INIT
-#include "w2812-rmt.hpp"  // Include the custom ESP32RMT_WS2812B class
+#include "w2812-rmt.hpp"
+
 ESP32RMT_WS2812B<GRB>* wsstripGRB;
 ESP32RMT_WS2812B<RGB>* wsstripRGB;
 ESP32RMT_WS2812B<BRG>* wsstripBRG;
@@ -222,8 +227,13 @@ void loadConfig() {
     std::unique_ptr<char[]> buf(new char[size]);
     configFile.readBytes(buf.get(), size);
 
-    DynamicJsonDocument doc(1024);
-    deserializeJson(doc, buf.get());
+    JsonDocument doc;
+    DeserializationError error = deserializeJson(doc, buf.get());
+
+    if (error) {
+      Serial.println("Failed to parse config file");
+      return;
+    }
 
     // Update configuration variables
     LED_PIN = doc["LED_PIN"] | LED_PIN;
@@ -238,7 +248,7 @@ void loadConfig() {
 }
 
 void updateConfigFile(const char* configKey, uint16_t newValue) {
-  DynamicJsonDocument doc(1024);
+  JsonDocument doc;
 
   // Read the existing config file
   File configFile = LittleFS.open("/config.cfg", "r");
@@ -249,7 +259,12 @@ void updateConfigFile(const char* configKey, uint16_t newValue) {
     configFile.close();
 
     // Deserialize the JSON document
-    deserializeJson(doc, buf.get());
+    DeserializationError error = deserializeJson(doc, buf.get());
+
+    if (error) {
+      Serial.println("Failed to parse config file");
+      return;
+    }
 
     // Update the specified config key with the new value
     doc[configKey] = newValue;
@@ -257,7 +272,9 @@ void updateConfigFile(const char* configKey, uint16_t newValue) {
     // Save the updated config file
     File updatedConfigFile = LittleFS.open("/config.cfg", "w");
     if (updatedConfigFile) {
-      serializeJson(doc, updatedConfigFile);
+      if (serializeJson(doc, updatedConfigFile) == 0) {
+        Serial.println("Failed to write updated config file");
+      }
       updatedConfigFile.close();
       Serial.println("Config file updated successfully");
     } else {
@@ -384,6 +401,41 @@ String getContentType(String filename) {
   return "text/plain";
 }
 
+#if USE_ARDUINO_OTA
+void setupArduinoOTA()
+{
+  ArduinoOTA.setHostname("PianoLux-ESP32-OTA");
+
+  ArduinoOTA
+  .onStart([]() {
+    String type;
+    if (ArduinoOTA.getCommand() == U_FLASH)
+      type = "sketch";
+    else // U_LittleFS
+      type = "filesystem";
+
+    // NOTE: if updating LittleFS this would be the place to unmount LittleFS using LittleFS.end()
+    Serial.println("Start updating " + type);
+  })
+  .onEnd([]() {
+    Serial.println("\nEnd");
+  })
+  .onProgress([](unsigned int progress, unsigned int total) {
+    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+  })
+  .onError([](ota_error_t error) {
+    Serial.printf("Error[%u]: ", error);
+    if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+    else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+    else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+    else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+    else if (error == OTA_END_ERROR) Serial.println("End Failed");
+  });
+
+  ArduinoOTA.begin();
+}
+#endif
+
 void setup() {
   // Start Serial at 115200 baud rate
   Serial.begin(115200);
@@ -433,43 +485,16 @@ void setup() {
     }
   });
 
-#if CURRENT_ARDUINO_OTA == ARDUINO_OTA_YES
-
-  ArduinoOTA.setHostname("PianoLux-ESP32-OTA");
-
-  ArduinoOTA
-  .onStart([]() {
-    String type;
-    if (ArduinoOTA.getCommand() == U_FLASH)
-      type = "sketch";
-    else // U_LittleFS
-      type = "filesystem";
-
-    // NOTE: if updating LittleFS this would be the place to unmount LittleFS using LittleFS.end()
-    Serial.println("Start updating " + type);
-  })
-  .onEnd([]() {
-    Serial.println("\nEnd");
-  })
-  .onProgress([](unsigned int progress, unsigned int total) {
-    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
-  })
-  .onError([](ota_error_t error) {
-    Serial.printf("Error[%u]: ", error);
-    if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-    else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-    else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-    else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-    else if (error == OTA_END_ERROR) Serial.println("End Failed");
-  });
-
-  ArduinoOTA.begin();
+#if USE_ARDUINO_OTA
+  setupArduinoOTA();
 #endif
 
   // Load configuration from file
   loadConfig();
 
-  AsyncElegantOTA.begin(&server);
+#if USE_ELEGANT_OTA
+  ElegantOTA.begin(&server);
+#endif
 
   server.begin();
 
@@ -489,8 +514,8 @@ void setup() {
 
   // Determine core assignment based on board type
   BaseType_t coreToUse = 0; // Default to core 0 for other board types
-#if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
-  coreToUse = 1; // Use core 1 for BOARD_TYPE_2
+#if BOARD_TYPE == ESP32 || BOARD_TYPE == ESP32S3
+  coreToUse = 1; // Use core 1 for ESP32 or ESP32S3
 #endif
 
   // Create the MIDI task
@@ -520,7 +545,7 @@ void setup() {
     sendESP32Log("RTP MIDI IN: NOTE OFF: Channel: " + String(channel) + " Pitch: " + String(note) + " Velocity: " + String(velocity));
   });
 
-#if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
+#if BOARD_TYPE == ESP3S3 || BOARD_TYPE == ESP32
   BLEMidiClient.begin("PianoLux-BLE");
   //BLEMidiClient.enableDebugging();
   BLEMidiClient.setNoteOnCallback(BLE_onNoteOn);
@@ -528,7 +553,7 @@ void setup() {
 #endif
 
   // USB setup
-#if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S2 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
+#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
   usbh_setup(show_config_desc_full);  // Init USB host for MIDI devices
 #endif
 }
@@ -536,15 +561,18 @@ void setup() {
 void loop() {
 
   // Handle USB
-#if CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S2 || CURRENT_BOARD_TYPE == BOARD_TYPE_ESP32S3
+#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
   usbh_task();
 #endif
 
-#if CURRENT_ARDUINO_OTA == ARDUINO_OTA_YES
+#if USE_ARDUINO_OTA
   ArduinoOTA.handle();
 #endif
 
-  AsyncElegantOTA.loop();
+#if USE_ELEGANT_OTA
+  ElegantOTA.loop();
+#endif
+
   webSocket.loop();  // Update function for the webSockets
 
   if (serverMode == 2) {
