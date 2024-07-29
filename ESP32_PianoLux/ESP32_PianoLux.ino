@@ -50,10 +50,10 @@ String firmwareVersion = "v1.9";
 #define CURRENT_BOARD_TYPE  3
 
 //DEV defines
-#define ARDUINO_OTA_YES 0
-#define ARDUINO_OTA_NO 1
+#define ARDUINO_OTA_YES 1
+#define ARDUINO_OTA_NO 0
 
-#define CURRENT_ARDUINO_OTA 1
+#define CURRENT_ARDUINO_OTA 0
 
 // WIFI Libs
 #include <WiFiManager.h>
@@ -301,7 +301,7 @@ TaskHandle_t midiTaskHandle = NULL;
 void midiTask(void* pvParameters) {
   while (1) {
     MIDI.read();                   // Handle MIDI messages
-    vTaskDelay(pdMS_TO_TICKS(10));  // Adjust the delay as needed
+    vTaskDelay(pdMS_TO_TICKS(0));  // Adjust the delay as needed
   }
 }
 void StartupAnimation() {
@@ -601,10 +601,10 @@ void loop() {
 }
 
 void controlLeds(uint8_t ledNo, uint8_t hueVal, uint8_t saturationVal, uint8_t brightnessVal) {
-  if (ledNo < 0 || ledNo >= NUM_LEDS) {
-    Serial.println("Invalid LED index");
-    return;
-  }
+  //  if (ledNo < 0 || ledNo >= NUM_LEDS) {
+  //    Serial.println("Invalid LED index");
+  //    return;
+  //  }
   // Convert HSB values to RGB values
   CRGB color = CHSV(hueVal, saturationVal, brightnessVal);
   leds[ledNum(ledNo)] = color;  // Set the LED color
@@ -697,13 +697,13 @@ void noteOn(uint8_t note, uint8_t velocity) {
       controlLeds(ledIndex, splitRightColor.h, splitRightColor.s, splitRightColor.v);
     }
   }
-  Serial.println("Note On: " + String(note) + " mapped to LED: " + String(ledIndex));  // Debug print
+  //Serial.println("Note On: " + String(note) + " mapped to LED: " + String(ledIndex));  // Debug print
 }
 
 void noteOff(uint8_t note, uint8_t velocity) {
   uint8_t ledIndex = mapMidiNoteToLED(note, lowestNote, highestNote, NUM_LEDS);  // Map MIDI note to LED index
   keysOn[ledIndex] = false;
-  Serial.println("Note Off: " + String(note) + " mapped to LED: " + String(ledIndex));  // Debug print
+  //Serial.println("Note Off: " + String(note) + " mapped to LED: " + String(ledIndex));  // Debug print
 }
 
 void sliderAction(uint8_t sliderNumber, uint8_t value) {
