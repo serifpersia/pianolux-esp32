@@ -12,8 +12,14 @@ call :getFirmwareDirectory
 rem Call the function to generate and execute commands
 call :generateCommands
 
-rem Move the generated .bin file to the script execution directory
-move "%esptool_dir%\%board_name_flash%.bin" "%~dp0"
+rem Ensure the required directories exist
+call :createDirectories
+
+rem Move the generated .bin file to the firmwares directory
+move "%esptool_dir%\%board_name_flash%.bin" "%~dp0\firmwares\%board_name_flash%.bin"
+
+rem Copy and rename the .bin files to the release directory
+call :copyAndRenameFiles
 
 rem End of script
 pause
@@ -153,5 +159,46 @@ pause
 
 rem Execute the esptool command
 %esptool_command%
+
+exit /b
+
+rem Function to create required directories
+:createDirectories
+if not exist "%~dp0\firmwares" (
+    mkdir "%~dp0\firmwares"
+)
+if not exist "%~dp0\release" (
+    mkdir "%~dp0\release"
+)
+exit /b
+
+rem Function to copy and rename the .bin files
+:copyAndRenameFiles
+rem Ensure the copied files are correctly identified and copied
+if exist "%app_bin%" (
+    copy "%app_bin%" "%~dp0\release\app.bin"
+    if "%board_type%"=="esp32" (
+        ren "%~dp0\release\app.bin" "esp32_firmware.bin"
+    ) else if "%board_type%"=="esp32s2" (
+        ren "%~dp0\release\app.bin" "esp32s2_firmware.bin"
+    ) else if "%board_type%"=="esp32s3" (
+        ren "%~dp0\release\app.bin" "esp32s3_firmware.bin"
+    )
+) else (
+    echo Error: App bin file "%app_bin%" does not exist.
+)
+
+if exist "%spiffs_bin%" (
+    copy "%spiffs_bin%" "%~dp0\release\spiffs.bin"
+    if "%board_type%"=="esp32" (
+        ren "%~dp0\release\spiffs.bin" "esp32_filesystem.bin"
+    ) else if "%board_type%"=="esp32s2" (
+        ren "%~dp0\release\spiffs.bin" "esp32s2_filesystem.bin"
+    ) else if "%board_type%"=="esp32s3" (
+        ren "%~dp0\release\spiffs.bin" "esp32s3_filesystem.bin"
+    )
+) else (
+    echo Error: Spiffs bin file "%spiffs_bin%" does not exist.
+)
 
 exit /b
