@@ -1,0 +1,4 @@
+pianoluxweb.local {
+  reverse_proxy /ws/* http://pianolux.local:81
+  reverse_proxy http://pianolux.local:80
+}

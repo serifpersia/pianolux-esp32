@@ -71,6 +71,7 @@ Manual Installation
 - Use barebones sketch to get to Elegant OTA page to use firmware and filesystem files
 - *release bins are only to be used for updating withing the PianoLux menus. For advance users esptool can be used to flash merged bin from auto install branch at 0x0 offest or the release bins look at the offests used in creating merged firmware here [merge commands file](https://github.com/serifpersia/pianolux-esp32/blob/auto-install-page/esp32%20merge%20commands.txt) filesystem file is spiffs parition and firmware file is main app parition in commands file called PianoLux. Construct proper flash command for your board and use correct files. Or you could just use auto install page :).
 
+* To use web midi api you need to install [caddy](https://caddyserver.com/download) for your OS. If you install it system wide(PATH) cd to CaddyFile dir to run the reverse proxy https server(cmd or terminal for unix) run `caddy run` or equivalent executable for caddy + run. On windows add line 127.0.0.1 pianoluxWeb.local in hosts file C:\Windows\System32\drivers\etc project repo provides the file so copy paste into that directory.
 ## Setup
 After auto or manual installation. Connect to ESP32's Access Point WiFi. If your WiFi capable device didn't redirect you to WiFiManager's captive portal,
 go to it manually by typing 192.168.4.1
