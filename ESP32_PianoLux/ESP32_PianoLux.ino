@@ -66,22 +66,21 @@ String firmwareVersion = "v1.10";
 #define USE_ARDUINO_OTA 0 // Set to 1 to use ArduinoOTA, 0 to not use
 #define USE_ELEGANT_OTA 0 // Set to 1 to use ElegantOTA, 0 to not use
 
-#if USE_ARDUINO_OTA
-#include <ArduinoOTA.h>
-#elif USE_ELEGANT_OTA
-#include <ElegantOTA.h>
-#endif
 
 // WIFI Libs
 #include <WiFiManager.h>
 #include <ESPmDNS.h>
 
-#include <ElegantOTA.h>
-
 #include <AsyncTCP.h>
 #include <ArduinoJson.h>
 #include <ESPAsyncWebServer.h>
 #include <WebSocketsServer.h>
+
+#if USE_ARDUINO_OTA
+#include <ArduinoOTA.h>
+#elif USE_ELEGANT_OTA
+#include <ElegantOTA.h>
+#endif
 
 // ESP Storage Library
 #include <LittleFS.h>
@@ -318,7 +317,7 @@ TaskHandle_t midiTaskHandle = NULL;
 void midiTask(void* pvParameters) {
   while (1) {
     MIDI.read();                   // Handle MIDI messages
-    vTaskDelay(pdMS_TO_TICKS(0));  // Adjust the delay as needed
+    vTaskDelay(pdMS_TO_TICKS(1));  // Adjust the delay as needed
   }
 }
 void StartupAnimation() {
@@ -513,13 +512,10 @@ void setup() {
   }
 
   // Determine core assignment based on board type
-  BaseType_t coreToUse = 0; // Default to core 0 for other board types
-#if BOARD_TYPE == ESP32 || BOARD_TYPE == ESP32S3
-  coreToUse = 1; // Use core 1 for ESP32 or ESP32S3
-#endif
-
   // Create the MIDI task
+  BaseType_t coreToUse = (BOARD_TYPE == ESP32 || BOARD_TYPE == ESP32S3) ? 1 : 0;
   xTaskCreatePinnedToCore(midiTask, "MIDITask", 2048, NULL, 1, &midiTaskHandle, coreToUse);
+
   MIDI.begin();
 
   AppleMIDI.setHandleConnected([](const APPLEMIDI_NAMESPACE::ssrc_t& ssrc, const char* name) {
@@ -541,7 +537,7 @@ void setup() {
     sendESP32Log("RTP MIDI IN: NOTE ON: Channel: " + String(channel) + " Pitch: " + String(note) + " Velocity: " + String(velocity));
   });
   MIDI.setHandleNoteOff([](byte channel, byte note, byte velocity) {
-    noteOff(note, velocity);
+    noteOff(note);
     sendESP32Log("RTP MIDI IN: NOTE OFF: Channel: " + String(channel) + " Pitch: " + String(note) + " Velocity: " + String(velocity));
   });
 
@@ -728,7 +724,7 @@ void noteOn(uint8_t note, uint8_t velocity) {
   //Serial.println("Note On: " + String(note) + " mapped to LED: " + String(ledIndex));  // Debug print
 }
 
-void noteOff(uint8_t note, uint8_t velocity) {
+void noteOff(uint8_t note) {
   uint8_t ledIndex = mapMidiNoteToLED(note, lowestNote, highestNote, NUM_LEDS);  // Map MIDI note to LED index
   keysOn[ledIndex] = false;
   //Serial.println("Note Off: " + String(note) + " mapped to LED: " + String(ledIndex));  // Debug print

@@ -26,7 +26,7 @@ static void midi_transfer_cb(usb_transfer_t *transfer) {
 
         // Execute noteOn, noteOff, or process CC message based on the MIDI statusByte
         if (statusByte >= 0x80 && statusByte < 0x90) {
-          noteOff(channel, value);
+          noteOff(channel);
           sendESP32Log("USB MIDI IN: NOTE OFF Pitch: " + String(channel) + " Velocity: " + String(value));
           if (isConnected) {
             MIDI.sendNoteOff(channel, value, 1);
@@ -34,7 +34,7 @@ static void midi_transfer_cb(usb_transfer_t *transfer) {
           }
         } else if (statusByte >= 0x90 && statusByte < 0xA0) {
           if (value == 0) {
-            noteOff(channel, value);  // Treat "Note On" with 0 velocity as "Note Off"
+            noteOff(channel);  // Treat "Note On" with 0 velocity as "Note Off"
             sendESP32Log("USB MIDI IN: NOTE OFF Pitch: " + String(channel) + " Velocity: " + String(value));
             if (isConnected) {
               MIDI.sendNoteOff(channel, value, 1);
