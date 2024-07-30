@@ -28,8 +28,8 @@ void BLE_onNoteOn(uint8_t channel, uint8_t note, uint8_t velocity, uint16_t time
 }
 
 void BLE_onNoteOff(uint8_t channel, uint8_t note, uint8_t velocity, uint16_t timestamp) {
-  noteOff(note, velocity);
-  sendESP32Log("BLE MIDI IN: Channel: " + String(channel) + "" + "Note OFF " + String(note) + "" + "Velocity" + String(velocity));
+  noteOff(note);
+  sendESP32Log("BLE MIDI IN: Channel: " + String(channel) + "" + "Note OFF " + String(note));
   if (BLEMidiClient.isConnected())
   {
     MIDI.sendNoteOff(note, velocity, 1);
