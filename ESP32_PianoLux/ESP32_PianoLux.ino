@@ -64,7 +64,7 @@ String firmwareVersion = "v1.10";
 
 // Define flags to choose libraries
 #define USE_ARDUINO_OTA 0 // Set to 1 to use ArduinoOTA, 0 to not use
-#define USE_ELEGANT_OTA 0 // Set to 1 to use ElegantOTA, 0 to not use
+#define USE_ELEGANT_OTA 1 // Set to 1 to use ElegantOTA, 0 to not use
 
 
 // WIFI Libs
