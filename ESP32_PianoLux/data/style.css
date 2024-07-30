@@ -568,6 +568,18 @@ select {
   font-size: 20px;
 }
 
+#popupMIDI {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: transparent;
+    padding: 20px;
+    text-align: center;
+    z-index: 2;
+    display: none;
+}
+
 footer {
   background: #191919;
   color: #cccccc;

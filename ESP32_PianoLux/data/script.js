@@ -1,8 +1,11 @@
 var Socket;
 
+let midiAccess = null; // Store MIDI access object
+let currentMidiInput = null; // Store the currently selected MIDI input
+
 // Function to initialize WebSocket
 function init() {
-  Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
+  Socket = new WebSocket("wss://" + window.location.hostname + "/ws/");
 
   // Add error event handler
   Socket.addEventListener("error", function(error) {
@@ -39,6 +42,75 @@ function init() {
     // Call the updateUI function to update the UI elements
     updateUI(data);
   });
+}
+
+// Send optimized MIDI data over WebSocket
+function sendMIDIData(status, note, velocity) {
+    if (!Socket || Socket.readyState !== Socket.OPEN) {
+        console.error('WebSocket is not connected.');
+        return;
+    }
+
+    // Create a Uint8Array directly for better performance
+    const buffer = new Uint8Array(3);
+    buffer[0] = status;
+    buffer[1] = note;
+    if (status === 0x90) { // Note On message
+        buffer[2] = velocity;
+    }
+
+    Socket.send(buffer);
+    console.log(`Sent MIDI data: Status: ${status}, Note: ${note}, Velocity: ${velocity}`);
+}
+
+function showPopup() {
+    const popup = document.getElementById('popupMIDI');
+    popup.style.display = 'block'; // Show the popup
+
+    const midiDeviceSelect = document.getElementById('midiDeviceSelect');
+    const startButton = document.getElementById('startButton');
+
+    // Clear previous options
+    midiDeviceSelect.innerHTML = '';
+
+    // Populate the dropdown with MIDI devices
+    const inputs = midiAccess.inputs.values();
+    for (const input of inputs) {
+        const option = document.createElement('option');
+        option.value = input.id;
+        option.text = input.name;
+        midiDeviceSelect.add(option);
+    }
+
+    // Handle the "Start" button click
+    startButton.addEventListener('click', () => {
+        const selectedDeviceId = midiDeviceSelect.value;
+        const selectedDevice = midiAccess.inputs.get(selectedDeviceId);
+
+        if (currentMidiInput && currentMidiInput !== selectedDevice) {
+            // Stop listening to the current MIDI input
+            currentMidiInput.onmidimessage = null;
+            console.log('Stopped listening to MIDI device:', currentMidiInput.name);
+        }
+
+        if (selectedDevice) {
+
+            // Start listening to the new selected MIDI device
+            selectedDevice.onmidimessage = (event) => {
+                const data = event.data; // MIDI message data
+                const [status, note, velocity] = data;
+
+                if (status === 0x90) { // Note On
+                    sendMIDIData(status, note, velocity);
+                } else if (status === 0x80) { // Note Off
+                    sendMIDIData(status, note, 0); // No velocity for Note Off
+                }
+            };
+            currentMidiInput = selectedDevice;
+            console.log('Listening to MIDI device:', selectedDevice.name);
+            popup.style.display = 'none'; // Hide the popup
+        }
+    });
 }
 
 // Function to send data via WebSocket with error handling
@@ -185,6 +257,8 @@ function updateUI(data) {
   updateToggles("cb2-8", data.BG_TOGGLE);
   updateToggles("cb3-8", data.REVERSE_TOGGLE);
   updateToggles("cb4-8", data.BGUPDATE_TOGGLE);
+  updateToggles("cb5-8", data.WEBMIDI_TOGGLE);
+
 
   updateInputs("maxCurrent", data.LED_CURRENT);
   updateInputs("ledDataPin", data.LED_PIN);
@@ -1377,6 +1451,19 @@ const cb2Checkbox2 = document.getElementById("cb2-8");
 const cb2Checkbox3 = document.getElementById("cb3-8");
 const cb2Checkbox4 = document.getElementById("cb4-8");
 const cb2Checkbox5 = document.getElementById("cb5-8");
+
+cb2Checkbox5.addEventListener("change", async function() {
+    try {
+        if (!midiAccess) {
+            midiAccess = await navigator.requestMIDIAccess();
+            console.log('MIDI access granted');
+        }
+        showPopup();
+    } catch (error) {
+        console.log('MIDI access denied or blocked', error);
+        midiAccess = null; // Reset midiAccess to prompt again if access is denied
+    }
+});
 
 createCheckboxListener(cb2Checkbox1, "FixAction");
 createCheckboxListener(cb2Checkbox2, "BGAction");

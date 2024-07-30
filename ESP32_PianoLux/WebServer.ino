@@ -16,6 +16,25 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
       numConnectedClients--;
       break;
 
+    case WStype_BIN:
+      if (length >= 3) { // Ensure payload is long enough
+        uint8_t status = payload[0];
+        uint8_t note = payload[1];
+        uint8_t velocity = payload[2];
+
+        switch (status) {
+          case 144:  // Note On
+            noteOn(note, velocity);
+            break;
+          case 128:  // Note Off
+            noteOff(note);
+            break;
+          default:
+            // Handle other MIDI messages or ignore them
+            break;
+        }
+      }
+      break;
     case WStype_TEXT:
       // Parse the JSON message
       JsonDocument doc;
