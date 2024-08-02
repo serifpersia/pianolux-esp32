@@ -625,10 +625,10 @@ void loop() {
 }
 
 void controlLeds(uint8_t ledNo, uint8_t hueVal, uint8_t saturationVal, uint8_t brightnessVal) {
-  //  if (ledNo < 0 || ledNo >= NUM_LEDS) {
-  //    Serial.println("Invalid LED index");
-  //    return;
-  //  }
+  if (ledNo < 0 || ledNo >= NUM_LEDS) {
+    Serial.println("Invalid LED index");
+    return;
+  }
   // Convert HSB values to RGB values
   CRGB color = CHSV(hueVal, saturationVal, brightnessVal);
   leds[ledNum(ledNo)] = color;  // Set the LED color
