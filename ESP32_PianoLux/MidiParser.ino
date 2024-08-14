@@ -24,51 +24,62 @@ static void midi_transfer_cb(usb_transfer_t *transfer) {
                  : "Other",
                  channel, value);
 
-        // Execute noteOn, noteOff, or process CC message based on the MIDI statusByte
-        if (statusByte >= 0x80 && statusByte < 0x90) {
-          noteOff(channel);
-          sendESP32Log("USB MIDI IN: NOTE OFF Pitch: " + String(channel) + " Velocity: " + String(value));
-          if (isConnected) {
-            MIDI.sendNoteOff(channel, value, 1);
-            sendESP32Log("RTP MIDI Out: Note OFF " + String(channel) + " Velocity: " + String(value));
-          }
-        } else if (statusByte >= 0x90 && statusByte < 0xA0) {
-          if (value == 0) {
-            noteOff(channel);  // Treat "Note On" with 0 velocity as "Note Off"
+        // Process MIDI messages
+        switch (statusByte & 0xF0) {
+          case 0x80: // Note Off
+            noteOff(channel);
             sendESP32Log("USB MIDI IN: NOTE OFF Pitch: " + String(channel) + " Velocity: " + String(value));
             if (isConnected) {
               MIDI.sendNoteOff(channel, value, 1);
               sendESP32Log("RTP MIDI Out: Note OFF " + String(channel) + " Velocity: " + String(value));
             }
-          } else {
-            noteOn(channel, value);
-            sendESP32Log("USB MIDI IN: NOTE ON Pitch: " + String(channel) + " Velocity: " + String(value));
-            if (isConnected) {
-              MIDI.sendNoteOn(channel, value, 1);
-              sendESP32Log("RTP MIDI Out: Note ON " + String(channel) + " Velocity: " + String(value));
-            }
-          }
-        } else if (statusByte >= 0xB0 && statusByte < 0xC0) {
-          // Handle Control Change messages here
+            break;
 
-          // Check if it's the sustain pedal CC (controller number 64)
-          if (channel == 64) {
-            // Process the sustain pedal CC messagery
-            MIDI.sendControlChange(channel, value, 1);
-            sendESP32Log("RTP MIDI Out: Sustain Pedal CC " + String(channel) + " Value: " + String(value));
-          }
-          // Check if it's the soft pedal CC (controller number 67)
-          else if (channel == 67) {
-            // Process the soft pedal CC message
-            MIDI.sendControlChange(channel, value, 1);
-            sendESP32Log("RTP MIDI Out: Soft Pedal CC " + String(channel) + " Value: " + String(value));
-          }
-          // Check if it's the sostenuto pedal CC (controller number 66)
-          else if (channel == 66) {
-            // Process the sostenuto pedal CC message
-            MIDI.sendControlChange(channel, value, 1);
-            sendESP32Log("RTP MIDI Out: Sostenuto Pedal CC " + String(channel) + " Value: " + String(value));
-          }
+          case 0x90: // Note On
+            if (value == 0) {
+              noteOff(channel); // Treat "Note On" with 0 velocity as "Note Off"
+              sendESP32Log("USB MIDI IN: NOTE OFF Pitch: " + String(channel) + " Velocity: " + String(value));
+              if (isConnected) {
+                MIDI.sendNoteOff(channel, value, 1);
+                sendESP32Log("RTP MIDI Out: Note OFF " + String(channel) + " Velocity: " + String(value));
+              }
+            } else {
+              noteOn(channel, value);
+              sendESP32Log("USB MIDI IN: NOTE ON Pitch: " + String(channel) + " Velocity: " + String(value));
+              if (isConnected) {
+                MIDI.sendNoteOn(channel, value, 1);
+                sendESP32Log("RTP MIDI Out: Note ON " + String(channel) + " Velocity: " + String(value));
+              }
+            }
+            break;
+
+          case 0xB0: // Control Change
+            // Process Control Change messages
+            switch (channel) {
+              case 64: // Sustain Pedal
+                MIDI.sendControlChange(channel, value, 1);
+                sendESP32Log("RTP MIDI Out: Sustain Pedal CC " + String(channel) + " Value: " + String(value));
+                break;
+
+              case 67: // Soft Pedal
+                MIDI.sendControlChange(channel, value, 1);
+                sendESP32Log("RTP MIDI Out: Soft Pedal CC " + String(channel) + " Value: " + String(value));
+                break;
+
+              case 66: // Sostenuto Pedal
+                MIDI.sendControlChange(channel, value, 1);
+                sendESP32Log("RTP MIDI Out: Sostenuto Pedal CC " + String(channel) + " Value: " + String(value));
+                break;
+
+              default:
+                // Handle other Control Change messages if needed
+                break;
+            }
+            break;
+
+          default:
+            // Handle other types of MIDI messages if needed
+            break;
         }
       }
       esp_err_t err = usb_host_transfer_submit(transfer);
