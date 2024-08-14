@@ -70,15 +70,7 @@ static void midi_transfer_cb(usb_transfer_t *transfer) {
                 MIDI.sendControlChange(channel, value, 1);
                 sendESP32Log("RTP MIDI Out: Sostenuto Pedal CC " + String(channel) + " Value: " + String(value));
                 break;
-
-              default:
-                // Handle other Control Change messages if needed
-                break;
             }
-            break;
-
-          default:
-            // Handle other types of MIDI messages if needed
             break;
         }
       }
