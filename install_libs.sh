@@ -29,7 +29,7 @@ install_library "https://github.com/mathieucarbou/AsyncTCP/archive/refs/heads/ma
 install_library "https://github.com/max22-/ESP32-BLE-MIDI/archive/refs/tags/v0.3.2.zip" "ESP32-BLE-MIDI.zip" "$ARDUINO_LIB_DIR"
 install_library "https://github.com/serifpersia/esp32partitiontool/releases/latest/download/ESP32PartitionTool-Arduino.zip" "ESP32PartitionTool.zip" "$ARDUINO_TOOLS_DIR"
 install_library "https://github.com/mathieucarbou/ESPAsyncWebServer/archive/refs/heads/master.zip" "ESPAsyncWebServer.zip" "$ARDUINO_LIB_DIR"
-install_library "https://github.com/FastLED/FastLED/archive/refs/heads/master.zip" "FastLED.zip" "$ARDUINO_LIB_DIR"
+install_library "https://github.com/FastLED/FastLED/archive/refs/tags/3.7.0.zip" "FastLED.zip" "$ARDUINO_LIB_DIR"
 install_library "https://github.com/h2zero/NimBLE-Arduino/archive/refs/tags/1.4.2.zip" "NimBLE-Arduino.zip" "$ARDUINO_LIB_DIR"
 install_library "https://github.com/Links2004/arduinoWebSockets/archive/refs/heads/master.zip" "WebSockets.zip" "$ARDUINO_LIB_DIR"
 install_library "https://github.com/tzapu/WiFiManager/archive/refs/heads/master.zip" "WiFiManager.zip" "$ARDUINO_LIB_DIR"

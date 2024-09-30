@@ -58,7 +58,7 @@ powershell -command "Expand-Archive -Path ESPAsyncWebServer.zip -DestinationPath
 
 rem Install FastLED library
 echo Installing FastLED library...
-powershell -command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/FastLED/FastLED/archive/refs/heads/master.zip', 'FastLED.zip')"
+powershell -command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/FastLED/FastLED/archive/refs/tags/3.7.0.zip', 'FastLED.zip')"
 powershell -command "Expand-Archive -Path FastLED.zip -DestinationPath %ARDUINO_LIB_DIR% -Force"
 
 rem Install NimBLE-Arduino library
