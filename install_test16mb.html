@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <title>PianoLux</title>
+        <link rel="stylesheet" type="text/css" href="style.css">
+    </head>
+    <body>
+        <header>
+            <div class="logo">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 350 300" class="piano-svg" width="350" height="300"><defs><linearGradient id="a" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#fe330d;stop-opacity:1"/><stop offset="100%" style="stop-color:#fff65d;stop-opacity:1"/></linearGradient></defs><rect x="4" y="4" width="100" height="300" rx="20" ry="20" fill="url(#a)"/><rect x="121" y="4" width="100" height="300" rx="20" ry="20" fill="#fff"/><rect x="239" y="4" width="100" height="300" rx="20" ry="20" fill="url(#a)"/><rect x="80" y="3" width="65" height="200" rx="20" ry="20"/><rect x="196" y="3" width="65" height="200" rx="20" ry="20"/></svg>
+                <h1><span class="piano-text">PIANO</span><span class="lux-text">Lux</span></h1>
+            </div>
+        </header>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+            </ul>
+        </nav>
+        <div id="container">
+            <div id="buttons">
+                <esp-web-install-button manifest="manifest_test_16mb.json"></esp-web-install-button>
+                <a href="#" id="ViewESP32" onclick="connectToDevice()">View ESP32</a>
+            </div>
+            <div id="readme-content"></div>
+        </div>
+        <div id="popup">
+            <h2>Device Information</h2>
+            <p id="deviceInfo"></p>
+            <a href="#" id="placeholderLink" onclick="openLink()">Visit Device</a>
+        </div>
+        <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+        <script src="script.js"></script>
+    </body>
+</html>
