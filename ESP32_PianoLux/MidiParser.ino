@@ -28,7 +28,10 @@ static void midi_transfer_cb(usb_transfer_t *transfer) {
         switch (statusByte & 0xF0) {
           case 0x80: // Note Off
             noteOff(channel);
-            sendESP32Log("USB MIDI IN: NOTE OFF Pitch: " + String(channel) + " Velocity: " + String(value));
+            if (numConnectedClients != 0)
+            {
+              sendESP32Log("USB MIDI IN: NOTE OFF Pitch: " + String(channel) + " Velocity: " + String(value));
+            }
             if (isConnected) {
               MIDI.sendNoteOff(channel, value, 1);
               sendESP32Log("RTP MIDI Out: Note OFF " + String(channel) + " Velocity: " + String(value));
@@ -38,40 +41,22 @@ static void midi_transfer_cb(usb_transfer_t *transfer) {
           case 0x90: // Note On
             if (value == 0) {
               noteOff(channel); // Treat "Note On" with 0 velocity as "Note Off"
-              sendESP32Log("USB MIDI IN: NOTE OFF Pitch: " + String(channel) + " Velocity: " + String(value));
-              if (isConnected) {
-                MIDI.sendNoteOff(channel, value, 1);
-                sendESP32Log("RTP MIDI Out: Note OFF " + String(channel) + " Velocity: " + String(value));
-              }
             } else {
               noteOn(channel, value);
-              sendESP32Log("USB MIDI IN: NOTE ON Pitch: " + String(channel) + " Velocity: " + String(value));
-              if (isConnected) {
-                MIDI.sendNoteOn(channel, value, 1);
-                sendESP32Log("RTP MIDI Out: Note ON " + String(channel) + " Velocity: " + String(value));
-              }
+            }
+
+            if (numConnectedClients != 0) {
+              String logMessage = (value == 0)
+                                  ? "USB MIDI IN: NOTE OFF Pitch: " + String(channel) + " Velocity: " + String(value)
+                                  : "USB MIDI IN: NOTE ON Pitch: " + String(channel) + " Velocity: " + String(value);
+              sendESP32Log(logMessage);
+            }
+            if (isConnected) {
+              MIDI.sendNoteOn(channel, value, 1);
+              sendESP32Log("RTP MIDI Out: Note ON " + String(channel) + " Velocity: " + String(value));
             }
             break;
 
-          case 0xB0: // Control Change
-            // Process Control Change messages
-            switch (channel) {
-              case 64: // Sustain Pedal
-                MIDI.sendControlChange(channel, value, 1);
-                sendESP32Log("RTP MIDI Out: Sustain Pedal CC " + String(channel) + " Value: " + String(value));
-                break;
-
-              case 67: // Soft Pedal
-                MIDI.sendControlChange(channel, value, 1);
-                sendESP32Log("RTP MIDI Out: Soft Pedal CC " + String(channel) + " Value: " + String(value));
-                break;
-
-              case 66: // Sostenuto Pedal
-                MIDI.sendControlChange(channel, value, 1);
-                sendESP32Log("RTP MIDI Out: Sostenuto Pedal CC " + String(channel) + " Value: " + String(value));
-                break;
-            }
-            break;
         }
       }
       esp_err_t err = usb_host_transfer_submit(transfer);

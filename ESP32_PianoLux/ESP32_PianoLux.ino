@@ -39,7 +39,7 @@
 // Once this AP is no longer visible your ESP32 should show you your IP, you might need to recconect the board or press reset button to see it.
 // Connect to PianoLux web interface via ip the link should look like http://192.168.1.32/ or use pianolux.local http://pianolux.local/.
 
-String firmwareVersion = "v1.10";
+String firmwareVersion = "v1.11";
 
 // Define board types with unique values
 #define ESP32    1
@@ -205,7 +205,7 @@ uint8_t MODE = COMMAND_SET_COLOR;
 uint8_t serverMode;
 
 uint8_t animationIndex;
-
+uint8_t numConnectedClients = 0;
 uint8_t splashMaxLength = 8;
 uint8_t SPLASH_HEAD_FADE_RATE = 5;
 
@@ -311,15 +311,6 @@ uint8_t isConnected = 0;
 
 APPLEMIDI_CREATE_DEFAULTSESSION_INSTANCE();
 
-// Task handles
-TaskHandle_t midiTaskHandle = NULL;
-
-void midiTask(void* pvParameters) {
-  while (1) {
-    MIDI.read();                   // Handle MIDI messages
-    vTaskDelay(pdMS_TO_TICKS(1));  // Adjust the delay as needed
-  }
-}
 void StartupAnimation() {
   for (uint8_t i = 0; i < NUM_LEDS; i++) {
     leds[i] = CHSV(getHueForPos(i), 255, 255);
@@ -511,11 +502,6 @@ void setup() {
     setIPLeds();
   }
 
-  // Determine core assignment based on board type
-  // Create the MIDI task
-  BaseType_t coreToUse = (BOARD_TYPE == ESP32 || BOARD_TYPE == ESP32S3) ? 1 : 0;
-  xTaskCreatePinnedToCore(midiTask, "MIDITask", 2048, NULL, 1, &midiTaskHandle, coreToUse);
-
   MIDI.begin();
 
   AppleMIDI.setHandleConnected([](const APPLEMIDI_NAMESPACE::ssrc_t& ssrc, const char* name) {
@@ -534,11 +520,17 @@ void setup() {
 
   MIDI.setHandleNoteOn([](byte channel, byte note, byte velocity) {
     noteOn(note, velocity);
-    sendESP32Log("RTP MIDI IN: NOTE ON: Channel: " + String(channel) + " Pitch: " + String(note) + " Velocity: " + String(velocity));
+    if (numConnectedClients != 0)
+    {
+      sendESP32Log("RTP MIDI IN: NOTE ON: Channel: " + String(channel) + " Pitch: " + String(note) + " Velocity: " + String(velocity));
+    }
   });
   MIDI.setHandleNoteOff([](byte channel, byte note, byte velocity) {
     noteOff(note);
-    sendESP32Log("RTP MIDI IN: NOTE OFF: Channel: " + String(channel) + " Pitch: " + String(note) + " Velocity: " + String(velocity));
+    if (numConnectedClients != 0)
+    {
+      sendESP32Log("RTP MIDI IN: NOTE OFF: Channel: " + String(channel) + " Pitch: " + String(note) + " Velocity: " + String(velocity));
+    }
   });
 
 #if BOARD_TYPE == ESP3S3 || BOARD_TYPE == ESP32
@@ -555,6 +547,8 @@ void setup() {
 }
 
 void loop() {
+
+  MIDI.read();
 
   // Handle USB
 #if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
