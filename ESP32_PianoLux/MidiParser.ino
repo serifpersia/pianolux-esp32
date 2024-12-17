@@ -33,8 +33,8 @@ static void midi_transfer_cb(usb_transfer_t *transfer) {
               sendESP32Log("USB MIDI IN: NOTE OFF Pitch: " + String(channel) + " Velocity: " + String(value));
             }
             if (isConnected) {
-              MIDI.sendNoteOff(channel, value, 1);
-              sendESP32Log("RTP MIDI Out: Note OFF " + String(channel) + " Velocity: " + String(value));
+              //MIDI.sendNoteOff(channel, value, 1);
+              //sendESP32Log("RTP MIDI Out: Note OFF " + String(channel) + " Velocity: " + String(value));
             }
             break;
 
@@ -52,8 +52,8 @@ static void midi_transfer_cb(usb_transfer_t *transfer) {
               sendESP32Log(logMessage);
             }
             if (isConnected) {
-              MIDI.sendNoteOn(channel, value, 1);
-              sendESP32Log("RTP MIDI Out: Note ON " + String(channel) + " Velocity: " + String(value));
+              //MIDI.sendNoteOn(channel, value, 1);
+              //sendESP32Log("RTP MIDI Out: Note ON " + String(channel) + " Velocity: " + String(value));
             }
             break;
 

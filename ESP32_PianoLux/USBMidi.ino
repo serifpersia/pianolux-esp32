@@ -91,4 +91,58 @@ void show_config_desc_full(const usb_config_desc_t *config_desc) {
     }
   }
 }
+
+// Send MIDI Note On message
+void sendMIDINoteOn(uint8_t channel, uint8_t note, uint8_t velocity) {
+  if (!MIDIOut || !isMIDIReady) {
+    return;
+  }
+
+  uint8_t midiData[4] = {
+    0x09,                   // Cable Number 0, CIN 9 (Note On)
+    0x90 | (channel & 0x0F),// Note On status byte
+    note & 0x7F,           // Note number (0-127)
+    velocity & 0x7F        // Velocity (0-127)
+  };
+
+  memcpy(MIDIOut->data_buffer, midiData, 4);
+  MIDIOut->num_bytes = 4;
+
+  esp_err_t err = usb_host_transfer_submit(MIDIOut);
+  if (err != ESP_OK) {
+    ESP_LOGI("", "MIDI Note On transfer submit failed: %x", err);
+    return;
+  }
+
+  if (numConnectedClients != 0) {
+    sendESP32Log("USB MIDI OUT: NOTE ON Pitch: " + String(note) + " Velocity: " + String(velocity));
+  }
+}
+
+// Send MIDI Note Off message
+void sendMIDINoteOff(uint8_t channel, uint8_t note, uint8_t velocity) {
+  if (!MIDIOut || !isMIDIReady) {
+    return;
+  }
+
+  uint8_t midiData[4] = {
+    0x08,                   // Cable Number 0, CIN 8 (Note Off)
+    0x80 | (channel & 0x0F),// Note Off status byte
+    note & 0x7F,           // Note number (0-127)
+    velocity & 0x7F        // Velocity (usually 0 for note off)
+  };
+
+  memcpy(MIDIOut->data_buffer, midiData, 4);
+  MIDIOut->num_bytes = 4;
+
+  esp_err_t err = usb_host_transfer_submit(MIDIOut);
+  if (err != ESP_OK) {
+    ESP_LOGI("", "MIDI Note Off transfer submit failed: %x", err);
+    return;
+  }
+
+  if (numConnectedClients != 0) {
+    sendESP32Log("USB MIDI OUT: NOTE OFF Pitch: " + String(note) + " Velocity: " + String(velocity));
+  }
+}
 #endif

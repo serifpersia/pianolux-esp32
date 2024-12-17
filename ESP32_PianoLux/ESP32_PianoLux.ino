@@ -219,6 +219,10 @@ float distance(CRGB color1, CRGB color2) {
   return sqrt(pow(color1.r - color2.r, 2) + pow(color1.g - color2.g, 2) + pow(color1.b - color2.b, 2));
 }
 
+// Function declarations
+void sendMIDINoteOn(uint8_t channel, uint8_t note, uint8_t velocity);
+void sendMIDINoteOff(uint8_t channel, uint8_t note, uint8_t velocity = 0);
+
 void loadConfig() {
   File configFile = LittleFS.open("/config.cfg", "r");
   if (configFile) {
@@ -519,17 +523,27 @@ void setup() {
   });
 
   MIDI.setHandleNoteOn([](byte channel, byte note, byte velocity) {
+    if (isConnected) {
+      sendMIDINoteOn(channel, note, velocity);
+    }
+
     noteOn(note, velocity);
+
     if (numConnectedClients != 0)
     {
-      sendESP32Log("RTP MIDI IN: NOTE ON: Channel: " + String(channel) + " Pitch: " + String(note) + " Velocity: " + String(velocity));
+      //sendESP32Log("RTP MIDI IN: NOTE ON: Channel: " + String(channel) + " Pitch: " + String(note) + " Velocity: " + String(velocity));
     }
   });
   MIDI.setHandleNoteOff([](byte channel, byte note, byte velocity) {
+    if (isConnected) {
+      sendMIDINoteOff(channel, note, velocity);
+    }
+
     noteOff(note);
+
     if (numConnectedClients != 0)
     {
-      sendESP32Log("RTP MIDI IN: NOTE OFF: Channel: " + String(channel) + " Pitch: " + String(note) + " Velocity: " + String(velocity));
+      //sendESP32Log("RTP MIDI IN: NOTE OFF: Channel: " + String(channel) + " Pitch: " + String(note) + " Velocity: " + String(velocity));
     }
   });
 
