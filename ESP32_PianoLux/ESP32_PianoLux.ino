@@ -89,11 +89,14 @@ String firmwareVersion = "v1.11";
 #define NO_SESSION_NAME
 #include <AppleMIDI.h>
 
+#include <WebSerial.h>
 
 //FastLED Library
 #include <FastLED.h>
 #include "FadingRunEffect.h"
 #include "FadeController.h"
+
+#include "ESP32MidiPlayer.h"
 
 // Initialization of webserver and websocket
 AsyncWebServer server(80);
@@ -315,6 +318,43 @@ uint8_t isConnected = 0;
 
 APPLEMIDI_CREATE_DEFAULTSESSION_INSTANCE();
 
+
+ESP32MidiPlayer midiPlayer;
+String currentLoadedFile = "";
+
+// Function to send the current status to clients (implement this)
+void sendPlaybackStatus(uint8_t num = 255) { // 255 means broadcast
+  MidiPlayerState state = midiPlayer.getState();
+  String statusStr;
+  switch (state) {
+    case MidiPlayerState::STOPPED:  statusStr = "stopped"; break;
+    case MidiPlayerState::PLAYING:  statusStr = "playing"; break;
+    case MidiPlayerState::PAUSED:   statusStr = "paused";  break;
+    case MidiPlayerState::FINISHED: statusStr = "finished"; break;
+    default: statusStr = "unknown"; break;
+  }
+
+  // Create JSON payload
+  DynamicJsonDocument doc(256);
+  doc["status"] = "playbackState"; // Use "status" as the identifier field
+  doc["state"] = statusStr;
+  // Only include filename if relevant (playing, paused, or just finished)
+  if (state == MidiPlayerState::PLAYING || state == MidiPlayerState::PAUSED || state == MidiPlayerState::FINISHED) {
+    doc["filename"] = currentLoadedFile; // Use the renamed variable
+  } else {
+    doc["filename"] = ""; // Or null? Empty string is fine.
+  }
+
+  String jsonOutput;
+  serializeJson(doc, jsonOutput);
+
+  if (num == 255) {
+    webSocket.broadcastTXT(jsonOutput); // Send to all clients
+  } else {
+    webSocket.sendTXT(num, jsonOutput); // Send to specific client
+  }
+}
+
 void StartupAnimation() {
   for (uint8_t i = 0; i < NUM_LEDS; i++) {
     leds[i] = CHSV(getHueForPos(i), 255, 255);
@@ -360,41 +400,6 @@ void startSTA(WiFiManager& wifiManager) {
   }
 }
 
-bool handleFileRead(AsyncWebServerRequest *request) {
-  String path = request->url();
-  Serial.println("Request for file: " + path);
-  if (path.endsWith("/")) {
-    path += "index.html";
-  }
-
-  String contentType = getContentType(path);
-  if (!LittleFS.exists(path)) {
-    Serial.println("File not found: " + path);
-    return false;
-  }
-
-  // Open the file for reading
-  File file = LittleFS.open(path, "r");
-  if (!file) {
-    Serial.println("Failed to open file: " + path);
-    return false;
-  }
-
-  // Send the file content to the client
-  request->send(LittleFS, path, contentType);
-
-  Serial.println("File served: " + path);
-  return true;
-}
-
-String getContentType(String filename) {
-  if (filename.endsWith(".html")) return "text/html";
-  if (filename.endsWith(".css"))  return "text/css";
-  if (filename.endsWith(".js"))   return "application/javascript";
-  if (filename.endsWith(".ico"))  return "image/x-icon";
-  return "text/plain";
-}
-
 #if USE_ARDUINO_OTA
 void setupArduinoOTA()
 {
@@ -438,6 +443,7 @@ void setup() {
   }
   Serial.println("Serial started at 115200");
 
+
   pinMode(wmJumperPin, INPUT_PULLUP);
   pinMode(apJumperPin, INPUT_PULLUP);
 
@@ -459,6 +465,8 @@ void setup() {
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 
+  WebSerial.begin(&server);
+  WebSerial.println("Booting...");
 
   // Initialize and start mDNS
   if (MDNS.begin("pianolux")) {
@@ -472,10 +480,23 @@ void setup() {
   }
   Serial.println("LittleFS mounted successfully");
 
-  // Route for serving static files
+  if (!midiPlayer.begin()) {
+    //WebSerial.println("Failed to initialize MIDI player.");
+  }
+
+  server.on("/api/files", HTTP_GET, handleFileList);
+  server.on("/api/upload", HTTP_POST, [](AsyncWebServerRequest * request) {
+    request->send(200, "text/plain", "Upload Received");
+  }, handleUpload);
+
   server.onNotFound([](AsyncWebServerRequest * request) {
     if (!handleFileRead(request)) {
-      request->send(404, "text/html", "<html><body><h1>No website files found on ESP32</h1></body></html>");
+      if (request->url() == "/" && LittleFS.exists("/index.html")) {
+        request->send(LittleFS, "/index.html", "text/html");
+      } else {
+        WebSerial.printf("Not Found: %s\n", request->url().c_str());
+        request->send(404, "text/plain", "Not Found");
+      }
     }
   });
 
@@ -492,8 +513,8 @@ void setup() {
 
   server.begin();
 
-  // Add service to mDNS for HTTP
   MDNS.addService("http", "tcp", 80);
+  MDNS.addService("ws", "tcp", 81);
 
   // Initialize LED strip based on the loaded configuration
   initializeLEDStrip(COLOR_ORDER);
@@ -564,10 +585,45 @@ void loop() {
 
   MIDI.read();
 
+  midiPlayer.update(); // Update MIDI player state and timing
+
+  // --- State Change Detection and Notification ---
+  static MidiPlayerState lastState = midiPlayer.getState(); // Initialize correctly
+  MidiPlayerState currentState = midiPlayer.getState();
+
+  if (currentState != lastState) {
+    //WebSerial.printf("MIDI Player State Changed: %d -> %d\n", (int)lastState, (int)currentState); // Debug log
+    sendPlaybackStatus(); // Broadcast the new state to all clients
+
+    // reset leds
+    fill_solid(leds, NUM_LEDS, bgColor);
+
+    // Send specific notification message when playback finishes naturally
+    if (currentState == MidiPlayerState::FINISHED) {
+      notifyClients("{\"status\":\"info\", \"message\":\"MIDI playback finished: " + currentLoadedFile + "\"}");
+      // Optionally clear currentLoadedFile here if desired after finish
+      // currentLoadedFile = "";
+    }
+    lastState = currentState; // Update the last known state
+  }
+
   // Handle USB
 #if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
   usbh_task();
 #endif
+
+  // --- Handle MIDI Events for LED Control ---
+  uint8_t note, velocity;
+
+  if (midiPlayer.isNoteOn(note, velocity)) {
+    // WebSerial.printf("Note On: %d Vel: %d\n", note, velocity); // Debug
+    noteOn(note, velocity);
+    sendMIDINoteOn(1, note, velocity);
+  } else if (midiPlayer.isNoteOff(note)) {
+    // WebSerial.printf("Note Off: %d\n", note); // Debug
+    noteOff(note);
+    sendMIDINoteOff(1, note, velocity);
+  }
 
 #if USE_ARDUINO_OTA
   ArduinoOTA.handle();

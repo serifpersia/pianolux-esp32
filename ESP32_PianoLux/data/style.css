@@ -568,6 +568,250 @@ select {
   font-size: 20px;
 }
 
+
+/* MIDI Player Section*/
+
+/* ==================== MIDI Player Styles ==================== */
+
+#midi-player {
+    background-color: #2a2d30; /* Slightly lighter card background */
+    padding: 25px;
+    border-radius: 15px;
+    margin-top: 50px; /* Add space before footer/navbar */
+    margin-bottom: 50px; /* Add space before footer/navbar */
+}
+
+#midi-player h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #e0e0e0;
+    font-size: 1.8em;
+}
+
+#midi-player h3 {
+    color: #cccccc;
+    margin-bottom: 15px;
+    margin-top: 25px; /* Space between sections */
+    border-bottom: 1px solid #444;
+    padding-bottom: 8px;
+    font-size: 1.3em;
+}
+#midi-player h3:first-of-type {
+    margin-top: 0; /* No top margin for the very first h3 */
+}
+
+
+/* --- Upload Section --- */
+.midi-upload-section .upload-form-container {
+    display: flex;
+    flex-direction: column; /* Stack elements vertically */
+    gap: 50px; /* Space between file input row and upload button */
+    align-items: stretch; /* Make children take full width */
+}
+
+.midi-upload-section .file-input-wrapper {
+    display: flex;
+    align-items: center;
+    background-color: #3a3d40; /* Background for the wrapper */
+    border-radius: 8px;
+    padding: 5px 15px 5px 5px; /* Padding around elements */
+    gap: 10px; /* Space between button and text */
+}
+
+.midi-upload-section .file-choose-button {
+    background-color: #007bff; /* Blue color like the example */
+    color: white;
+    padding: 10px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    white-space: nowrap; /* Prevent wrapping */
+    transition: background-color 0.2s ease;
+}
+
+.midi-upload-section .file-choose-button:hover {
+    background-color: #0056b3;
+}
+
+.midi-upload-section .file-name-text {
+    color: #b0b0b0; /* Lighter text color */
+    font-style: italic;
+    flex-grow: 1; /* Take remaining space */
+    overflow: hidden; /* Hide overflow */
+    text-overflow: ellipsis; /* Add ... if too long */
+    white-space: nowrap; /* Prevent wrapping */
+}
+
+.midi-action-button { /* Base style for all action buttons in this section */
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 1em;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    margin-bottom: 25px;
+}
+.midi-action-button:active {
+    transform: scale(0.98); /* Slight press effect */
+}
+
+.upload-submit-button {
+    background-color: #4a4d50; /* Darker grey for upload */
+    width: 100%; /* Make button full width */
+}
+.upload-submit-button:hover {
+    background-color: #5a5d60;
+}
+
+.status-message {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #3a3d40;
+    border-radius: 8px;
+    text-align: center;
+    color: #cccccc;
+    font-size: 0.9em;
+    min-height: 20px; /* Ensure it has some height even when empty */
+    margin-bottom: 25px;
+}
+
+/* --- Available Files Section --- */
+#file-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* Space between file items */
+    margin-bottom: 20px; /* Space before refresh button */
+}
+
+.file-item {
+    display: flex;
+    align-items: center;
+    background-color: #3a3d40;
+    padding: 10px 15px;
+    border-radius: 8px;
+    gap: 15px; /* Space between elements inside the item */
+}
+
+.file-item .file-radio {
+    /* Style the radio button appearance */
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #cccccc;
+    border-radius: 50%;
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0; /* Prevent radio from shrinking */
+}
+
+.file-item .file-radio:checked {
+    border-color: #007bff; /* Blue border when checked */
+    background-color: #007bff; /* Blue fill */
+}
+
+/* Add the inner dot for checked state */
+.file-item .file-radio:checked::before {
+    content: '';
+    display: block;
+    width: 10px;
+    height: 10px;
+    background-color: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.file-item .file-details {
+    display: flex;
+    flex-direction: column; /* Stack filename and size */
+    flex-grow: 1; /* Take available space */
+    cursor: pointer; /* Make label clickable for radio */
+    color: #e0e0e0;
+}
+
+.file-item .filename {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.file-item .filesize {
+    font-size: 0.85em;
+    color: #a0a0a0;
+}
+
+.delete-button-style {
+    background-color: #dc3545; /* Red for delete */
+    padding: 8px 15px; /* Smaller padding */
+    font-size: 0.9em;
+    flex-shrink: 0; /* Prevent button shrinking */
+}
+.delete-button-style:hover {
+    background-color: #c82333;
+}
+
+.refresh-button-style {
+     background-color: #006AFF; /* Match navbar blue */
+     width: 100%; /* Make button full width */
+ }
+ .refresh-button-style:hover {
+     background-color: #0050CC;
+ }
+
+/* --- Playback Controls Section --- */
+.playback-buttons-container {
+    display: flex;
+    justify-content: space-between; /* Distribute buttons evenly */
+    gap: 15px; /* Space between buttons */
+}
+
+.playback-button-style {
+    background-color: #4a4d50; /* Same grey as upload button */
+    flex-grow: 1; /* Make buttons share width equally */
+}
+.playback-button-style:hover {
+    background-color: #5a5d60;
+}
+/* Add styles for active/disabled states if needed later */
+/* .playback-button-style:disabled { ... } */
+/* .playback-button-style.playing { background-color: green; } */
+
+.playback-status-message {
+    /* Specific styles if needed */
+     min-height: 20px;
+     margin-top: 20px; /* More space above status */
+}
+
+/* Remove redundant styles from old table approach */
+#file-list-table,
+#file-list-table th,
+#file-list-table td,
+#file-list-table tbody tr {
+    /* You can remove these if the table is fully gone */
+    /* Or set display: none if you want to be sure */
+     display: none;
+}
+
+/* Adjust general button styling if it conflicts */
+/* Ensure the #midi-player buttons don't inherit unwanted styles */
+#midi-player button {
+    margin-top: 0; /* Override general button margin-top if present */
+    margin-right: 0; /* Override general button margin-right if present */
+    width: auto; /* Let flexbox/specific styles control width */
+    height: auto; /* Let padding control height */
+}
+
+/* Apply specific widths back where needed */
+.upload-submit-button, .refresh-button-style {
+    width: 100%;
+}
+/* MIDI Player Section end*/
+
 footer {
   background: #191919;
   color: #cccccc;
@@ -579,3 +823,4 @@ footer {
   text-decoration: none; /* Remove underline if you want */
   padding-bottom: 35px;
 }
+

@@ -3,7 +3,6 @@ var Socket;
 // Function to initialize WebSocket
 function init() {
   Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
-
   // Add error event handler
   Socket.addEventListener("error", function(error) {
     console.error("WebSocket error:", error);
@@ -29,15 +28,47 @@ function init() {
   Socket.addEventListener("open", function(event) {
     console.log("WebSocket connection opened");
     sendData("RequestValues");
+    sendWsCommand({ command: 'getStatus' });
   });
 
   // Event listener to handle updates from the server
   Socket.addEventListener("message", function(event) {
     var data = JSON.parse(event.data);
-    console.log("Received data from the server:", data);
+
+  if (Array.isArray(data)) {
+                // File list update
+                updateFileList(data);
+                updatePlaybackStatus('File list updated.', 'ok');
+            } else if (data.status === 'playbackState') {
+                // Playback state update from ESP32 - The Source of Truth
+                console.log("Received playbackState:", data);
+                const newState = data.state || 'stopped';
+                const newFilename = data.filename || null;
+
+                // Update internal state ONLY if it changed
+                if (playbackState.state !== newState || playbackState.filename !== newFilename) {
+                    playbackState.state = newState;
+                    playbackState.filename = newFilename;
+                    updatePlaybackControlsUI(); // Update UI based on the new authoritative state
+                    console.log("Internal playback state updated:", playbackState);
+                }
+                 // Ensure correct radio button is checked if playback started/stopped externally
+                const radios = fileListContainer.querySelectorAll('input[type="radio"]');
+                radios.forEach(radio => {
+                    radio.checked = (playbackState.state !== 'stopped' && playbackState.filename === radio.value);
+                     if (radio.checked) {
+                        selectedFilename = radio.value; // Sync selectedFilename if changed externally
+                    }
+                });
+                 if (playbackState.state === 'stopped') {
+                    selectedFilename = null; // Clear selection when stopped
+                 }
+            }
 
     // Call the updateUI function to update the UI elements
     updateUI(data);
+    
+    //console.log("Received data from the server:", data);
   });
 }
 
@@ -1893,6 +1924,397 @@ color: #333;
   document.head.appendChild(style);
 }
 
+const uploadForm = document.getElementById('upload-form');
+const fileInput = document.getElementById('file-input');
+const fileNameDisplay = document.getElementById('file-name-display'); // For showing chosen file
+const uploadButton = document.getElementById('upload-button'); // Specific upload submit button
+const uploadStatusDiv = document.getElementById('upload-status'); // Upload status message area
+const fileListContainer = document.getElementById('file-list-container'); // Container for file items
+const refreshButton = document.getElementById('refresh-button'); // Refresh list button
+
+// Global Playback Controls
+const playButton = document.getElementById('play-button');
+const pauseButton = document.getElementById('pause-button');
+const stopButton = document.getElementById('stop-button');
+const playbackStatusDiv = document.getElementById('playback-status'); // Playback status message area
+
+// Central state object, updated ONLY by WebSocket messages from ESP32
+let playbackState = {
+    state: 'stopped', // Possible values: 'stopped', 'playing', 'paused', 'finished'
+    filename: null
+};
+
+// Track which file is selected in the UI
+let selectedFilename = null;
+
+// Helper to safely send commands via WebSocket
+function sendWsCommand(commandData) {
+    if (Socket && Socket.readyState === Socket.OPEN) {
+        const commandString = JSON.stringify(commandData);
+        console.debug("WS Sending:", commandString); // Debug log
+        Socket.send(commandString);
+    } else {
+        updatePlaybackStatus("Cannot send command: WebSocket not connected.", "error");
+        console.error("WebSocket not open. State:", Socket ? Socket.readyState : 'null');
+    }
+}
+
+// --- File Management Functions ---
+async function fetchFileList() {
+    updatePlaybackStatus('Fetching file list via HTTP...', 'info');
+    try {
+        // Assuming your ESP32 list endpoint is /api/files or similar
+        const response = await fetch('/api/files'); // ADJUST ENDPOINT IF NEEDED
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status} ${response.statusText}`);
+        }
+        const files = await response.json();
+        updateFileList(files);
+        updatePlaybackStatus('File list loaded via HTTP.', 'ok');
+    } catch (error) {
+        updatePlaybackStatus(`Error fetching files: ${error.message}`, 'error');
+        console.error("Fetch File List Error:", error);
+        fileListContainer.innerHTML = '<p style="text-align:center; color:red;">Error loading file list.</p>';
+    }
+}
+
+// --- File Upload ---
+function handleFileInputChange() {
+    if (fileInput.files.length > 0) {
+        fileNameDisplay.textContent = fileInput.files[0].name;
+        fileNameDisplay.style.fontStyle = 'normal';
+        uploadStatusDiv.textContent = ''; // Clear previous upload status
+    } else {
+        fileNameDisplay.textContent = 'No file chosen';
+        fileNameDisplay.style.fontStyle = 'italic';
+    }
+}
+
+async function handleUploadSubmit(event) {
+    event.preventDefault();
+    if (!fileInput.files || fileInput.files.length === 0) {
+        uploadStatusDiv.textContent = 'Please select a file first.';
+        uploadStatusDiv.className = 'status-message upload-status-message status-warning';
+        return;
+    }
+    const file = fileInput.files[0];
+
+    // Basic client-side validation
+    const invalidChars = /[\\/]|\.\./;
+    const allowedExtensions = /\.(mid|midi)$/i;
+
+    if (invalidChars.test(file.name) || file.name === "" || file.name.startsWith('.')) {
+        const errorMsg = `Upload Error: Invalid filename. Slashes, '..', or hidden files not allowed.`;
+        uploadStatusDiv.textContent = errorMsg;
+        uploadStatusDiv.className = 'status-message upload-status-message status-error';
+        fileInput.value = ''; handleFileInputChange();
+        return;
+    }
+    if (!allowedExtensions.test(file.name)) {
+         const errorMsg = `Upload Error: Invalid file type. Only .mid or .midi allowed.`;
+         uploadStatusDiv.textContent = errorMsg;
+         uploadStatusDiv.className = 'status-message upload-status-message status-error';
+         fileInput.value = ''; handleFileInputChange();
+         return;
+    }
+
+    const formData = new FormData();
+    // Ensure the field name matches what the ESP32 AsyncWebServer upload handler expects
+    // Common examples are "file" or "update"
+    formData.append('file', file, file.name); // TRY 'file' FIRST
+
+    uploadStatusDiv.textContent = `Uploading ${file.name}... (0%)`;
+    uploadStatusDiv.className = 'status-message upload-status-message status-info';
+    uploadButton.disabled = true;
+    fileInput.disabled = true;
+
+    try {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/api/upload', true);
+
+        xhr.upload.onprogress = (e) => {
+            if (e.lengthComputable) {
+                const percentComplete = Math.round((e.loaded / e.total) * 100);
+                uploadStatusDiv.textContent = `Uploading ${file.name}... (${percentComplete}%)`;
+            }
+        };
+
+        xhr.onload = () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                // Check response text for success hints if possible
+                 const successMsg = `Upload successful: ${file.name}`;
+                 uploadStatusDiv.textContent = successMsg;
+                 uploadStatusDiv.className = 'status-message upload-status-message status-ok';
+                 updatePlaybackStatus(`"${file.name}" uploaded.`, 'ok'); // Use main status too
+                 // ESP32 should ideally broadcast the new file list via WebSocket
+                 // If not, uncomment the next line:
+                 // fetchFileList();
+            } else {
+                const errorText = xhr.responseText || `HTTP Error ${xhr.status}`;
+                uploadStatusDiv.textContent = `Upload failed: ${errorText}`;
+                uploadStatusDiv.className = 'status-message upload-status-message status-error';
+                 updatePlaybackStatus(`Upload error for "${file.name}": ${errorText}`, 'error');
+            }
+            // Re-enable form elements and clear input
+            fileInput.value = ''; handleFileInputChange();
+            uploadButton.disabled = false;
+            fileInput.disabled = false;
+            // Optional: Clear status message after delay
+            setTimeout(() => { if (uploadStatusDiv.classList.contains('status-ok')) uploadStatusDiv.textContent = ''; }, 5000);
+        };
+
+        xhr.onerror = () => {
+             const errorMsg = `Upload network error for ${file.name}.`;
+             uploadStatusDiv.textContent = errorMsg;
+             uploadStatusDiv.className = 'status-message upload-status-message status-error';
+             updatePlaybackStatus(errorMsg, 'error');
+            console.error("XHR Upload Error:", xhr.statusText);
+            uploadButton.disabled = false;
+            fileInput.disabled = false;
+        };
+
+        xhr.send(formData);
+
+    } catch (error) {
+         const errorMsg = `Upload setup error: ${error.message}.`;
+         uploadStatusDiv.textContent = errorMsg;
+         uploadStatusDiv.className = 'status-message upload-status-message status-error';
+         updatePlaybackStatus(errorMsg, 'error');
+         console.error("Upload Setup Error:", error);
+         uploadButton.disabled = false;
+         fileInput.disabled = false;
+    }
+}
+
+// --- File Deletion ---
+async function deleteFile(filename) {
+  if (!confirm(`Are you sure you want to delete "${filename}"?`)) {
+    return;
+  }
+
+  updatePlaybackStatus(`Requesting delete for: ${filename}...`, 'info');
+  try {
+    const deleteCommand = {
+      command: "deleteFile",
+      filename: filename
+    };
+    Socket.send(JSON.stringify(deleteCommand));
+    updatePlaybackStatus(`Delete request sent for "${filename}". Awaiting confirmation...`, 'info');
+  } catch (error) {
+    updatePlaybackStatus(`Network error sending delete for "${filename}": ${error.message}`, 'error');
+    console.error(`Delete Network Error for ${filename}:`, error);
+  }
+}
+
+// --- MIDI Playback Control Functions (using WebSocket commands) ---
+function playSelectedMidi() {
+    if (!selectedFilename) {
+        alert('Please select a MIDI file from the list first.');
+        updatePlaybackStatus('Play cancelled: No file selected.', 'warning');
+        return;
+    }
+
+    console.log(`Play/Resume requested for selected: ${selectedFilename}. Current state: ${playbackState.state}`);
+
+    if (playbackState.state === 'paused' && playbackState.filename === selectedFilename) {
+        updatePlaybackStatus(`Requesting RESUME for: ${selectedFilename}`, 'info');
+        sendWsCommand({ command: 'resumeMidi' });
+    } else {
+        // Start playing the selected file (ESP handles stopping current if needed)
+        updatePlaybackStatus(`Requesting PLAY for: ${selectedFilename}`, 'info');
+        sendWsCommand({ command: 'playMidi', filename: selectedFilename });
+    }
+    // UI state updates reactively via WebSocket 'playbackState' message
+}
+
+function pauseActiveMidi() {
+    if (playbackState.state === 'playing') {
+        updatePlaybackStatus(`Requesting PAUSE for: ${playbackState.filename}`, 'info');
+        sendWsCommand({ command: 'pauseMidi' });
+    } else {
+        console.warn("Pause ignored: Player not playing.");
+        updatePlaybackStatus('Pause ignored: Player not playing.', 'warning');
+    }
+    // UI updates reactively
+}
+
+function stopActiveMidi() {
+    if (playbackState.state === 'playing' || playbackState.state === 'paused') {
+        updatePlaybackStatus(`Requesting STOP for: ${playbackState.filename}`, 'info');
+        sendWsCommand({ command: 'stopMidi' });
+    } else {
+        console.warn("Stop ignored: Player not active.");
+        updatePlaybackStatus('Stop ignored: Player not active.', 'warning');
+    }
+    // UI updates reactively
+}
+
+// --- UI Update Functions ---
+
+// Updates the list of files based on data from ESP32
+function updateFileList(files) {
+    fileListContainer.innerHTML = ''; // Clear existing list
+
+    if (!files || files.length === 0) {
+        fileListContainer.innerHTML = '<p style="text-align:center; color: #aaa; font-style: italic;">No MIDI files found on ESP32.</p>';
+        updatePlaybackControlsUI(); // Update buttons state even if list is empty
+        return;
+    }
+
+    // Sort files alphabetically by name, case-insensitive
+    files.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+
+    files.forEach(file => {
+        const fileItem = document.createElement('div');
+        fileItem.classList.add('file-item');
+
+        // Generate a safe ID for the radio button and label
+        const safeName = file.name.replace(/[^a-zA-Z0-9]/g, '_');
+        const radioId = `file_radio_${safeName}`;
+
+        fileItem.innerHTML = `
+            <input type="radio" id="${radioId}" name="selectedFile" value="${file.name}" class="file-radio">
+            <label for="${radioId}" class="file-details">
+                <span class="filename">${file.name}</span>
+                <span class="filesize">(${(file.size / 1024).toFixed(2)} KB)</span>
+            </label>
+            <button class="delete-button midi-action-button delete-button-style" data-filename="${file.name}" title="Delete ${file.name}">Delete</button>
+        `;
+
+        // Add event listeners for this specific item
+        const radio = fileItem.querySelector('.file-radio');
+        const deleteBtn = fileItem.querySelector('.delete-button');
+
+        // Handle selection change
+        radio.addEventListener('change', (event) => {
+            if (event.target.checked) {
+                selectedFilename = event.target.value;
+                console.log("Selected file:", selectedFilename);
+                updatePlaybackStatus(`Selected: ${selectedFilename}`);
+                updatePlaybackControlsUI(); // Update global button states
+            }
+        });
+
+        // Handle delete click
+        deleteBtn.addEventListener('click', (event) => {
+            event.stopPropagation(); // Prevent label click
+            deleteFile(event.target.dataset.filename);
+        });
+
+        // Check if this file should be selected based on current playback state
+         if (playbackState.filename === file.name && playbackState.state !== 'stopped') {
+            radio.checked = true;
+            selectedFilename = file.name; // Ensure internal tracking matches
+         }
+
+
+        fileListContainer.appendChild(fileItem);
+    }); // End forEach file
+
+    // Final update of button states after list is populated
+    updatePlaybackControlsUI();
+}
+
+
+// Updates the global Play/Pause/Stop buttons based on playback and selection state
+function updatePlaybackControlsUI() {
+    const isPlaying = playbackState.state === 'playing';
+    const isPaused = playbackState.state === 'paused';
+    const isActive = isPlaying || isPaused;
+    const activeFilename = playbackState.filename; // File ESP32 says is active
+
+    // --- Play/Resume Button Logic ---
+    playButton.classList.remove('resume'); // Reset style
+    playButton.textContent = 'Play';
+    playButton.title = 'Play selected file';
+
+    if (isPaused && activeFilename === selectedFilename && selectedFilename !== null) {
+        // State: PAUSED, this IS the active file, and a file IS selected
+        playButton.textContent = 'Resume';
+        playButton.classList.add('resume');
+        playButton.title = `Resume ${selectedFilename}`;
+        playButton.disabled = false;
+    } else {
+        // State: PLAYING, STOPPED, or PAUSED but not the selected file
+        playButton.textContent = 'Play';
+        // Disable Play if:
+        // 1. No file is selected in the UI.
+        // 2. Any file (even a different one) is currently PLAYING.
+        playButton.disabled = (selectedFilename === null) || isPlaying;
+        playButton.title = playButton.disabled ? 'Select a file or wait for playback to stop' : `Play ${selectedFilename || 'selected file'}`;
+    }
+
+    // --- Pause Button Logic ---
+    // Enable Pause ONLY if the currently selected file is the one actually PLAYING
+    pauseButton.disabled = !(isPlaying && activeFilename === selectedFilename && selectedFilename !== null);
+    pauseButton.title = pauseButton.disabled ? 'Pause (Select the playing file first)' : `Pause ${selectedFilename}`;
+
+    // --- Stop Button Logic ---
+    // Enable Stop if ANY file is currently PLAYING or PAUSED (global stop)
+    stopButton.disabled = !isActive;
+    stopButton.title = stopButton.disabled ? 'Stop (Nothing is playing)' : `Stop ${activeFilename || 'playback'}`;
+
+
+    // --- Update Playback Status Text ---
+    let statusText = "Status: Idle";
+    let statusType = 'info';
+    if (isPlaying) {
+        statusText = `Status: Playing ${activeFilename}`;
+        statusType = 'ok';
+    } else if (isPaused) {
+        statusText = `Status: Paused ${activeFilename}`;
+        statusType = 'warning';
+    } else if (selectedFilename) {
+         statusText = `Status: Selected ${selectedFilename}`; // Show selection when idle
+    }
+    updatePlaybackStatus(statusText, statusType); // Update the dedicated playback status area
+
+}
+
+// Updates the playback status display area
+function updatePlaybackStatus(message, type = 'info') {
+    const now = new Date();
+    const timeString = typeof Intl !== 'undefined' ?
+                 new Intl.DateTimeFormat(navigator.language, { hour: 'numeric', minute: 'numeric', second: 'numeric' }).format(now)
+                 : now.toTimeString().split(' ')[0];
+
+    // Trim message if too long? Maybe later.
+    playbackStatusDiv.textContent = `${message}`; // Keep it simple, timestamp might clutter
+    // Apply CSS class for styling (e.g., color)
+    playbackStatusDiv.className = `status-message playback-status-message status-${type}`; // type: ok, error, warning, info
+}
+
+
+// Utility to format file sizes (from original script)
+function formatBytes(bytes, decimals = 2) {
+    if (!Number.isFinite(bytes) || bytes < 0) return 'Invalid Size';
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    const unitIndex = Math.min(i, sizes.length - 1);
+    return parseFloat((bytes / Math.pow(k, unitIndex)).toFixed(dm)) + ' ' + sizes[unitIndex];
+}
+
+// --- Event Listeners Initialization ---
+function initializeMIDIPlayer() {
+    // File Upload
+    uploadForm.addEventListener('submit', handleUploadSubmit);
+    fileInput.addEventListener('change', handleFileInputChange); // Update display on file select
+
+    // File List Refresh
+    refreshButton.addEventListener('click', fetchFileList); // Allow manual refresh via HTTP
+
+    // Playback Controls
+    playButton.addEventListener('click', playSelectedMidi);
+    pauseButton.addEventListener('click', pauseActiveMidi);
+    stopButton.addEventListener('click', stopActiveMidi);
+
+    // Initial State
+    updatePlaybackControlsUI(); // Set initial button states
+    fetchFileList(); // Get initial file list via HTTP
+}
 // Get the current year
 var currentYear = new Date().getFullYear();
 
@@ -1902,4 +2324,5 @@ document.getElementById("currentYear").innerHTML += " " + currentYear;
 // Call the init function when the window loads
 window.onload = function(event) {
   init();
+  initializeMIDIPlayer();
 };
