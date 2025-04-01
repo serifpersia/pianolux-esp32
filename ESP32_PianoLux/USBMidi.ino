@@ -93,7 +93,7 @@ void show_config_desc_full(const usb_config_desc_t *config_desc) {
 }
 
 // Send MIDI Note On message
-void sendMIDINoteOn(uint8_t channel, uint8_t note, uint8_t velocity) {
+void sendUSBMIDINoteOn(uint8_t channel, uint8_t note, uint8_t velocity) {
   if (!MIDIOut || !isMIDIReady) {
     return;
   }
@@ -120,7 +120,7 @@ void sendMIDINoteOn(uint8_t channel, uint8_t note, uint8_t velocity) {
 }
 
 // Send MIDI Note Off message
-void sendMIDINoteOff(uint8_t channel, uint8_t note, uint8_t velocity) {
+void sendUSBMIDINoteOff(uint8_t channel, uint8_t note, uint8_t velocity) {
   if (!MIDIOut || !isMIDIReady) {
     return;
   }
@@ -145,4 +145,90 @@ void sendMIDINoteOff(uint8_t channel, uint8_t note, uint8_t velocity) {
     sendESP32Log("USB MIDI OUT: NOTE OFF Pitch: " + String(note) + " Velocity: " + String(velocity));
   }
 }
+void sendUSBMIDIControlChange(uint8_t channel, uint8_t controller, uint8_t value) {
+  if (!MIDIOut || !isMIDIReady) {
+    return;
+  }
+
+  uint8_t midiData[4] = {
+    0x0B,                   // Cable Number 0, CIN 0xB (Control Change)
+    0xB0 | (channel & 0x0F),// Control Change status byte (channel 0-15)
+    controller & 0x7F,     // Controller number (0-127)
+    value & 0x7F           // Value (0-127)
+  };
+
+  memcpy(MIDIOut->data_buffer, midiData, 4);
+  MIDIOut->num_bytes = 4;
+
+  esp_err_t err = usb_host_transfer_submit(MIDIOut);
+  if (err != ESP_OK) {
+    ESP_LOGI("", "MIDI Control Change transfer submit failed: %x", err);
+    return;
+  }
+
+  if (numConnectedClients != 0) {
+    sendESP32Log("USB MIDI OUT: CONTROL CHANGE Channel: " + String(channel) +
+                 " Controller: " + String(controller) + " Value: " + String(value));
+  }
+}
+
+void sendUSBMIDIProgramChange(uint8_t channel, uint8_t program) {
+  if (!MIDIOut || !isMIDIReady) {
+    return;
+  }
+
+  uint8_t midiData[4] = {
+    0x0C,                   // Cable Number 0, CIN 0xC (Program Change)
+    0xC0 | (channel & 0x0F),// Program Change status byte (channel 0-15)
+    program & 0x7F,        // Program number (0-127)
+    0x00                   // Unused byte (padding)
+  };
+
+  memcpy(MIDIOut->data_buffer, midiData, 4);
+  MIDIOut->num_bytes = 4;
+
+  esp_err_t err = usb_host_transfer_submit(MIDIOut);
+  if (err != ESP_OK) {
+    ESP_LOGI("", "MIDI Program Change transfer submit failed: %x", err);
+    return;
+  }
+
+  if (numConnectedClients != 0) {
+    sendESP32Log("USB MIDI OUT: PROGRAM CHANGE Channel: " + String(channel) +
+                 " Program: " + String(program));
+  }
+}
+
+void sendUSBMIDIPitchBend(uint8_t channel, int bendValue) {
+  if (!MIDIOut || !isMIDIReady) {
+    return;
+  }
+
+  // Convert signed bendValue (-8192 to +8191) to unsigned 14-bit (0-16383)
+  uint16_t unsignedBend = (bendValue + 8192) & 0x3FFF; // Ensure 14-bit range
+  uint8_t lsb = unsignedBend & 0x7F;         // Least Significant 7 bits
+  uint8_t msb = (unsignedBend >> 7) & 0x7F;  // Most Significant 7 bits
+
+  uint8_t midiData[4] = {
+    0x0E,                   // Cable Number 0, CIN 0xE (Pitch Bend)
+    0xE0 | (channel & 0x0F),// Pitch Bend status byte (channel 0-15)
+    lsb,                   // LSB (0-127)
+    msb                    // MSB (0-127)
+  };
+
+  memcpy(MIDIOut->data_buffer, midiData, 4);
+  MIDIOut->num_bytes = 4;
+
+  esp_err_t err = usb_host_transfer_submit(MIDIOut);
+  if (err != ESP_OK) {
+    ESP_LOGI("", "MIDI Pitch Bend transfer submit failed: %x", err);
+    return;
+  }
+
+  if (numConnectedClients != 0) {
+    sendESP32Log("USB MIDI OUT: PITCH BEND Channel: " + String(channel) +
+                 " Bend: " + String(bendValue));
+  }
+}
+
 #endif

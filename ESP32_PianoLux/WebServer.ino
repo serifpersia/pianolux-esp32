@@ -351,22 +351,39 @@ void notifyClients(const String& message) {
   webSocket.broadcastTXT(localMessage);
 }
 
+// Add storage info endpoint
+void handleStorageInfo(AsyncWebServerRequest *request) {
+  size_t totalBytes = LittleFS.totalBytes();
+  size_t usedBytes = LittleFS.usedBytes();
+  size_t freeSpace = totalBytes - usedBytes;
+
+  DynamicJsonDocument doc(256);
+  doc["totalBytes"] = totalBytes;
+  doc["usedBytes"] = usedBytes;
+  doc["freeSpace"] = freeSpace;
+
+  String json;
+  serializeJson(doc, json);
+  request->send(200, "application/json", json);
+}
+
 String listFilesJSON() {
   String json = "[";
   File root = LittleFS.open("/");
   if (!root || !root.isDirectory()) {
-    //WebSerial.println("ERROR: Failed to open root directory!");
     return "[]";
   }
   File file = root.openNextFile();
   bool firstFile = true;
   while (file) {
     if (!file.isDirectory()) {
-      if (!firstFile) json += ",";
       String filename = file.name();
-      if (filename.startsWith("/")) filename = filename.substring(1);
-      json += "{\"name\":\"" + filename + "\",\"size\":" + String(file.size()) + "}";
-      firstFile = false;
+      if (filename.endsWith(".mid") || filename.endsWith(".midi")) {
+        if (!firstFile) json += ",";
+        if (filename.startsWith("/")) filename = filename.substring(1);
+        json += "{\"name\":\"" + filename + "\",\"size\":" + String(file.size()) + "}";
+        firstFile = false;
+      }
     }
     file.close();
     file = root.openNextFile();
@@ -377,6 +394,7 @@ String listFilesJSON() {
 }
 
 
+
 void handleFileList(AsyncWebServerRequest *request) {
   WebSerial.println("API: Request for file list");
   request->send(200, "application/json", listFilesJSON());
@@ -385,38 +403,61 @@ void handleFileList(AsyncWebServerRequest *request) {
 File uploadFile;
 void handleUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
   String path = "/" + filename;
-  if (filename.indexOf('/') != -1 || filename.indexOf('\\') != -1 || filename == "" || filename == "..") {
-    //WebSerial.printf("UPLOAD: Invalid filename: %s\n", filename.c_str());
+
+  // Enhanced filename validation
+  if (filename.indexOf('/') != -1 || filename.indexOf('\\') != -1 ||
+      filename == "" || filename == ".." ||
+      (!filename.endsWith(".mid") && !filename.endsWith(".midi"))) {
     if (final && uploadFile) {
       uploadFile.close();
       LittleFS.remove(path);
     }
+    request->send(400, "text/plain", "Invalid filename or type");
     return;
   }
+
+  // Check file size limit and storage space on first chunk
   if (index == 0) {
-    //WebSerial.printf("UPLOAD START: %s\n", filename.c_str());
+    size_t totalBytes = LittleFS.totalBytes();
+    size_t usedBytes = LittleFS.usedBytes();
+    size_t freeSpace = totalBytes - usedBytes;
+    size_t totalSize = request->contentLength();
+
+    if (totalSize > 1024 * 1024) {  // 1MB limit
+      request->send(400, "text/plain", "File exceeds 1MB limit");
+      return;
+    }
+
+    if (totalSize > freeSpace) {
+      request->send(400, "text/plain", "Insufficient storage space");
+      return;
+    }
+
     if (uploadFile) uploadFile.close();
     uploadFile = LittleFS.open(path, "w");
     if (!uploadFile) {
-      //WebSerial.printf("UPLOAD ERROR: Could not open %s\n", path.c_str());
       notifyClients("{\"status\":\"error\", \"message\":\"Failed to open file for upload\"}");
+      request->send(500, "text/plain", "Failed to create file");
       return;
     }
   }
+
   if (uploadFile) {
     size_t bytesWritten = uploadFile.write(data, len);
     if (bytesWritten != len) {
-      //WebSerial.println("UPLOAD ERROR: File write failed!");
       uploadFile.close();
       notifyClients("{\"status\":\"error\", \"message\":\"File write error during upload\"}");
+      request->send(500, "text/plain", "Write error");
       return;
     }
   }
+
   if (final) {
     WebSerial.printf("UPLOAD END: %s, Total Size: %u\n", filename.c_str(), index + len);
     if (uploadFile) {
       uploadFile.close();
       notifyClients(listFilesJSON());
+      request->send(200, "text/plain", "Upload successful");
     }
   }
 }

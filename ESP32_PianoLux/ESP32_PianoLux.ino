@@ -223,8 +223,8 @@ float distance(CRGB color1, CRGB color2) {
 }
 
 // Function declarations
-void sendMIDINoteOn(uint8_t channel, uint8_t note, uint8_t velocity);
-void sendMIDINoteOff(uint8_t channel, uint8_t note, uint8_t velocity = 0);
+void sendUSBMIDINoteOn(uint8_t channel, uint8_t note, uint8_t velocity);
+void sendUSBMIDINoteOff(uint8_t channel, uint8_t note, uint8_t velocity = 0);
 
 void loadConfig() {
   File configFile = LittleFS.open("/config.cfg", "r");
@@ -435,6 +435,31 @@ void setupArduinoOTA()
 }
 #endif
 
+void midiLoggerCallback(MidiLogLevel level, const char* format, ...) {
+  const char* levelStr = "";
+  switch (level) {
+    case MIDI_LOG_NONE: levelStr = "[NONE] "; break;
+    case MIDI_LOG_FATAL: levelStr = "[FATAL] "; break;
+    case MIDI_LOG_ERROR: levelStr = "[ERROR] "; break;
+    case MIDI_LOG_WARN:  levelStr = "[WARN]  "; break;
+    case MIDI_LOG_INFO:  levelStr = "[INFO]  "; break;
+    case MIDI_LOG_DEBUG: levelStr = "[DEBUG] "; break;
+    case MIDI_LOG_VERBOSE: levelStr = "[VERB]  "; break;
+    default: break;
+  }
+
+  // Buffer to hold the formatted message
+  char messageBuffer[256];
+  va_list args;
+  va_start(args, format);
+  vsnprintf(messageBuffer, sizeof(messageBuffer), format, args);
+  va_end(args);
+
+  // Output to WebSerial
+  WebSerial.print(levelStr);
+  WebSerial.println(messageBuffer);
+}
+
 void setup() {
   // Start Serial at 115200 baud rate
   Serial.begin(115200);
@@ -481,9 +506,13 @@ void setup() {
   Serial.println("LittleFS mounted successfully");
 
   if (!midiPlayer.begin()) {
-    //WebSerial.println("Failed to initialize MIDI player.");
+    WebSerial.println("Failed to initialize MIDI player.");
   }
 
+
+  midiPlayer.setLogger(MIDI_LOG_INFO, midiLoggerCallback);
+
+  server.on("/api/storage", HTTP_GET, handleStorageInfo);
   server.on("/api/files", HTTP_GET, handleFileList);
   server.on("/api/upload", HTTP_POST, [](AsyncWebServerRequest * request) {
     request->send(200, "text/plain", "Upload Received");
@@ -545,7 +574,7 @@ void setup() {
 
   MIDI.setHandleNoteOn([](byte channel, byte note, byte velocity) {
     if (isConnected) {
-      sendMIDINoteOn(channel, note, velocity);
+      sendUSBMIDINoteOn(channel, note, velocity);
     }
 
     noteOn(note, velocity);
@@ -557,7 +586,7 @@ void setup() {
   });
   MIDI.setHandleNoteOff([](byte channel, byte note, byte velocity) {
     if (isConnected) {
-      sendMIDINoteOff(channel, note, velocity);
+      sendUSBMIDINoteOff(channel, note, velocity);
     }
 
     noteOff(note);
@@ -585,8 +614,6 @@ void loop() {
 
   MIDI.read();
 
-  midiPlayer.update(); // Update MIDI player state and timing
-
   // --- State Change Detection and Notification ---
   static MidiPlayerState lastState = midiPlayer.getState(); // Initialize correctly
   MidiPlayerState currentState = midiPlayer.getState();
@@ -612,18 +639,75 @@ void loop() {
   usbh_task();
 #endif
 
-  // --- Handle MIDI Events for LED Control ---
-  uint8_t note, velocity;
+  uint8_t channel, note, velocity, controller, value, program;
+  int bendValue;
 
-  if (midiPlayer.isNoteOn(note, velocity)) {
-    // WebSerial.printf("Note On: %d Vel: %d\n", note, velocity); // Debug
+  midiPlayer.update(); // Ensure this is called in your loop to process events
+
+  // Note On
+  if (midiPlayer.isNoteOn(channel, note, velocity)) {
+    //WebSerial.printf("Note On: Chan %d Note %d Vel %d\n", channel + 1, note, velocity);
     noteOn(note, velocity);
-    sendMIDINoteOn(1, note, velocity);
-  } else if (midiPlayer.isNoteOff(note)) {
-    // WebSerial.printf("Note Off: %d\n", note); // Debug
-    noteOff(note);
-    sendMIDINoteOff(1, note, velocity);
+    sendUSBMIDINoteOn(channel, note, velocity); // 0-based for USB MIDI
+
+    if (isConnected) {
+      MIDI.sendNoteOn(note, velocity, channel + 1); // 1-based for RTP-MIDI
+      if (numConnectedClients != 0) {
+        //sendESP32Log("MIDI PLAYER: RTP MIDI Out: Note ON " + String(note) + " Velocity: " + String(velocity));
+      }
+    }
   }
+  // Note Off
+  else if (midiPlayer.isNoteOff(channel, note)) {
+    //WebSerial.printf("Note Off: Chan %d Note %d\n", channel + 1, note);
+    noteOff(note);
+    sendUSBMIDINoteOff(channel, note, velocity); // 0-based for USB MIDI
+
+    if (isConnected) {
+      MIDI.sendNoteOff(note, velocity, channel + 1); // 1-based for RTP-MIDI
+      if (numConnectedClients != 0) {
+        //sendESP32Log("MIDI PLAYER: RTP MIDI Out: Note OFF " + String(note) + " Velocity: " + String(velocity));
+      }
+    }
+  }
+  // Control Change
+  else if (midiPlayer.isControlChange(channel, controller, value)) {
+    //WebSerial.printf("Control Change: Chan %d Controller %d Value %d\n", channel + 1, controller, value);
+    // Add local CC handling if needed (e.g., adjust LED brightness)
+    sendUSBMIDIControlChange(channel, controller, value); // 0-based for USB MIDI
+
+    if (isConnected) {
+      MIDI.sendControlChange(controller, value, channel + 1); // 1-based for RTP-MIDI
+      if (numConnectedClients != 0) {
+        //sendESP32Log("MIDI PLAYER: RTP MIDI Out: CC " + String(controller) + " Value: " + String(value));
+      }
+    }
+  }
+  // Program Change
+  else if (midiPlayer.isProgramChange(channel, program)) {
+    //WebSerial.printf("Program Change: Chan %d Program %d\n", channel + 1, program);
+    sendUSBMIDIProgramChange(channel, program); // 0-based for USB MIDI
+
+    if (isConnected) {
+      //MIDI.sendProgramChange(program, channel + 1); // 1-based for RTP-MIDI
+      if (numConnectedClients != 0) {
+        //sendESP32Log("MIDI PLAYER: RTP MIDI Out: Program Change " + String(program));
+      }
+    }
+  }
+  // Pitch Bend
+  else if (midiPlayer.isPitchBend(channel, bendValue)) {
+    //WebSerial.printf("Pitch Bend: Chan %d Value %d\n", channel + 1, bendValue);
+    sendUSBMIDIPitchBend(channel, bendValue); // 0-based for USB MIDI
+
+    if (isConnected) {
+      //MIDI.sendPitchBend(bendValue, channel + 1); // 1-based for RTP-MIDI
+      if (numConnectedClients != 0) {
+        //sendESP32Log("MIDI PLAYER: RTP MIDI Out: Pitch Bend " + String(bendValue));
+      }
+    }
+  }
+
 
 #if USE_ARDUINO_OTA
   ArduinoOTA.handle();

@@ -1924,6 +1924,8 @@ color: #333;
   document.head.appendChild(style);
 }
 
+
+const MAX_MIDI_SIZE = 1 * 1024 * 1024; // 1MB in bytes
 const uploadForm = document.getElementById('upload-form');
 const fileInput = document.getElementById('file-input');
 const fileNameDisplay = document.getElementById('file-name-display'); // For showing chosen file
@@ -1990,6 +1992,7 @@ function handleFileInputChange() {
     }
 }
 
+// Modify handleUploadSubmit function
 async function handleUploadSubmit(event) {
     event.preventDefault();
     if (!fileInput.files || fileInput.files.length === 0) {
@@ -1999,29 +2002,57 @@ async function handleUploadSubmit(event) {
     }
     const file = fileInput.files[0];
 
-    // Basic client-side validation
-    const invalidChars = /[\\/]|\.\./;
+    // Enhanced filename validation
+    const invalidChars = /[\\/:*?"<>|]|\.\./;
     const allowedExtensions = /\.(mid|midi)$/i;
+    const sanitizedFilename = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
 
     if (invalidChars.test(file.name) || file.name === "" || file.name.startsWith('.')) {
-        const errorMsg = `Upload Error: Invalid filename. Slashes, '..', or hidden files not allowed.`;
+        const errorMsg = `Upload Error: Invalid filename characters. Use only letters, numbers, dots, dashes, and underscores.`;
         uploadStatusDiv.textContent = errorMsg;
         uploadStatusDiv.className = 'status-message upload-status-message status-error';
-        fileInput.value = ''; handleFileInputChange();
+        fileInput.value = ''; 
+        handleFileInputChange();
         return;
     }
+
     if (!allowedExtensions.test(file.name)) {
-         const errorMsg = `Upload Error: Invalid file type. Only .mid or .midi allowed.`;
-         uploadStatusDiv.textContent = errorMsg;
-         uploadStatusDiv.className = 'status-message upload-status-message status-error';
-         fileInput.value = ''; handleFileInputChange();
-         return;
+        const errorMsg = `Upload Error: Invalid file type. Only .mid or .midi allowed.`;
+        uploadStatusDiv.textContent = errorMsg;
+        uploadStatusDiv.className = 'status-message upload-status-message status-error';
+        fileInput.value = ''; 
+        handleFileInputChange();
+        return;
+    }
+
+    if (file.size > MAX_MIDI_SIZE) {
+        const errorMsg = `Upload Error: File size exceeds 1MB limit (${formatBytes(file.size)}).`;
+        uploadStatusDiv.textContent = errorMsg;
+        uploadStatusDiv.className = 'status-message upload-status-message status-error';
+        fileInput.value = ''; 
+        handleFileInputChange();
+        return;
+    }
+
+    // Check available storage before upload
+    try {
+        const storageResponse = await fetch('/api/storage');
+        const storageData = await storageResponse.json();
+        
+        if (file.size > storageData.freeSpace) {
+            const errorMsg = `Upload Error: Insufficient storage space. Need ${formatBytes(file.size)}, only ${formatBytes(storageData.freeSpace)} available.`;
+            uploadStatusDiv.textContent = errorMsg;
+            uploadStatusDiv.className = 'status-message upload-status-message status-error';
+            fileInput.value = ''; 
+            handleFileInputChange();
+            return;
+        }
+    } catch (error) {
+        console.error('Storage check failed:', error);
     }
 
     const formData = new FormData();
-    // Ensure the field name matches what the ESP32 AsyncWebServer upload handler expects
-    // Common examples are "file" or "update"
-    formData.append('file', file, file.name); // TRY 'file' FIRST
+    formData.append('file', file, sanitizedFilename);
 
     uploadStatusDiv.textContent = `Uploading ${file.name}... (0%)`;
     uploadStatusDiv.className = 'status-message upload-status-message status-info';
@@ -2153,18 +2184,23 @@ function stopActiveMidi() {
 
 // Updates the list of files based on data from ESP32
 function updateFileList(files) {
-    fileListContainer.innerHTML = ''; // Clear existing list
+    fileListContainer.innerHTML = '';
+    
+    const midiFiles = files.filter(file => 
+        file.name.toLowerCase().endsWith('.mid') || 
+        file.name.toLowerCase().endsWith('.midi')
+    );
 
-    if (!files || files.length === 0) {
+    if (!midiFiles.length) {
         fileListContainer.innerHTML = '<p style="text-align:center; color: #aaa; font-style: italic;">No MIDI files found on ESP32.</p>';
-        updatePlaybackControlsUI(); // Update buttons state even if list is empty
+        updatePlaybackControlsUI();
         return;
     }
 
     // Sort files alphabetically by name, case-insensitive
-    files.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+     midiFiles.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
 
-    files.forEach(file => {
+    midiFiles.forEach(file => {
         const fileItem = document.createElement('div');
         fileItem.classList.add('file-item');
 
