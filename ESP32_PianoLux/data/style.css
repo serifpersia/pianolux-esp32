@@ -693,6 +693,7 @@ select {
     padding: 10px 15px;
     border-radius: 8px;
     gap: 15px; /* Space between elements inside the item */
+    overflow-x: auto; /* Add horizontal scroll if content overflows */
 }
 
 .file-item .file-radio {
@@ -733,11 +734,15 @@ select {
     flex-grow: 1; /* Take available space */
     cursor: pointer; /* Make label clickable for radio */
     color: #e0e0e0;
+    min-width: 0; /* Add this line */
 }
 
 .file-item .filename {
     font-weight: bold;
     font-size: 1.1em;
+    white-space: nowrap; /* Prevent the filename from wrapping */
+    overflow: hidden;      /* Hide the overflow text */
+    text-overflow: ellipsis; /* Add ellipsis (...) to the end of overflowing text */
 }
 
 .file-item .filesize {
@@ -750,7 +755,9 @@ select {
     padding: 8px 15px; /* Smaller padding */
     font-size: 0.9em;
     flex-shrink: 0; /* Prevent button shrinking */
+    white-space: nowrap;
 }
+
 .delete-button-style:hover {
     background-color: #c82333;
 }
