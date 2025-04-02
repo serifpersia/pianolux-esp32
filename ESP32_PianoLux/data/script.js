@@ -168,6 +168,7 @@ function updateUI(data) {
   updateDropdownList("selected-item-animations", data.ANIMATION);
   updateDropdownList("selected-item-presetColors", data.LED_COLOR_PRESET);
   updateDropdownList("selected-item-colorOrder", data.LED_COLOR_ORDER);
+  updateDropdownList("selected-item-wifiMode", data.WIFI_MODE);
 
   updateControlValue("HUE", data.HUE, track, thumb, handleMove, 255);
   updateControlValue(
@@ -312,6 +313,24 @@ selectedItemPresetColors.addEventListener("change", () => {
   handleEnd(selectedItemPresetColors);
   updateBrightnessTrackGradient(hue);
   updateSaturationTrackGradient(hue);
+});
+
+// DropdownList script for LED Strip Color Order
+const selectedItemWifiMode = document.querySelector(
+  "#selected-item-wifiMode"
+);
+
+selectedItemWifiMode.addEventListener("change", () => {
+  const selectedWifiModeId = selectedItemWifiMode.value;
+  console.log("Selected Wifi Mode ID:", selectedWifiModeId); // Debugging statement
+
+  // Send a WebSocket message for changing the wifi mode
+  sendData("ChangeWifiModeAction", { wifiMode: selectedWifiModeId });
+
+  // Refresh the page after 2 seconds
+  setTimeout(() => {
+    location.reload();
+  }, 3500);
 });
 
 // Function to update UI elements based on the selected preset

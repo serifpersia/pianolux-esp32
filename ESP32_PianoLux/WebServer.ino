@@ -60,7 +60,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
             }
 
             // loadFile stops the player first if necessary
-            if (midiPlayer.loadFile(path.c_str())) {
+            if (midiPlayer.load(path.c_str())) {
               currentLoadedFile = filename; // Store the name of the successfully loaded file
               midiPlayer.play();
               //WebSerial.printf("Playing MIDI: %s\n", filename);
@@ -85,7 +85,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
             WebSerial.printf("[%u] Pause command received.\n", num);
             midiPlayer.pause();
             // Check if pause was successful (player must have been playing)
-            if (midiPlayer.getState() == MidiPlayerState::PAUSED) {
+            if (midiPlayer.getState() == PlaybackState::PAUSED) {
               notifyClients("{\"status\":\"info\", \"message\":\"MIDI playback paused.\"}");
               sendPlaybackStatus(); // Broadcast the PAUSED state
             } else {
@@ -97,7 +97,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
             WebSerial.printf("[%u] Resume command received.\n", num);
             midiPlayer.resume();
             // Check if resume was successful (player must have been paused)
-            if (midiPlayer.getState() == MidiPlayerState::PLAYING) {
+            if (midiPlayer.getState() == PlaybackState::PLAYING) {
               notifyClients("{\"status\":\"info\", \"message\":\"MIDI playback resumed.\"}");
               sendPlaybackStatus(); // Broadcast the PLAYING state
             } else {
@@ -169,6 +169,12 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
             hue = doc["colorPresetHue"];
             saturation = doc["colorPresetSaturation"];
             COLOR_PRESET = doc["colorPresetID"];
+          }
+          else if (action == "ChangeWifiModeAction") {
+            WIFI_MODE = doc["wifiMode"];
+            updateConfigFile("WIFI_MODE", WIFI_MODE);
+            delay(1000);
+            ESP.restart();  // Restart the ESP32
           }
           else if (action == "PianoSizeAction") {
             keySizeVal = doc["value"];
@@ -296,6 +302,7 @@ void sendValues() {
   doc["LED_PIN"] = LED_PIN;
   doc["LED_COLOR_PRESET"] = COLOR_PRESET;
   doc["LED_COLOR_ORDER"] = COLOR_ORDER;
+  doc["WIFI_MODE"] = WIFI_MODE;
 
   // Serialize the JSON document to a string
   String jsonStr;
