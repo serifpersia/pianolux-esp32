@@ -39,7 +39,7 @@
 // Once this AP is no longer visible your ESP32 should show you your IP, you might need to recconect the board or press reset button to see it.
 // Connect to PianoLux web interface via ip the link should look like http://192.168.1.32/ or use pianolux.local http://pianolux.local/.
 
-String firmwareVersion = "v1.11";
+String firmwareVersion = "v1.12";
 
 // Define board types with unique values
 #define ESP32    1
@@ -239,8 +239,10 @@ float distance(CRGB color1, CRGB color2) {
 }
 
 // Function declarations
+#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
 void sendUSBMIDINoteOn(uint8_t channel, uint8_t note, uint8_t velocity);
 void sendUSBMIDINoteOff(uint8_t channel, uint8_t note, uint8_t velocity = 0);
+#endif
 
 void handleNoteOn(uint8_t channel, uint8_t note, uint8_t velocity);
 void handleNoteOff(uint8_t channel, uint8_t note, uint8_t velocity);
@@ -588,13 +590,17 @@ void setup() {
 
   MIDI.setHandleNoteOn([](byte channel, byte note, byte velocity) {
     if (isConnected) {
+#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
       sendUSBMIDINoteOn(channel, note, velocity);
+#endif
     }
     noteOn(note, velocity);
   });
   MIDI.setHandleNoteOff([](byte channel, byte note, byte velocity) {
     if (isConnected) {
+#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
       sendUSBMIDINoteOff(channel, note, velocity);
+#endif
     }
     noteOff(note);
   });
@@ -909,7 +915,9 @@ void handleNoteOn(uint8_t channel, uint8_t note, uint8_t velocity) {
   //              channel + 1, note, velocity, midiPlayer.getCurrentTick()); // Display channel 1-16
 
   noteOn(note, velocity);
+#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
   sendUSBMIDINoteOn(channel, note, velocity);
+#endif
   if (isConnected) {
     MIDI.sendNoteOn(note, velocity, channel + 1);
   }
@@ -920,7 +928,9 @@ void handleNoteOff(uint8_t channel, uint8_t note, uint8_t velocity) {
   //              channel + 1, note, velocity, midiPlayer.getCurrentTick()); // Display channel 1-16
 
   noteOff(note);
+#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
   sendUSBMIDINoteOff(channel, note, velocity);
+#endif
   if (isConnected) {
     MIDI.sendNoteOn(note, velocity, channel + 1);
   }
@@ -930,6 +940,9 @@ void handleControlChange(uint8_t channel, uint8_t controller, uint8_t value) {
   //WebSerial.printf("[EVT] Ctrl Chg: Ch=%u CC=%u Val=%u (Tick: %lu)\n",
   //               channel + 1, controller, value, midiPlayer.getCurrentTick()); // Display channel 1-16
 
+#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
+  sendUSBMIDIControlChange(channel, controller, value);
+#endif
   if (isConnected)
   {
     MIDI.sendControlChange(controller, value, channel + 1);

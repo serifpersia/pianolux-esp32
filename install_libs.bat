@@ -76,6 +76,11 @@ echo Installing WiFiManager library...
 powershell -command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/tzapu/WiFiManager/archive/refs/heads/master.zip', 'WiFiManager.zip')"
 powershell -command "Expand-Archive -Path WiFiManager.zip -DestinationPath '%ARDUINO_LIB_DIR%' -Force"
 
+rem Install ESP32MidiPlayer library
+echo Installing ESP32MidiPlayer library...
+powershell -command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/serifpersia/ESP32MidiPlayer/archive/refs/tags/1.0.1.zip', 'ESP32MidiPlayer.zip')"
+powershell -command "Expand-Archive -Path ESP32MidiPlayer.zip -DestinationPath '%ARDUINO_LIB_DIR%' -Force"
+
 rem Delete the temporary directory
 cd ..
 rmdir /s /q arduino_temp

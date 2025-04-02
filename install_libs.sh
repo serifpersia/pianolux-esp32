@@ -33,6 +33,7 @@ install_library "https://github.com/FastLED/FastLED/archive/refs/tags/3.7.0.zip"
 install_library "https://github.com/h2zero/NimBLE-Arduino/archive/refs/tags/1.4.2.zip" "NimBLE-Arduino.zip" "$ARDUINO_LIB_DIR"
 install_library "https://github.com/Links2004/arduinoWebSockets/archive/refs/heads/master.zip" "WebSockets.zip" "$ARDUINO_LIB_DIR"
 install_library "https://github.com/tzapu/WiFiManager/archive/refs/heads/master.zip" "WiFiManager.zip" "$ARDUINO_LIB_DIR"
+install_library "https://github.com/serifpersia/ESP32MidiPlayer/archive/refs/tags/1.0.1.zip" "ESP32MidiPlayer.zip" "$ARDUINO_LIB_DIR"
 
 # Cleanup
 cd ..
