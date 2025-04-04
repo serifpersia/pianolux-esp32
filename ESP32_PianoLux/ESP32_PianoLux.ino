@@ -48,6 +48,7 @@ String firmwareVersion = "v1.12";
 
 // Define the actual board type (change this based on your board)
 #define BOARD_TYPE  ESP32S3 // select your board: ESP32, ESP32S2, or ESP32S3
+#define BOARD_TYPE  ESP32S2 // select your board: ESP32, ESP32S2, or ESP32S3
 
 #if BOARD_TYPE == ESP32S3
 #include <BLEMidi.h>
@@ -113,10 +114,6 @@ ESP32MidiPlayer midiPlayer(LittleFS); // Use LittleFS
 String currentLoadedFile = ""; // Declare currentLoadedFile globally
 uint8_t isConnected = 0; // Declare isConnected globally
 
-// Task handles
-TaskHandle_t midiTaskHandle = NULL;
-TaskHandle_t ledTaskHandle = NULL;
-TaskHandle_t networkTaskHandle = NULL;
 
 // Constants for LED strip
 #define UPDATES_PER_SECOND 60
@@ -241,13 +238,52 @@ float distance(CRGB color1, CRGB color2) {
 // Function declarations
 #if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
 void sendUSBMIDINoteOn(uint8_t channel, uint8_t note, uint8_t velocity);
-void sendUSBMIDINoteOff(uint8_t channel, uint8_t note, uint8_t velocity = 0);
+void sendUSBMIDINoteOff(uint8_t channel, uint8_t note, uint8_t velocity);
+void sendUSBMIDIControlChange(uint8_t channel, uint8_t controller, uint8_t value);
 #endif
 
-void handleNoteOn(uint8_t channel, uint8_t note, uint8_t velocity);
-void handleNoteOff(uint8_t channel, uint8_t note, uint8_t velocity);
-void handleControlChange(uint8_t channel, uint8_t controller, uint8_t value);
-void handlePlaybackComplete();
+// Function definitions (outside midiTask())
+void handleNoteOn(uint8_t channel, uint8_t note, uint8_t velocity) {
+  WebSerial.printf("[EVT] Note On:  Ch=%u Note=%u Vel=%u (Tick: %lu)\n",
+                   channel + 1, note, velocity, midiPlayer.getCurrentTick()); // Display channel 1-16
+
+  noteOn(note, velocity);
+#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
+  sendUSBMIDINoteOn(channel, note, velocity);
+#endif
+  if (isConnected) {
+    MIDI.sendNoteOn(note, velocity, channel + 1);
+  }
+}
+
+void handleNoteOff(uint8_t channel, uint8_t note, uint8_t velocity) {
+  WebSerial.printf("[EVT] Note Off:  Ch=%u Note=%u Vel=%u (Tick: %lu)\n",
+                   channel + 1, note, velocity, midiPlayer.getCurrentTick()); // Display channel 1-16
+
+  noteOff(note);
+#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
+  sendUSBMIDINoteOff(channel, note, velocity);
+#endif
+  if (isConnected) {
+    MIDI.sendNoteOn(note, velocity, channel + 1);
+  }
+}
+
+void handleControlChange(uint8_t channel, uint8_t controller, uint8_t value) {
+  WebSerial.printf("[EVT] Control Change:  Ch=%u Controller=%u Value=%u (Tick: %lu)\n",
+                   channel + 1, controller, value, midiPlayer.getCurrentTick()); // Display channel 1-16
+
+  noteOff(note);
+#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
+  sendUSBMIDIControlChange(channel, controller, value);
+#endif
+  if (isConnected) {
+    MIDI.sendNoteOn(note, velocity, channel + 1);
+  }
+}
+void handlePlaybackComplete() {
+  notifyClients("{\"status\":\"info\", \"message\":\"MIDI playback finished: " + currentLoadedFile + "\"}"); // Now accessible
+}
 
 void loadConfig() {
   File configFile = LittleFS.open("/config.cfg", "r");
@@ -478,13 +514,7 @@ void handleLog(MidiLogLevel level, const char* message) {
   WebSerial.printf("%s%s\n", levelStr, message);
 }
 
-
 void setup() {
-  Serial.begin(115200);
-  while (!Serial) {
-    // Wait for Serial to be ready
-  }
-  Serial.println("Serial started at 115200");
 
   pinMode(wmJumperPin, INPUT_PULLUP);
   pinMode(apJumperPin, INPUT_PULLUP);
@@ -492,13 +522,10 @@ void setup() {
   WiFiManager wifiManager;
 
   if (!LittleFS.begin()) {
-    Serial.println("An error occurred while mounting LittleFS");
     return;
   }
 
   loadConfig();
-  Serial.println("LittleFS mounted successfully");
-
 
   if (digitalRead(wmJumperPin) == LOW || WIFI_MODE == 1) {
     if (WIFI_MODE == 1)
@@ -513,24 +540,18 @@ void setup() {
     startSTA(wifiManager);
   }
 
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
-
   WebSerial.begin(&server);
   WebSerial.println("Booting...");
 
 
+  WebSerial.println("IP address: ");
+  WebSerial.println(WiFi.localIP());
+
+
+  // Initialize and start mDNS
   if (MDNS.begin("pianolux")) {
-    Serial.println("MDNS Responder Started!");
+    WebSerial.println("MDNS Responder Started!");
   }
-
-  midiPlayer.setLogCallback(handleLog);
-  midiPlayer.setLogLevel(MidiLogLevel::INFO);
-
-  midiPlayer.setNoteOnCallback(handleNoteOn);
-  midiPlayer.setNoteOffCallback(handleNoteOff);
-  midiPlayer.setControlChangeCallback(handleControlChange);
-  midiPlayer.setPlaybackCompleteCallback(handlePlaybackComplete);
 
   server.on("/api/storage", HTTP_GET, handleStorageInfo);
   server.on("/api/files", HTTP_GET, handleFileList);
@@ -562,6 +583,7 @@ void setup() {
   MDNS.addService("http", "tcp", 80);
   MDNS.addService("ws", "tcp", 81);
 
+  // Initialize LED strip based on the loaded configuration
   initializeLEDStrip(COLOR_ORDER);
 
   webSocket.begin();
@@ -572,7 +594,7 @@ void setup() {
     setIPLeds();
   }
 
-  MIDI.begin(); // Initialize global MIDI object
+  MIDI.begin();
 
   AppleMIDI.setHandleConnected([](const APPLEMIDI_NAMESPACE::ssrc_t& ssrc, const char* name) {
     isConnected++;
@@ -590,66 +612,136 @@ void setup() {
 
   MIDI.setHandleNoteOn([](byte channel, byte note, byte velocity) {
     if (isConnected) {
-#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
       sendUSBMIDINoteOn(channel, note, velocity);
-#endif
     }
+
     noteOn(note, velocity);
+
+    if (numConnectedClients != 0)
+    {
+      //sendESP32Log("RTP MIDI IN: NOTE ON: Channel: " + String(channel) + " Pitch: " + String(note) + " Velocity: " + String(velocity));
+    }
   });
   MIDI.setHandleNoteOff([](byte channel, byte note, byte velocity) {
     if (isConnected) {
-#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
       sendUSBMIDINoteOff(channel, note, velocity);
-#endif
     }
+
     noteOff(note);
+
+    if (numConnectedClients != 0)
+    {
+      //sendESP32Log("RTP MIDI IN: NOTE OFF: Channel: " + String(channel) + " Pitch: " + String(note) + " Velocity: " + String(velocity));
+    }
   });
 
-#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32
+#if BOARD_TYPE == ESP3S3 || BOARD_TYPE == ESP32
   BLEMidiClient.begin("PianoLux-BLE");
+  //BLEMidiClient.enableDebugging();
   BLEMidiClient.setNoteOnCallback(BLE_onNoteOn);
   BLEMidiClient.setNoteOffCallback(BLE_onNoteOff);
 #endif
 
+  // USB setup
 #if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
-  usbh_setup(show_config_desc_full);
+  usbh_setup(show_config_desc_full);  // Init USB host for MIDI devices
 #endif
 
-  // Create FreeRTOS tasks pinned to core 0
-  xTaskCreatePinnedToCore(
-    midiTask,        // Task function
-    "MIDITask",      // Task name
-    4096,            // Stack size
-    NULL,            // Parameters
-    2,               // Priority
-    &midiTaskHandle, // Task handle
-    0                // Core 0
-  );
+  //midiPlayer.setLogCallback(handleLog);
+  //midiPlayer.setLogLevel(MidiLogLevel::INFO);
 
-  xTaskCreatePinnedToCore(
-    ledTask,         // Task function
-    "LEDTask",       // Task name
-    4096,            // Stack size
-    NULL,            // Parameters
-    1,               // Priority
-    &ledTaskHandle,  // Task handle
-    0                // Core 0
-  );
-
-  xTaskCreatePinnedToCore(
-    networkTask,     // Task function
-    "NetworkTask",   // Task name
-    4096,            // Stack size
-    NULL,            // Parameters
-    1,               // Priority
-    &networkTaskHandle, // Task handle
-    0                // Core 0
-  );
+  midiPlayer.setNoteOnCallback(handleNoteOn);
+  midiPlayer.setNoteOffCallback(handleNoteOff);
+  midiPlayer.setControlChangeCallback(handleControlChange);
+  midiPlayer.setPlaybackCompleteCallback(handlePlaybackComplete);
 }
 
 void loop() {
-  // Empty loop - all work is handled by tasks
-  vTaskDelay(pdMS_TO_TICKS(1000)); // Yield to tasks
+
+  MIDI.read();
+
+  // Check MIDI player state changes
+  static PlaybackState lastState = midiPlayer.getState();
+  PlaybackState currentState = midiPlayer.getState();
+  if (currentState != lastState) {
+    sendPlaybackStatus();
+
+    // reset leds
+    fill_solid(leds, NUM_LEDS, bgColor);
+
+    lastState = currentState;
+  }
+
+  // Handle USB
+#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
+  usbh_task();
+#endif
+
+
+  midiPlayer.tick(); // Ensure this is called in your loop to process events
+
+
+#if USE_ARDUINO_OTA
+  ArduinoOTA.handle();
+#endif
+
+#if USE_ELEGANT_OTA
+  ElegantOTA.loop();
+#endif
+
+  webSocket.loop();  // Update function for the webSockets
+
+  if (serverMode == 2) {
+    // Update hue for LEDs that are currently on
+    for (uint8_t i = 0; i < NUM_LEDS; i++) {
+      if (keysOn[i]) {
+        currentHue[i] = (currentHue[i] + HUE_CHANGE_SPEED) % 256;
+        controlLeds(i, currentHue[i], saturation, brightness);
+      }
+    }
+  }
+
+  currentTime = millis();
+
+  //slowing it down with interval
+  if (currentTime - previousTime >= interval) {
+    for (uint8_t i = 0; i < numEffects; i++) {
+      if (effects[i]->finished()) {
+        delete effects[i];
+        removeEffect(effects[i]);
+      } else {
+        effects[i]->nextStep();
+      }
+    }
+    previousTime = currentTime;
+  }
+  if (currentTime - previousFadeTime >= fadeInterval) {
+    if (numEffects > 0 || generalFadeRate > 0) {
+      fadeCtrl->fade(generalFadeRate);
+    }
+    previousFadeTime = currentTime;
+  }
+  switch (MODE) {
+    case COMMAND_ANIMATION:
+      if (animationIndex == 7) {
+        // If the selected animation is 7, run the sineWave() animation
+        sineWave();
+      } else if (animationIndex == 8) {
+        // If the selected animation is 7, run the sineWave() animation
+        sparkleDots();
+      } else if (animationIndex == 9) {
+        // If the selected animation is 7, run the sineWave() animation
+        Snake();
+      } else {
+        // For other animations (0 to 6), use the palette-based approach
+        Animatons(animationIndex);
+        static uint8_t startIndex = 0;
+        startIndex = startIndex + 1; /* motion speed */
+        FillLEDsFromPaletteColors(startIndex);
+      }
+      break;
+  }
+  FastLED.show();
 }
 
 void controlLeds(uint8_t ledNo, uint8_t hueVal, uint8_t saturationVal, uint8_t brightnessVal) {
@@ -834,7 +926,7 @@ void setColorFromVelocity(uint8_t velocity, uint8_t& hue, uint8_t& saturation, u
 }
 
 // Add a new effect
-void addEffect(FadingRunEffect* effect) {
+void addEffect(FadingRunEffect * effect) {
   if (numEffects < MAX_EFFECTS) {
     effects[numEffects] = effect;
     numEffects++;
@@ -842,7 +934,7 @@ void addEffect(FadingRunEffect* effect) {
 }
 
 // Remove an effect
-void removeEffect(FadingRunEffect* effect) {
+void removeEffect(FadingRunEffect * effect) {
   for (uint8_t i = 0; i < numEffects; i++) {
     if (effects[i] == effect) {
       // Shift the remaining effects down
@@ -906,142 +998,4 @@ void setIPLeds() {
   // Show the entire IP address
   generalFadeRate = 0;
   FastLED.show();
-}
-
-
-// Function definitions (outside midiTask())
-void handleNoteOn(uint8_t channel, uint8_t note, uint8_t velocity) {
-  //WebSerial.printf("[EVT] Note On:  Ch=%u Note=%u Vel=%u (Tick: %lu)\n",
-  //              channel + 1, note, velocity, midiPlayer.getCurrentTick()); // Display channel 1-16
-
-  noteOn(note, velocity);
-#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
-  sendUSBMIDINoteOn(channel, note, velocity);
-#endif
-  if (isConnected) {
-    MIDI.sendNoteOn(note, velocity, channel + 1);
-  }
-}
-
-void handleNoteOff(uint8_t channel, uint8_t note, uint8_t velocity) {
-  //WebSerial.printf("[EVT] Note Off:  Ch=%u Note=%u Vel=%u (Tick: %lu)\n",
-  //              channel + 1, note, velocity, midiPlayer.getCurrentTick()); // Display channel 1-16
-
-  noteOff(note);
-#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
-  sendUSBMIDINoteOff(channel, note, velocity);
-#endif
-  if (isConnected) {
-    MIDI.sendNoteOn(note, velocity, channel + 1);
-  }
-}
-
-void handleControlChange(uint8_t channel, uint8_t controller, uint8_t value) {
-  //WebSerial.printf("[EVT] Ctrl Chg: Ch=%u CC=%u Val=%u (Tick: %lu)\n",
-  //               channel + 1, controller, value, midiPlayer.getCurrentTick()); // Display channel 1-16
-
-#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
-  sendUSBMIDIControlChange(channel, controller, value);
-#endif
-  if (isConnected)
-  {
-    MIDI.sendControlChange(controller, value, channel + 1);
-  }
-}
-
-void handlePlaybackComplete() {
-  notifyClients("{\"status\":\"info\", \"message\":\"MIDI playback finished: " + currentLoadedFile + "\"}"); // Now accessible
-}
-
-// MIDI Task
-void midiTask(void *pvParameters) {
-  for (;;) {
-    MIDI.read(); // Now accessible as a global object
-
-    // Handle MIDI player updates
-    midiPlayer.tick();
-
-
-#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
-    usbh_task();
-#endif
-
-    vTaskDelay(pdMS_TO_TICKS(10)); // Yield every 10ms
-  }
-}
-
-// LED Task (unchanged from previous version, assuming it uses globals correctly)
-void ledTask(void *pvParameters) {
-  for (;;) {
-    currentTime = millis();
-
-    if (currentTime - previousTime >= interval) {
-      for (uint8_t i = 0; i < numEffects; i++) {
-        if (effects[i]->finished()) {
-          delete effects[i];
-          removeEffect(effects[i]);
-        } else {
-          effects[i]->nextStep();
-        }
-      }
-      previousTime = currentTime;
-    }
-
-    if (currentTime - previousFadeTime >= fadeInterval) {
-      if (numEffects > 0 || generalFadeRate > 0) {
-        fadeCtrl->fade(generalFadeRate);
-      }
-      previousFadeTime = currentTime;
-    }
-
-    switch (MODE) {
-      case COMMAND_ANIMATION:
-        if (animationIndex == 7) {
-          sineWave();
-        } else if (animationIndex == 8) {
-          sparkleDots();
-        } else if (animationIndex == 9) {
-          Snake();
-        } else {
-          static uint8_t startIndex = 0;
-          Animatons(animationIndex);
-          startIndex = startIndex + 1;
-          FillLEDsFromPaletteColors(startIndex);
-        }
-        break;
-    }
-
-    FastLED.show();
-    vTaskDelay(pdMS_TO_TICKS(16)); // ~60 FPS
-  }
-}
-
-
-// Network Task
-void networkTask(void *pvParameters) {
-  for (;;) {
-    webSocket.loop();
-
-#if USE_ARDUINO_OTA
-    ArduinoOTA.handle();
-#endif
-
-#if USE_ELEGANT_OTA
-    ElegantOTA.loop();
-#endif
-
-    // Check MIDI player state changes
-    static PlaybackState lastState = midiPlayer.getState();
-    PlaybackState currentState = midiPlayer.getState();
-    if (currentState != lastState) {
-      sendPlaybackStatus();
-
-      // reset leds
-      fill_solid(leds, NUM_LEDS, bgColor);
-
-      lastState = currentState;
-    }
-
-    vTaskDelay(pdMS_TO_TICKS(10)); // Yield every 10ms
-  }
 }
