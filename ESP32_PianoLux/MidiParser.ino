@@ -69,13 +69,13 @@ static void midi_transfer_cb(usb_transfer_t *transfer) {
               }
             } else {
               noteOn(data1, data2);
-              if (numConnectedClients != 0)
+              if (numConnectedClients != 0 && CLIENT_LOGGER)
               {
                 sendESP32Log("USB MIDI IN: Note ON " + String(data1) + " Velocity: " + String(data2));
 
               }
               if (isConnected) {
-                if (numConnectedClients != 0)
+                if (numConnectedClients != 0 && CLIENT_LOGGER)
                 {
                   sendESP32Log("RTP MIDI Out: Note ON " + String(data1) + " Velocity: " + String(data2));
                 }

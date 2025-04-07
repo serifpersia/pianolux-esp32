@@ -265,7 +265,6 @@ float distance(CRGB color1, CRGB color2) {
 
 // Function definitions (outside midiTask())
 void handleMidiPlayerNoteOn(uint8_t channel, uint8_t note, uint8_t velocity) {
-
   noteOn(note, velocity);
   sendUSBMIDINoteOn(channel, note, velocity);
 }

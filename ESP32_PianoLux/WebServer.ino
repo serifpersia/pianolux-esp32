@@ -176,6 +176,10 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
             delay(1000);
             ESP.restart();  // Restart the ESP32
           }
+          else if (action == "ChangeClientLoggerAction") {
+            CLIENT_LOGGER = doc["clientLogger"];
+            updateConfigFile("CLIENT_LOGGER", CLIENT_LOGGER);
+          }
           else if (action == "PianoSizeAction") {
             keySizeVal = doc["value"];
             switch (keySizeVal) {
@@ -303,6 +307,8 @@ void sendValues() {
   doc["LED_COLOR_PRESET"] = COLOR_PRESET;
   doc["LED_COLOR_ORDER"] = COLOR_ORDER;
   doc["WIFI_MODE"] = WIFI_MODE;
+  doc["CLIENT_LOGGER"] = CLIENT_LOGGER;
+
 
   // Serialize the JSON document to a string
   String jsonStr;
