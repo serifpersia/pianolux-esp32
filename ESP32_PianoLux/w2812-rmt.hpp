@@ -6,7 +6,7 @@
 template <EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
 class ESP32RMT_ClocklessController : public CPixelLEDController<RGB_ORDER>
 {
-private:
+  private:
 
     // -- The actual controller object for ESP32
     ESP32RMTController mRMTController;
@@ -15,19 +15,21 @@ private:
     // no static checks for run-time defined gpio
     //static_assert(FastPin<DATA_PIN>::validpin(), "Invalid pin specified");
 
-public:
+  public:
 
     ESP32RMT_ClocklessController(uint8_t pin, unsigned t1, unsigned t2, unsigned t3)
-        : mRMTController(pin, t1, t2, t3, FASTLED_RMT_MAX_CHANNELS, FASTLED_RMT_MEM_BLOCKS)
-        {}
+      : mRMTController(pin, t1, t2, t3, FASTLED_RMT_MAX_CHANNELS, FASTLED_RMT_MEM_BLOCKS)
+    {}
 
     void init()
     {
     }
 
-    virtual uint16_t getMaxRefreshRate() const { return 400; }
+    virtual uint16_t getMaxRefreshRate() const {
+      return 400;
+    }
 
-protected:
+  protected:
 
     // -- Load pixel data
     //    This method loads all of the pixel data into a separate buffer for use by
@@ -36,31 +38,31 @@ protected:
     //    It also packs the bytes into 32 bit chunks with the right bit order.
     void loadPixelData(PixelController<RGB_ORDER> & pixels)
     {
-        // -- Make sure the buffer is allocated
-        int size_in_bytes = pixels.size() * 3;
-        uint8_t * pData = mRMTController.getPixelBuffer(size_in_bytes);
+      // -- Make sure the buffer is allocated
+      int size_in_bytes = pixels.size() * 3;
+      uint8_t * pData = mRMTController.getPixelBuffer(size_in_bytes);
 
-        // -- This might be faster
-        while (pixels.has(1)) {
-            *pData++ = pixels.loadAndScale0();
-            *pData++ = pixels.loadAndScale1();
-            *pData++ = pixels.loadAndScale2();
-            pixels.advanceData();
-            pixels.stepDithering();
-        }
+      // -- This might be faster
+      while (pixels.has(1)) {
+        *pData++ = pixels.loadAndScale0();
+        *pData++ = pixels.loadAndScale1();
+        *pData++ = pixels.loadAndScale2();
+        pixels.advanceData();
+        pixels.stepDithering();
+      }
     }
 
     // -- Show pixels
     //    This is the main entry point for the controller.
     virtual void showPixels(PixelController<RGB_ORDER> & pixels)
     {
-        if (FASTLED_RMT_BUILTIN_DRIVER) {
-            convertAllPixelData(pixels);
-        } else {
-            loadPixelData(pixels);
-        }
+      if (FASTLED_RMT_BUILTIN_DRIVER) {
+        convertAllPixelData(pixels);
+      } else {
+        loadPixelData(pixels);
+      }
 
-        mRMTController.showPixels();
+      mRMTController.showPixels();
     }
 
     // -- Convert all pixels to RMT pulses
@@ -69,23 +71,23 @@ protected:
     //    up-front.
     void convertAllPixelData(PixelController<RGB_ORDER> & pixels)
     {
-        // -- Make sure the data buffer is allocated
-        mRMTController.initPulseBuffer(pixels.size() * 3);
+      // -- Make sure the data buffer is allocated
+      mRMTController.initPulseBuffer(pixels.size() * 3);
 
-        // -- Cycle through the R,G, and B values in the right order,
-        //    storing the pulses in the big buffer
+      // -- Cycle through the R,G, and B values in the right order,
+      //    storing the pulses in the big buffer
 
-        uint32_t byteval;
-        while (pixels.has(1)) {
-            byteval = pixels.loadAndScale0();
-            mRMTController.convertByte(byteval);
-            byteval = pixels.loadAndScale1();
-            mRMTController.convertByte(byteval);
-            byteval = pixels.loadAndScale2();
-            mRMTController.convertByte(byteval);
-            pixels.advanceData();
-            pixels.stepDithering();
-        }
+      uint32_t byteval;
+      while (pixels.has(1)) {
+        byteval = pixels.loadAndScale0();
+        mRMTController.convertByte(byteval);
+        byteval = pixels.loadAndScale1();
+        mRMTController.convertByte(byteval);
+        byteval = pixels.loadAndScale2();
+        mRMTController.convertByte(byteval);
+        pixels.advanceData();
+        pixels.stepDithering();
+      }
     }
 };
 
@@ -95,16 +97,16 @@ protected:
 
 template <EOrder RGB_ORDER = RGB>
 class ESP32RMT_WS2812Controller800Khz : public ESP32RMT_ClocklessController<RGB_ORDER> {
-public:
+  public:
     ESP32RMT_WS2812Controller800Khz(uint8_t pin) : ESP32RMT_ClocklessController<RGB_ORDER>(pin, C_NS(250), C_NS(625), C_NS(375)) {}
 };
 
 /*
- WS2812 controller class @ 800 KHz.
- with RTM run-time defined gpio
+  WS2812 controller class @ 800 KHz.
+  with RTM run-time defined gpio
 */
 template<EOrder RGB_ORDER = RGB>
 class ESP32RMT_WS2812B : public ESP32RMT_WS2812Controller800Khz<RGB_ORDER> {
-public:
-    ESP32RMT_WS2812B(uint8_t pin) : ESP32RMT_WS2812Controller800Khz<RGB_ORDER>(pin){}
+  public:
+    ESP32RMT_WS2812B(uint8_t pin) : ESP32RMT_WS2812Controller800Khz<RGB_ORDER>(pin) {}
 };

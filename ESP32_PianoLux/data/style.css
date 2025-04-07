@@ -1,833 +1,923 @@
+/* ==========================================================================
+   Base & Global Styles
+   ========================================================================== */
+:root {
+  --navbar-height: 70px; /* Define navbar height for calculations */
+  --navbar-height-desktop: 85px;
+  --bg-dark: #191919;
+  --bg-medium: #2a2d30;
+  --bg-light: #3a3d40;
+  --bg-interactive: #46494b;
+  --text-light: #e0e0e0;
+  --text-medium: #cccccc;
+  --text-dark: #a0a0a0;
+  --accent-primary: #007bff;
+  --accent-primary-dark: #0056b3;
+  --accent-secondary: #fff65d;
+  --accent-danger: #dc3545;
+  --accent-danger-dark: #c82333;
+  --border-radius-small: 8px;
+  --border-radius-medium: 15px;
+  --border-radius-large: 20px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 html {
   scroll-behavior: smooth;
+  font-size: 16px; /* Base font size for rem calculation */
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: var(--bg-dark);
+  color: var(--text-medium);
+  /* Add padding to prevent content from being hidden by fixed navbar */
+  padding-bottom: var(--navbar-height);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-light);
+  margin-bottom: 1rem;
+}
+
+h1 { font-size: 2.5rem; }
+h2 { font-size: 1.8rem; }
+h3 { font-size: 1.3rem; }
+
+label {
+  font-weight: bold;
+  color: var(--text-light);
+  display: block; /* Changed from flex for simplicity */
+  padding-top: 1rem;
+  padding-bottom: 0.5rem;
+}
+
+main {
+  padding: 2rem;
+}
+
+/* Style links consistently */
+a {
+  color: var(--accent-primary);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* ==========================================================================
+   Header & Logo
+   ========================================================================== */
+header {
+  background-color: var(--bg-dark);
+  color: var(--text-medium);
+  padding-top: 1.5rem; /* Use padding instead of negative margin */
 }
 
 .logo {
   display: flex;
-  flex-direction: column; /* Display items vertically */
+  flex-direction: column;
   align-items: center;
-  padding-bottom: 35px;
-  padding-top: 25px;
-  margin-bottom: -65px;
 }
 
-/* Style for Piano text */
+.logo h1 {
+  line-height: 1.8;
+  font-size: 4rem;
+  
+}
+
+.piano-svg {
+  width: 12rem;
+  height: 10rem;
+  margin-bottom: -1rem;
+}
+
 h1 .piano-text {
   color: white;
   font-weight: lighter;
 }
 
-/* Style for Lux text */
 h1 .lux-text {
-  color: #fff65d;
-  font-family: "Comic Sans MS";
-}
-
-.piano-svg {
-  height: 100px;
-  width: 100px;
-  margin-bottom: -30px;
+  color: var(--accent-secondary);
+  font-family: "Comic Sans MS", cursive, sans-serif; /* Add fallbacks */
 }
 
 #pianoKeysVisuals {
-  height: 55px;
+  height: 3.5rem; /* Use rem */
+  width: 100%; /* Ensure it takes full width if needed */
+  margin-top: 1rem;
 }
 
-@media (min-width: 768px) {
-  .piano-svg {
-    width: 300px;
-    height: 300px;
-    margin-bottom: -100px;
-  }
-  .logo {
-    margin-bottom: -120px;
-  }
-  h1 {
-    font-size: 100px;
-  }
-
-  .buttons button {
-    height: 100px;
-    font-size: 50px;
-  }
-  #pianoKeysVisuals {
-    height: 130px;
-  }
-}
-
-body,
-p {
-  margin: 0;
-  padding: 0;
-}
+/* ==========================================================================
+   Navbar (Fixed Bottom)
+   ========================================================================== */
 .navbar {
-  background: #191919;
-  bottom: 0;
-  width: 100%;
+  background: var(--bg-dark);
+  border-top: 1px solid var(--bg-light); /* Add subtle top border */
   position: fixed;
+  bottom: 0;
+  left: 0; /* Ensure it starts from left edge */
+  width: 100%;
+  height: var(--navbar-height);
   display: flex;
-  justify-content: center;
+  justify-content: space-around; /* Better distribution */
+  align-items: center; /* Vertically center icons */
   opacity: 1;
   transition: opacity 0.3s ease-in-out;
-  z-index: 20;
+  z-index: 1000; /* Ensure it's above other content */
+  padding: 0 0.5rem; /* Add some horizontal padding */
 }
 
-.controls-icon {
-  display: flex;
-  padding: 15px;
-  height: 55px;
-}
-
-.controls-icon:active {
-  /* Change the background color when the icon is hovered or clicked */
-  background-color: #007bff;
-}
-
-.mode-settings-icon {
-  display: flex;
-  padding: 15px;
-  height: 55px;
-}
-
-.mode-settings-icon:active {
-  /* Change the background color when the icon is hovered or clicked */
-  background-color: #007bff;
-}
-
-.upload-icon {
-  display: flex;
-  padding: 15px;
-  height: 55px;
-}
-
-.upload-icon:active {
-  /* Change the background color when the icon is hovered or clicked */
-  background-color: #006aff;
-}
-
+/* Using original specific classes for icons */
+.controls-icon,
+.mode-settings-icon,
+.upload-icon,
 .info-icon {
   display: flex;
-  padding: 15px;
-  height: 55px;
+  padding: 0.8rem; /* Use rem */
+  height: 100%; /* Make clickable area fill height */
+  cursor: pointer;
+  border-radius: var(--border-radius-small);
+  transition: background-color 0.2s ease;
+  align-items: center; /* Center SVG vertically */
+  justify-content: center; /* Center SVG horizontally */
 }
 
-.info-icon:active {
-  /* Change the background color when the icon is hovered or clicked */
-  background-color: #007bff;
+.controls-icon svg,
+.mode-settings-icon svg,
+.upload-icon svg,
+.info-icon svg {
+   height: 2rem; /* Control icon size */
+   width: auto;
+   fill: var(--text-medium); /* Default icon color */
+   transition: fill 0.2s ease; /* Smooth color transition */
 }
 
-#prg {
-  opacity: 0%;
-  color: white;
+/* Specific active/hover states */
+.controls-icon:active, .controls-icon:hover,
+.mode-settings-icon:active, .mode-settings-icon:hover,
+.upload-icon:active, .upload-icon:hover,
+.info-icon:active, .info-icon:hover {
+  background-color: var(--accent-primary);
 }
 
-body {
-  font-family: Arial, sans-serif;
-  background: #191919;
+.controls-icon:active svg, .controls-icon:hover svg,
+.mode-settings-icon:active svg, .mode-settings-icon:hover svg,
+.upload-icon:active svg, .upload-icon:hover svg,
+.info-icon:active svg, .info-icon:hover svg {
+  fill: white; /* Change icon color on hover/active */
 }
 
-header {
-  background-color: #191919;
-  color: #cccccc;
-}
 
-h2 {
-  color: #fff;
-}
-
-main {
-  padding: 30px;
-}
-
-/* Add card styling to sections */
+/* ==========================================================================
+   Card & Section Styles
+   ========================================================================== */
 .card {
-  scroll-margin-block-start: 100px;
+  scroll-margin-block-start: calc(var(--navbar-height) + 1rem); /* Offset for fixed navbar */
+  background-color: var(--bg-medium);
+  padding: 1.5rem;
+  border-radius: var(--border-radius-medium);
+  margin-bottom: 1.5rem;
 }
 
-.toggle-control {
-  padding-top: 15px;
-}
+/* ==========================================================================
+   Form Controls (Sliders, Toggles, Dropdowns, Buttons, Inputs)
+   ========================================================================== */
 
-.toggle-control > .checkbox-wrapper-8 .tgl + .tgl-btn {
-  width: 100%;
-}
-
+/* --- General Control Spacing --- */
 .control {
-  padding-bottom: 15px;
+  margin-bottom: 1.5rem; /* Consistent spacing below controls */
+}
+.control:last-child {
+  margin-bottom: 0;
 }
 
-label {
-  font-weight: bold;
-  color: #fff;
-  display: flex;
-  padding-top: 15px;
-  padding-bottom: 15px;
-}
-
-input[type="range"] {
-  width: 100%;
-}
-
-/* Style the toggle switch */
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 60px;
-  height: 30px;
-}
-
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  transition: 0.4s;
-  transition: 0.4s;
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 26px;
-  width: 26px;
-  left: 2px;
-  bottom: 2px;
-  background-color: white;
-  transition: 0.4s;
-  transition: 0.4s;
-}
-
-input:checked + .slider {
-  background-color: #2196f3;
-}
-
-input:focus + .slider {
-  box-shadow: 0 0 1px #2196f3;
-}
-
-input:checked + .slider:before {
-  transform: translateX(26px);
-  transform: translateX(26px);
-  transform: translateX(26px);
-}
-
-.custom-dropdown {
-  position: relative;
-  width: 100%;
-  margin-top: 15px;
-  margin-bottom: 15px;
-  background-color: #46494b;
-  border-radius: 20px;
-  overflow: hidden;
-}
-
-.selected-item {
-  padding: 15px;
-  background-color: #46494b;
-  color: white;
-  font-size: 20px;
-  cursor: pointer;
-  border-radius: 20px;
-}
-
-.dropdown-list-modes {
-  max-height: 210px; /* Maximum height to display 6 items */
-  overflow-y: auto; /* Enable vertical scrollbar if needed */
-  display: none;
-}
-
-.dropdown-list-animations {
-  max-height: 210px; /* Maximum height to display 6 items */
-  overflow-y: auto; /* Enable vertical scrollbar if needed */
-  display: none;
-}
-
-.dropdown-item {
-  padding: 15px;
-  cursor: pointer;
-  color: white;
-  font-size: 20px;
-}
-
-/* Increase the size of the slider, track, and thumb */
+/* Hue Slider */
 .hue-slider {
   position: relative;
   width: 100%;
-  height: 40px; /* Adjust the height as needed */
+  height: 40px; /* Original px */
+  margin-top: 0.5rem;
 }
-
-.track {
+.hue-slider .track {
   width: 100%;
   height: 100%;
   background: linear-gradient(
     to right,
-    hsl(0, 100%, 50%),
-    /* Red (0 degrees) */ hsl(60, 100%, 50%),
-    /* Yellow (60 degrees) */ hsl(120, 100%, 50%),
-    /* Green (120 degrees) */ hsl(180, 100%, 50%),
-    /* Cyan (180 degrees) */ hsl(240, 100%, 50%),
-    /* Blue (240 degrees) */ hsl(300, 100%, 50%),
-    /* Magenta (300 degrees) */ hsl(360, 100%, 50%)
-      /* Red again (360 degrees) */
-  ); /* Gradient representing the full hue spectrum from red to red */
-  border-radius: 10px; /* Increased border-radius for the track */
+    hsl(0, 100%, 50%), /* Red (0 degrees) */
+    hsl(60, 100%, 50%), /* Yellow (60 degrees) */
+    hsl(120, 100%, 50%), /* Green (120 degrees) */
+    hsl(180, 100%, 50%), /* Cyan (180 degrees) */
+    hsl(240, 100%, 50%), /* Blue (240 degrees) */
+    hsl(300, 100%, 50%), /* Magenta (300 degrees) */
+    hsl(360, 100%, 50%) /* Red again (360 degrees) */
+  );
+  border-radius: 10px; /* Original px */
 }
-
-.thumb {
+.hue-slider .thumb {
   position: absolute;
-  width: 45px; /* Adjust the thumb width as needed */
-  height: 45px; /* Adjust the thumb height as needed */
-  background-color: red;
+  width: 45px; /* Original px */
+  height: 45px; /* Original px */
+  background-color: red; /* Initial color, JS updates this */
   border-radius: 50%;
   top: 50%;
   transform: translateY(-50%);
   left: 0;
   cursor: pointer;
-  box-shadow: 0 0 0 6px white; /* Add a white edge (bezel) with a specified width */
+  box-shadow: 0 0 0 6px white; /* Original px */
 }
 
-/* Updated CSS for the Background Light slider */
+/* Saturation Slider */
 .saturation-slider {
   position: relative;
   width: 100%;
-  height: 40px; /* Adjust the height as needed */
+  height: 40px; /* Original px */
+   margin-top: 0.5rem;
 }
-
 .saturation-slider .track {
   width: 100%;
   height: 100%;
-  background: #46494b;
-  border-radius: 10px;
+  background: var(--bg-interactive); /* Default, JS updates with gradient */
+  border-radius: 10px; /* Original px */
 }
-
 .saturation-slider .thumb {
   position: absolute;
-  width: 45px; /* Adjust the thumb width as needed */
-  height: 45px; /* Adjust the thumb height as needed */
+  width: 45px; /* Original px */
+  height: 45px; /* Original px */
   background-color: white;
   border-radius: 50%;
   top: 50%;
   transform: translateY(-50%);
   left: 0;
   cursor: pointer;
-  box-shadow: 0 0 0 6px white; /* Add a white edge (bezel) with a specified width */
+  box-shadow: 0 0 0 6px white; /* Original px */
 }
 
-/* Updated CSS for the brightness slider */
+/* Brightness Slider */
 .brightness-slider {
   position: relative;
   width: 100%;
-  height: 40px; /* Adjust the height as needed */
+  height: 40px; /* Original px */
+   margin-top: 0.5rem;
 }
-
 .brightness-slider .track {
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    to right,
-    #000,
-    transparent
-  ); /* Gradient from black to transparent */
-  border-radius: 10px;
+  background: linear-gradient(to right, #000, transparent); /* Default, JS updates */
+  border-radius: 10px; /* Original px */
 }
-
 .brightness-slider .thumb {
   position: absolute;
-  width: 45px; /* Adjust the thumb width as needed */
-  height: 45px; /* Adjust the thumb height as needed */
+  width: 45px; /* Original px */
+  height: 45px; /* Original px */
   background-color: white;
   border-radius: 50%;
   top: 50%;
   transform: translateY(-50%);
   left: 0;
   cursor: pointer;
-  box-shadow: 0 0 0 6px white; /* Add a white edge (bezel) with a specified width */
+  box-shadow: 0 0 0 6px white; /* Original px */
 }
 
-/* Updated CSS for the fade slider */
+/* Fade Slider */
 .fade-slider {
   position: relative;
   width: 100%;
-  height: 40px; /* Adjust the height as needed */
+  height: 40px; /* Original px */
+   margin-top: 0.5rem;
 }
-
 .fade-slider .track {
   width: 100%;
   height: 100%;
-  background: #46494b;
-  border-radius: 10px;
+  background: var(--bg-interactive);
+  border-radius: 10px; /* Original px */
 }
-
 .fade-slider .thumb {
   position: absolute;
-  width: 45px; /* Adjust the thumb width as needed */
-  height: 45px; /* Adjust the thumb height as needed */
+  width: 45px; /* Original px */
+  height: 45px; /* Original px */
   background-color: white;
   border-radius: 50%;
   top: 50%;
   transform: translateY(-50%);
   left: 0;
   cursor: pointer;
-  box-shadow: 0 0 0 6px white; /* Add a white edge (bezel) with a specified width */
+  box-shadow: 0 0 0 6px white; /* Original px */
 }
 
-/* Updated CSS for the Splash slider */
+/* Splash Slider */
 .splash-slider {
   position: relative;
   width: 100%;
-  height: 40px; /* Adjust the height as needed */
+  height: 40px; /* Original px */
+   margin-top: 0.5rem;
 }
-
 .splash-slider .track {
   width: 100%;
   height: 100%;
-  background: #46494b;
-  border-radius: 10px;
+  background: var(--bg-interactive);
+  border-radius: 10px; /* Original px */
 }
-
 .splash-slider .thumb {
   position: absolute;
-  width: 45px; /* Adjust the thumb width as needed */
-  height: 45px; /* Adjust the thumb height as needed */
+  width: 45px; /* Original px */
+  height: 45px; /* Original px */
   background-color: white;
   border-radius: 50%;
   top: 50%;
   transform: translateY(-50%);
   left: 0;
   cursor: pointer;
-  box-shadow: 0 0 0 6px white; /* Add a white edge (bezel) with a specified width */
+  box-shadow: 0 0 0 6px white; /* Original px */
 }
 
-/* Updated CSS for the Background Light slider */
+/* Background Light Slider */
 .bg-slider {
   position: relative;
   width: 100%;
-  height: 40px; /* Adjust the height as needed */
+  height: 40px; /* Original px */
+   margin-top: 0.5rem;
 }
-
 .bg-slider .track {
   width: 100%;
   height: 100%;
-  background: #46494b;
-  border-radius: 10px;
+  background: var(--bg-interactive);
+  border-radius: 10px; /* Original px */
 }
-
 .bg-slider .thumb {
   position: absolute;
-  width: 45px; /* Adjust the thumb width as needed */
-  height: 45px; /* Adjust the thumb height as needed */
+  width: 45px; /* Original px */
+  height: 45px; /* Original px */
   background-color: white;
   border-radius: 50%;
   top: 50%;
   transform: translateY(-50%);
   left: 0;
   cursor: pointer;
-  box-shadow: 0 0 0 6px white; /* Add a white edge (bezel) with a specified width */
+  box-shadow: 0 0 0 6px white; /* Original px */
 }
 
-#maxCurrent,
-#ledDataPin {
-  width: 100%;
-  height: 40px;
-  color: white;
-  background: #46494b;
-  border: none; /* Remove border */
-  border-radius: 15px;
-  font-weight: bold;
-  font-size: 20px;
-  text-align: center;
-}
-
-/* Updated CSS for the fade slider */
+/* Split Slider */
 .split-slider {
   position: relative;
   width: 100%;
-  height: 40px; /* Adjust the height as needed */
+  height: 40px; /* Original px */
+   margin-top: 0.5rem;
 }
-
 .split-slider .track {
   width: 100%;
   height: 100%;
-  background: #46494b;
-  border-radius: 10px;
+  background: var(--bg-interactive);
+  border-radius: 10px; /* Original px */
 }
-
 .split-slider .thumb {
   position: absolute;
-  width: 20px; /* Adjust the thumb width as needed */
-  height: 45px; /* Adjust the thumb height as needed */
-  border-radius: 0%;
+  width: 20px; /* Original px */
+  height: 45px; /* Original px */
   background-color: white;
+  border-radius: 0%; /* Original style */
+  top: 50%; /* Need top for transform */
   transform: translateY(-50%);
-}
-
-/* Target the spin buttons and hide them for all browsers */
-input[type="number"] {
-  appearance: textfield; /* Remove spin buttons in Firefox */
-}
-
-.colorControls {
-  display: flex;
-}
-.buttons {
-  display: flex;
-}
-
-button {
-  margin-right: 5px;
-  margin-top: 15px;
-  width: 100%;
-  height: 50px;
-  z-index: 2;
-  background: #46494b;
-  color: #fff;
-  font-size: 18px;
-  font-weight: bold;
-  border-radius: 15px;
-  border: none;
+  left: 0;
   cursor: pointer;
+  /* No box-shadow in original */
 }
 
-button:active {
-  color: red;
+/* --- Toggle Switches (Checkbox Wrapper 8 - Unchanged from previous revision) --- */
+.toggle-control {
+  padding-top: 1rem;
+  display: flex; /* Align label and toggle */
+  align-items: center;
+  justify-content: space-between; /* Push toggle to the right */
+}
+.toggle-control label {
+  padding: 0; /* Remove default label padding */
+  margin-right: 1rem; /* Space between label and toggle */
+  flex-shrink: 0; /* Prevent label from shrinking */
 }
 
-.checkbox-wrapper-8 .tgl {
-  display: none;
+.checkbox-wrapper-8 {
+    flex-shrink: 0; /* Prevent toggle shrinking */
 }
+.checkbox-wrapper-8 .tgl { display: none; }
+.checkbox-wrapper-8 .tgl, .checkbox-wrapper-8 .tgl:after, .checkbox-wrapper-8 .tgl:before, .checkbox-wrapper-8 .tgl *, .checkbox-wrapper-8 .tgl *:after, .checkbox-wrapper-8 .tgl *:before, .checkbox-wrapper-8 .tgl + .tgl-btn { box-sizing: border-box; }
+.checkbox-wrapper-8 .tgl::-moz-selection { background: none; }
+.checkbox-wrapper-8 .tgl::selection { background: none; }
 .checkbox-wrapper-8 .tgl + .tgl-btn {
-  width: 5.4em;
-  height: 1em;
+  outline: 0; display: grid; width: 7rem; height: 2REM; position: relative;
+  cursor: pointer; user-select: none; font-size: 17px; /* Base size, scales with wrapper */
 }
+.checkbox-wrapper-8 .tgl + .tgl-btn:after, .checkbox-wrapper-8 .tgl + .tgl-btn:before {
+  position: relative; display: block; content: ""; width: 50%; height: 100%;
+}
+.checkbox-wrapper-8 .tgl + .tgl-btn:after { left: 0; }
+.checkbox-wrapper-8 .tgl + .tgl-btn:before { display: none; }
+.checkbox-wrapper-8 .tgl:checked + .tgl-btn:after { left: 50%; }
+
+/* TGL Skewed specific styles */
 .checkbox-wrapper-8 .tgl-skewed + .tgl-btn {
-  overflow: hidden;
-  transform: skew(0);
-  background: #46494b;
-  border-radius: 15px;
-  margin-right: 10px;
+  overflow: hidden; transform: skew(-10deg);
+  backface-visibility: hidden; transition: all .2s ease;
+  font-family: sans-serif; background: var(--bg-interactive);
+  border-radius: var(--border-radius-medium); /* Use variable */
 }
-.checkbox-wrapper-8 .tgl-skewed + .tgl-btn:after,
-.checkbox-wrapper-8 .tgl-skewed + .tgl-btn:before {
-  transition: all 0.2s ease;
-  width: 100%;
-  text-align: center;
-  position: absolute;
-  line-height: 1em;
-  color: #fff;
+.checkbox-wrapper-8 .tgl-skewed + .tgl-btn:after, .checkbox-wrapper-8 .tgl-skewed + .tgl-btn:before {
+  transform: skew(10deg); display: inline-block; transition: all .2s ease;
+  width: 100%; text-align: center; position: absolute; line-height: 2em;
+  font-weight: bold; color: #fff; text-shadow: 0 1px 0 rgba(0, 0, 0, .4);
 }
 .checkbox-wrapper-8 .tgl-skewed + .tgl-btn:after {
-  left: 100%;
-  content: attr(data-tg-on);
+  left: 100%; content: attr(data-tg-on);
 }
 .checkbox-wrapper-8 .tgl-skewed + .tgl-btn:before {
-  left: 0;
-  content: attr(data-tg-off);
+  left: 0; content: attr(data-tg-off);
 }
-.checkbox-wrapper-8 .tgl-skewed + .tgl-btn:active:before {
-  left: -10%;
-}
-.checkbox-wrapper-8 .tgl-skewed:checked + .tgl-btn {
-  background: #006aff;
-}
-.checkbox-wrapper-8 .tgl-skewed:checked + .tgl-btn:before {
-  left: -100%;
-}
-.checkbox-wrapper-8 .tgl-skewed:checked + .tgl-btn:after {
-  left: 0;
-}
+.checkbox-wrapper-8 .tgl-skewed + .tgl-btn:active { background: #888; }
+.checkbox-wrapper-8 .tgl-skewed + .tgl-btn:active:before { left: -10%; }
+.checkbox-wrapper-8 .tgl-skewed:checked + .tgl-btn { background: var(--accent-primary); }
+.checkbox-wrapper-8 .tgl-skewed:checked + .tgl-btn:before { left: -100%; }
+.checkbox-wrapper-8 .tgl-skewed:checked + .tgl-btn:after { left: 0; }
+.checkbox-wrapper-8 .tgl-skewed:checked + .tgl-btn:active:after { left: 10%; }
 
+/* Container for multiple toggles */
 .toggles {
   display: flex;
-  justify-content: center;
-  width: 100%;
-  padding-top: 15px;
+  flex-wrap: wrap; /* Allow toggles to wrap on small screens */
+  justify-content: space-around; /* Distribute toggles */
+  gap: 1rem; /* Space between toggles */
+  padding-top: 1rem;
 }
 
+
+/* --- Dropdowns (Custom & Select - Unchanged from previous revision) --- */
+/* Using standard select elements now, keeping styling */
 select {
-  padding: 15px;
-  border-radius: 15px; /* Round the corners */
+  padding: 1rem;
+  border-radius: var(--border-radius-medium);
   width: 100%;
-  background: #46494b;
+  background: var(--bg-interactive);
   color: white;
   font-weight: bold;
-  text-align: center; /* Center-align the text */
+  font-size: 1.1rem; /* Use rem */
+  border: none;
+  appearance: none; /* Remove default arrow */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23cccccc'%3E%3Cpath fill-rule='evenodd' d='M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z' clip-rule='evenodd'/%3E%3C/svg%3E"); /* Basic dropdown arrow */
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1em;
+  cursor: pointer;
+  margin-top: 0.5rem;
 }
 
-.control select {
-  text-align: left; /* Justify text left-aligned */
+
+/* --- Buttons --- */
+/* Container for multiple buttons in a row */
+.buttons, .colorControls {
+  display: flex;
+  flex-wrap: wrap; /* Allow buttons to wrap */
+  gap: 0.5rem; /* Space between buttons */
+  margin-top: 1rem;
+}
+
+/* Individual Button Styling (based on original but using padding) */
+button, .button-style {
+  padding: 0.8rem 1.2rem;
+  flex-grow: 1;
+  min-width: 100px;
+  background: var(--bg-interactive);
+  color: var(--text-light);
+  font-size: 1rem; /* Use rem */
   font-weight: bold;
-  font-size: 20px;
+  border-radius: var(--border-radius-medium);
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.1s ease;
 }
 
+button:hover, .button-style:hover {
+  background-color: #5a5f63;
+}
 
-/* MIDI Player Section*/
+button:active, .button-style:active {
+  color: var(--accent-danger);
+  transform: scale(0.98);
+}
 
-/* ==================== MIDI Player Styles ==================== */
+/* --- Inputs (Text, Number - Unchanged from previous revision) --- */
+input[type="number"],
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  height: 2.8rem; /* Use rem */
+  color: white;
+  background: var(--bg-interactive);
+  border: none;
+  border-radius: var(--border-radius-medium);
+  font-weight: bold;
+  font-size: 1.1rem; /* Use rem */
+  text-align: center;
+  padding: 0 1rem; /* Add horizontal padding */
+  margin-top: 0.5rem;
+}
 
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield; /* Firefox */
+  appearance: auto;
+}
+
+/* ==========================================================================
+   MIDI Player (#midi-player - Unchanged from previous revision)
+   ========================================================================== */
 #midi-player {
-    background-color: #2a2d30; /* Slightly lighter card background */
-    padding: 25px;
-    border-radius: 15px;
-    margin-top: 50px; /* Add space before footer/navbar */
-    margin-bottom: 50px; /* Add space before footer/navbar */
+  background-color: var(--bg-medium);
+  padding: 1.5rem;
+  border-radius: var(--border-radius-medium);
+
 }
 
 #midi-player h2 {
-    text-align: center;
-    margin-bottom: 25px;
-    color: #e0e0e0;
-    font-size: 1.8em;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: var(--text-light);
+  font-size: 1.5em;
 }
 
 #midi-player h3 {
-    color: #cccccc;
-    margin-bottom: 15px;
-    margin-top: 25px; /* Space between sections */
-    border-bottom: 1px solid #444;
-    padding-bottom: 8px;
-    font-size: 1.3em;
+  color: var(--text-medium);
+  margin-bottom: 1rem;
+  margin-top: 1.5rem; /* Space between sections */
+  border-bottom: 1px solid var(--bg-light);
+  padding-bottom: 0.5rem;
+  font-size: 1.2em;
 }
 #midi-player h3:first-of-type {
-    margin-top: 0; /* No top margin for the very first h3 */
+  margin-top: 2rem;
 }
-
 
 /* --- Upload Section --- */
 .midi-upload-section .upload-form-container {
-    display: flex;
-    flex-direction: column; /* Stack elements vertically */
-    gap: 50px; /* Space between file input row and upload button */
-    align-items: stretch; /* Make children take full width */
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* Reduced gap */
+  align-items: stretch;
 }
 
 .midi-upload-section .file-input-wrapper {
-    display: flex;
-    align-items: center;
-    background-color: #3a3d40; /* Background for the wrapper */
-    border-radius: 8px;
-    padding: 5px 15px 5px 5px; /* Padding around elements */
-    gap: 10px; /* Space between button and text */
+  display: flex;
+  align-items: center;
+  background-color: var(--bg-light);
+  border-radius: var(--border-radius-small);
+  padding: 0.3rem 1rem 0.3rem 0.3rem;
+  gap: 0.8rem;
 }
+
 
 .midi-upload-section .file-choose-button {
-    background-color: #007bff; /* Blue color like the example */
-    color: white;
-    padding: 10px 18px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: bold;
-    white-space: nowrap; /* Prevent wrapping */
-    transition: background-color 0.2s ease;
+  background-color: var(--accent-primary);
+  color: white;
+  padding: 0.6rem 1rem;
+  border-radius: var(--border-radius-small);
+  font-weight: bold;
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
 }
-
-.midi-upload-section .file-choose-button:hover {
-    background-color: #0056b3;
+.midi-upload-section .file-input-wrapper:hover .file-choose-button {
+  background-color: var(--accent-primary-dark);
 }
 
 .midi-upload-section .file-name-text {
-    color: #b0b0b0; /* Lighter text color */
-    font-style: italic;
-    flex-grow: 1; /* Take remaining space */
-    overflow: hidden; /* Hide overflow */
-    text-overflow: ellipsis; /* Add ... if too long */
-    white-space: nowrap; /* Prevent wrapping */
+  color: var(--text-dark);
+  font-style: italic;
+  flex-grow: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.9rem;
 }
 
-.midi-action-button { /* Base style for all action buttons in this section */
-    padding: 12px 20px;
-    border: none;
-    border-radius: 8px;
-    color: #ffffff;
-    font-weight: bold;
-    font-size: 1em;
-    cursor: pointer;
-    text-align: center;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-    margin-bottom: 25px;
+.midi-action-button { /* Base style for MIDI player buttons */
+  padding: 0.8rem 1.2rem;
+  border: none;
+  border-radius: var(--border-radius-small);
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  width: 100%; /* Full width by default */
+  margin-bottom: 1rem; /* Space below buttons */
 }
 .midi-action-button:active {
-    transform: scale(0.98); /* Slight press effect */
+  transform: scale(0.98);
 }
 
 .upload-submit-button {
-    background-color: #4a4d50; /* Darker grey for upload */
-    width: 100%; /* Make button full width */
+  background-color: var(--bg-interactive); /* Use theme color */
 }
 .upload-submit-button:hover {
-    background-color: #5a5d60;
+  background-color: #5a5f63;
 }
 
-.status-message {
-    margin-top: 15px;
-    padding: 10px;
-    background-color: #3a3d40;
-    border-radius: 8px;
-    text-align: center;
-    color: #cccccc;
-    font-size: 0.9em;
-    min-height: 20px; /* Ensure it has some height even when empty */
-    margin-bottom: 25px;
+.status-message { /* For both upload and playback status */
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: var(--bg-light);
+  border-radius: var(--border-radius-small);
+  text-align: center;
+  color: var(--text-medium);
+  font-size: 0.9em;
+  min-height: 1.5rem;
+  margin-bottom: 1rem;
+  word-wrap: break-word; /* Allow long messages to wrap */
+  /* Added status types */
+  &.status-ok { color: #90ee90; /* Light green */}
+  &.status-error { color: #ff7f7f; /* Light red */ }
+  &.status-warning { color: #ffd700; /* Gold/Yellow */ }
+  &.status-info { color: var(--text-medium); /* Default */ }
 }
 
 /* --- Available Files Section --- */
 #file-list-container {
-    display: flex;
-    flex-direction: column;
-    gap: 12px; /* Space between file items */
-    margin-bottom: 20px; /* Space before refresh button */
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
 }
 
 .file-item {
-    display: flex;
-    align-items: center;
-    background-color: #3a3d40;
-    padding: 10px 15px;
-    border-radius: 8px;
-    gap: 15px; /* Space between elements inside the item */
-    overflow-x: auto; /* Add horizontal scroll if content overflows */
+  display: flex;
+  align-items: center;
+  background-color: var(--bg-light);
+  padding: 0.8rem 1rem;
+  border-radius: var(--border-radius-small);
+  gap: 1rem;
+  /* overflow-x: auto; Removed, let content wrap or use ellipsis */
 }
 
 .file-item .file-radio {
-    /* Style the radio button appearance */
-    appearance: none;
-    -webkit-appearance: none;
-    width: 20px;
-    height: 20px;
-    border: 2px solid #cccccc;
-    border-radius: 50%;
-    cursor: pointer;
-    position: relative;
-    flex-shrink: 0; /* Prevent radio from shrinking */
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1.25rem; height: 1.25rem;
+  border: 2px solid var(--text-medium);
+  border-radius: 50%;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  margin-right: 0.5rem; /* Add some space */
+  transition: border-color 0.2s ease, background-color 0.2s ease;
 }
-
 .file-item .file-radio:checked {
-    border-color: #007bff; /* Blue border when checked */
-    background-color: #007bff; /* Blue fill */
+  border-color: var(--accent-primary);
+  background-color: var(--accent-primary);
 }
-
-/* Add the inner dot for checked state */
 .file-item .file-radio:checked::before {
-    content: '';
-    display: block;
-    width: 10px;
-    height: 10px;
-    background-color: white;
-    border-radius: 50%;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+  content: ''; display: block;
+  width: 0.6rem; height: 0.6rem;
+  background-color: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .file-item .file-details {
-    display: flex;
-    flex-direction: column; /* Stack filename and size */
-    flex-grow: 1; /* Take available space */
-    cursor: pointer; /* Make label clickable for radio */
-    color: #e0e0e0;
-    min-width: 0; /* Add this line */
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  cursor: pointer; /* Make label clickable */
+  color: var(--text-light);
+  min-width: 0; /* Crucial for ellipsis */
 }
 
 .file-item .filename {
-    font-weight: bold;
-    font-size: 1.1em;
-    white-space: nowrap; /* Prevent the filename from wrapping */
-    overflow: hidden;      /* Hide the overflow text */
-    text-overflow: ellipsis; /* Add ellipsis (...) to the end of overflowing text */
+  font-weight: bold;
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .file-item .filesize {
-    font-size: 0.85em;
-    color: #a0a0a0;
+  font-size: 0.8em;
+  color: var(--text-dark);
 }
 
-.delete-button-style {
-    background-color: #dc3545; /* Red for delete */
-    padding: 8px 15px; /* Smaller padding */
-    font-size: 0.9em;
-    flex-shrink: 0; /* Prevent button shrinking */
-    white-space: nowrap;
+.delete-button-style { /* Specific style for delete button */
+  background-color: var(--accent-danger);
+  padding: 0.5rem 0.8rem; /* Smaller padding */
+  font-size: 0.9em;
+  flex-shrink: 0;
+  white-space: nowrap;
+  border-radius: var(--border-radius-small);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  width: auto; /* Override base button width */
+  margin-bottom: 0; /* Override base button margin */
 }
+.delete-button-style:hover { background-color: var(--accent-danger-dark); }
+.delete-button-style:active { transform: scale(0.98); }
 
-.delete-button-style:hover {
-    background-color: #c82333;
-}
 
 .refresh-button-style {
-     background-color: #006AFF; /* Match navbar blue */
-     width: 100%; /* Make button full width */
+     background-color: var(--accent-primary); /* Match theme */
  }
  .refresh-button-style:hover {
-     background-color: #0050CC;
+     background-color: var(--accent-primary-dark);
  }
 
 /* --- Playback Controls Section --- */
 .playback-buttons-container {
-    display: flex;
-    justify-content: space-between; /* Distribute buttons evenly */
-    gap: 15px; /* Space between buttons */
+  display: flex;
+  /* justify-content: space-between; /* <--- Original, caused edge pushing */
+  justify-content: center;      /* <--- Changed: Center buttons horizontally */
+  flex-wrap: wrap;             /* <--- Added: Allow buttons to wrap */
+  gap: 0.8rem;
+  margin-bottom: 1rem; /* Space below buttons */
 }
 
-.playback-button-style {
-    background-color: #4a4d50; /* Same grey as upload button */
-    flex-grow: 1; /* Make buttons share width equally */
-}
-.playback-button-style:hover {
-    background-color: #5a5d60;
-}
-/* Add styles for active/disabled states if needed later */
-/* .playback-button-style:disabled { ... } */
-/* .playback-button-style.playing { background-color: green; } */
-
-.playback-status-message {
-    /* Specific styles if needed */
-     min-height: 20px;
-     margin-top: 20px; /* More space above status */
+/* Optional: Ensure buttons don't grow excessively when wrapped (might not be needed depending on base button styles) */
+/* If buttons stretch too wide on their own line when wrapped, add this: */
+.playback-buttons-container button { /* Or use a specific class if the playback buttons have one */
+    flex-grow: 0; /* Prevent buttons from growing to fill wrapped lines unevenly */
 }
 
-/* Remove redundant styles from old table approach */
-#file-list-table,
-#file-list-table th,
-#file-list-table td,
-#file-list-table tbody tr {
-    /* You can remove these if the table is fully gone */
-    /* Or set display: none if you want to be sure */
-     display: none;
-}
 
-/* Adjust general button styling if it conflicts */
-/* Ensure the #midi-player buttons don't inherit unwanted styles */
-#midi-player button {
-    margin-top: 0; /* Override general button margin-top if present */
-    margin-right: 0; /* Override general button margin-right if present */
-    width: auto; /* Let flexbox/specific styles control width */
-    height: auto; /* Let padding control height */
-}
-
-/* Apply specific widths back where needed */
-.upload-submit-button, .refresh-button-style {
-    width: 100%;
-}
-/* MIDI Player Section end*/
-
+/* ==========================================================================
+   Footer
+   ========================================================================== */
 footer {
-  background: #191919;
-  color: #cccccc;
+  background: var(--bg-dark);
+  color: var(--text-medium);
   text-align: center;
-  font-size: 25px;
-}
-.footer-link {
-  color: #cccccc;
-  text-decoration: none; /* Remove underline if you want */
-  padding-bottom: 35px;
+  font-size: 1rem; /* Use rem */
+  padding-top: 1.5rem;
+  /* Footer padding-bottom handled by body padding-bottom */
 }
 
+.footer-link {
+  color: var(--text-medium);
+  text-decoration: none;
+  display: inline-block; /* Allow padding */
+  padding-bottom: 1rem; /* Space at the very bottom */
+}
+.footer-link:hover {
+  color: var(--text-light);
+}
+
+
+/* ==========================================================================
+   Media Queries for Larger Screens
+   ========================================================================== */
+
+/* Medium screens (Tablets, small desktops) */
+@media (min-width: 768px) {
+  html {
+    font-size: 17px; /* Slightly increase base font size */
+  }
+
+  body {
+     padding-bottom: var(--navbar-height-desktop); /* Adjust for taller navbar */
+  }
+
+  main {
+    padding: 2rem;
+    max-width: 1200px; /* Add max-width to center content */
+    margin: 0 auto; /* Center main content area */
+  }
+
+  .logo {
+     padding-bottom: 1.5rem;
+  }
+
+  .piano-svg {
+    width: 12rem; /* Increase size */
+    height: 12rem;
+    margin-bottom: -4rem; /* Adjust overlap */
+  }
+
+  .logo h1 {
+    font-size: 7rem; /* Increase font size */
+  }
+
+  .navbar {
+      height: var(--navbar-height-desktop);
+      justify-content: center; /* Center icons */
+      gap: 2rem; /* Add space between icons */
+  }
+  .controls-icon svg,
+  .mode-settings-icon svg,
+  .upload-icon svg,
+  .info-icon svg {
+      height: 2.5rem; /* Slightly larger icons */
+  }
+
+  #pianoKeysVisuals {
+    height: 6rem; /* Increase size */
+  }
+
+  .card {
+    padding: 2rem;
+  }
+
+  label {
+    padding-top: 1.5rem;
+    padding-bottom: 0.8rem;
+  }
+
+  /* Allow buttons to sit side-by-side */
+  .buttons, .colorControls {
+    flex-wrap: nowrap; /* Prevent wrapping */
+  }
+  button, .button-style {
+     /* flex-grow: 0; Optional: prevent growing if you want fixed widths */
+     width: auto; /* Let content or fixed width define size */
+     padding: 1rem 1.5rem; /* Increase padding */
+  }
+  .midi-action-button {
+     width: auto; /* Override full width for MIDI buttons too */
+     padding: 0.8rem 1.5rem; /* Adjust padding */
+     margin-bottom: 0; /* Reset margin if needed */
+  }
+  .upload-submit-button {
+    flex-shrink: 0; /* Prevent shrinking */
+  }
+   .refresh-button-style {
+     width: auto; /* Let padding define size */
+     max-width: 250px; /* Example */
+     margin-left: auto;
+     margin-right: auto;
+   }
+
+   .delete-button-style {
+        width: auto; /* Ensure delete button doesn't stretch */
+        margin-bottom: 0;
+   }
+
+  /* MIDI Player Layout */
+   .midi-upload-section .upload-form-container {
+     flex-direction: row; /* Place input and button side-by-side */
+     align-items: center;
+     gap: 1rem;
+   }
+   .midi-upload-section .file-input-wrapper {
+       flex-grow: 1; /* Allow input wrapper to take space */
+   }
+   .upload-submit-button {
+       flex-shrink: 0; /* Prevent shrinking */
+   }
+  
+  
+  
+   .playback-buttons-container {
+       justify-content: center; /* Already set to center */
+       gap: 1rem;
+       /* flex-wrap: wrap; /* Keep wrap, though less likely needed */
+   }
+   
+   .playback-button-style,
+   .playback-buttons-container button {
+       flex-grow: 0; /* Keep flex-grow 0 for desktop */
+       min-width: 120px; /* Ensure decent width */
+       width: auto; /* Let content and padding define width */
+       margin-bottom: 0; /* Reset margin if inherited */
+   }
+}
+
+/* Larger screens (Desktops) */
+@media (min-width: 1024px) {
+  html {
+    font-size: 18px; /* Further increase base font size */
+  }
+
+  .logo h1 {
+     font-size: 8rem;
+  }
+
+  .controls-icon,
+  .mode-settings-icon,
+  .upload-icon,
+  .info-icon {
+      padding: 1rem; /* More clickable area */
+  }
+
+  /* Add any further adjustments for very large screens if needed */
+
+}

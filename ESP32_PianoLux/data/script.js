@@ -217,6 +217,7 @@ function updateUI(data) {
   updateToggles("cb2-8", data.BG_TOGGLE);
   updateToggles("cb3-8", data.REVERSE_TOGGLE);
   updateToggles("cb4-8", data.BGUPDATE_TOGGLE);
+  updateToggles("cb6-8", data.CLIENT_LOGGER);
 
   updateInputs("maxCurrent", data.LED_CURRENT);
   updateInputs("ledDataPin", data.LED_PIN);
@@ -614,7 +615,6 @@ let isBrightnessDragging = false;
 function updateBrightnessTrackGradient(hue) {
   const track = document.querySelector(".brightness-slider .track");
   // Map the hue value from 0-360 to;
-  0 - 255;
   const mappedHue = Math.round((hue / 180) * 255);
   // Update the track gradient CSS with the mapped hue value
   track.style.background = `linear-gradient(to right, #000, hsl(${mappedHue}, 100%, 50%))`;
@@ -1630,49 +1630,175 @@ function showUpdateMenu() {
     doOTA();
   });
 
+  applyPopupStyles();
+}
+function applyPopupStyles() {
+  // Remove existing style if it exists to prevent duplication
+  const existingStyle = document.getElementById('popup-style-dark-v2'); // Changed ID
+  if (existingStyle) {
+    existingStyle.remove();
+  }
+
   // Add CSS styles
   const style = document.createElement("style");
+  style.id = 'popup-style-dark-v2'; // Use a new ID
   style.innerHTML = `
-#popup {
-position: fixed;
-top: 50%;
-left: 50%;
-transform: translate(-50%, -50%);
-width: 80%; /* Set width to 80% of the screen */
-max-width: 400px; /* Limit maximum width for better readability */
-background-color: #ffffff;
-padding: 20px;
-border-radius: 12px;
-box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
-z-index: 100; /* Keep the highest index */
-}
+    /* Define Dark Mode Variables */
+    :root {
+      --popup-bg: #2d2d2d;             /* Dark background */
+      --popup-text: #e0e0e0;           /* Light grey text */
+      /* --- Button Colors Updated --- */
+      --popup-primary-bg: #4a4a4a;      /* PRIMARY button background (Grey) */
+      --popup-primary-bg-hover: #5a5a5a; /* PRIMARY button hover */
+      --popup-close-bg: #d9534f;        /* CLOSE button background (Red) */
+      --popup-close-bg-hover: #c9302c;  /* CLOSE button hover (Darker Red) */
+      /* --- End Button Colors --- */
+      --popup-button-text: #ffffff;     /* Text on ALL buttons (White) */
+      --popup-shadow: rgba(0, 0, 0, 0.6); /* Darker shadow */
+      --popup-border: #555555;         /* Subtle border color */
+      --popup-focus-ring: rgba(100, 100, 100, 0.6); /* Neutral focus ring */
+      --popup-border-radius: 8px;       /* Consistent border radius */
+    }
 
-#selectDiv select {
-margin-bottom: 0px;
-margin-top: 10px;
-border: none;
-background: #24A0ED;
-border-radius: 20px;
-height: auto;
-font-size: 18px;
-font-weight: 600;
-}
+    #popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 450px; /* Keeping this, flex-wrap will handle overflow */
+      background-color: var(--popup-bg);
+      color: var(--popup-text);
+      padding: 25px;
+      border-radius: var(--popup-border-radius);
+      box-shadow: 0 6px 20px var(--popup-shadow);
+      z-index: 1000;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.5;
+      border: 1px solid var(--popup-border);
+    }
 
-#buttonDiv button {
-background: #24A0ED;
-border: none;
-border-radius: 20px;
-font-size: 18px;
-font-weight: 600;
-}
+    #selectDiv {
+       margin-bottom: 20px;
+    }
 
-#closeButton {
-background: #24A0ED;
-border-radius: 20px;
-font-size: 18px;
-font-weight: 600;
-}
-`;
+    #popup label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        font-size: 0.9em;
+        color: #bbbbbb;
+    }
+
+    #popup select {
+      display: block;
+      width: 100%;
+      padding: 10px 15px;
+      margin-top: 5px;
+      border: 1px solid var(--popup-border);
+      background-color: #444444;
+      color: var(--popup-text);
+      border-radius: var(--popup-border-radius);
+      font-size: 16px;
+      font-weight: 400;
+      box-sizing: border-box;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="%23e0e0e0" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/></svg>');
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 16px 12px;
+      padding-right: 40px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    #popup select:focus {
+       outline: none;
+       border-color: #888888; /* Focus border for select */
+       box-shadow: 0 0 0 3px var(--popup-focus-ring); /* Use neutral focus ring */
+    }
+
+
+    /* --- Button Styling --- */
+
+    #buttonDiv {
+       margin-top: 25px;
+       display: flex;
+       flex-direction: column; /* Mobile: stack vertically */
+       gap: 12px; /* Space between buttons */
+    }
+
+    /* Base styles for ALL buttons inside the popup */
+    #popup button {
+      display: block;
+      width: 100%; /* Full width on mobile */
+      padding: 10px 15px;
+      border: none;
+      border-radius: var(--popup-border-radius);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+      box-sizing: border-box;
+      line-height: 1.5;
+      color: var(--popup-button-text); /* White text for all */
+    }
+
+    /* Primary Button Style (Grey) - Applied to buttons *without* the id #closeButton */
+    #popup button:not(#closeButton) {
+       background-color: var(--popup-primary-bg);
+    }
+
+    #popup button:not(#closeButton):hover {
+       background-color: var(--popup-primary-bg-hover);
+       transform: translateY(-1px);
+    }
+
+    /* Close Button Style (Red) - Applied specifically to #closeButton */
+    #closeButton {
+      background-color: var(--popup-close-bg);
+    }
+
+    #closeButton:hover {
+       background-color: var(--popup-close-bg-hover);
+       transform: translateY(-1px);
+    }
+
+    /* Focus style for ALL buttons */
+    #popup button:focus-visible {
+       outline: none;
+       box-shadow: 0 0 0 3px var(--popup-focus-ring); /* Consistent neutral focus ring */
+    }
+
+    /* Active style for ALL buttons */
+    #popup button:active {
+        transform: translateY(0px); /* Press down effect */
+    }
+
+
+    /* --- Responsive Adjustments for Buttons --- */
+    @media (min-width: 600px) {
+      #buttonDiv {
+         flex-direction: row; /* Desktop: side-by-side */
+         justify-content: flex-end; /* Align buttons/lines to the right */
+         gap: 15px; /* Space between horizontal buttons */
+         flex-wrap: wrap; /* *** ADDED: Allow buttons to wrap to next line if needed *** */
+      }
+
+      #popup button {
+         width: auto; /* Allow buttons to size based on content */
+         min-width: 90px; /* Slightly smaller min-width might help, adjust as needed */
+      }
+
+      /* Optional: Put the close (red) button first on desktop if desired */
+      /* #closeButton { order: -1; } */
+      /* #buttonDiv { justify-content: space-between; } */ /* If you want space between */
+    }
+  `;
 
   document.head.appendChild(style);
 }
@@ -1767,16 +1893,34 @@ function updatePopup(message) {
   }
 }
 
+
+
+    // Function to handle messages received from WebSocket
+function handleMessage(event) {
+  const data = JSON.parse(event.data);
+  const message = data.LOG_MESSAGE; // Assuming the message is contained in the LOG_MESSAGE property
+
+  if (message !== undefined) {
+   updatePopup(message); // Update popup content with received message
+  }
+}
+
 showLogsToggleCheckbox.addEventListener("click", function() {
+  const logsToggleState = showLogsToggleCheckbox.checked;
+  console.log("logsToggleState:", logsToggleState);
+
+  // Send a WebSocket message for changing clientLogger state
+  sendData("ChangeClientLoggerAction", { clientLogger: logsToggleState });
+  
   if (showLogsToggleCheckbox.checked) {
     console.log("The checkbox is checked: true");
 
     sendData("ReadESP32Logs");
-
+    
     // Create the popup container
     popup = document.createElement("div");
     popup.id = "popup";
-    popup.style.height = "45px"; // Set a fixed height for the popup
+    popup.style.height = "100px"; // Set a fixed height for the popup
     popup.style.overflowY = "auto"; // Enable vertical scrolling
     document.body.appendChild(popup);
 
@@ -1801,16 +1945,6 @@ showLogsToggleCheckbox.addEventListener("click", function() {
 `;
     document.head.appendChild(style);
 
-    // Function to handle messages received from WebSocket
-    function handleMessage(event) {
-      const data = JSON.parse(event.data);
-      const message = data.LOG_MESSAGE; // Assuming the message is contained in the LOG_MESSAGE property
-
-      if (message !== undefined) {
-        updatePopup(message); // Update popup content with received message
-      }
-    }
-
     // Event listener to handle updates from the server
     Socket.addEventListener("message", handleMessage);
 
@@ -1834,8 +1968,8 @@ showLogsToggleCheckbox.addEventListener("click", function() {
     clearButton.style.background = "#24A0ED";
     clearButton.style.fontSize = "15px";
     clearButton.style.fontWeight = "#300";
-    clearButton.style.top = "calc(10% + 15px + 15px)"; // Adjust the top position accordingly
-    clearButton.style.left = "87%";
+    clearButton.style.top = "calc(10% + 30px + 30px)"; // Adjust the top position accordingly
+    clearButton.style.left = "80%";
     clearButton.style.transform = "translateX(-50%)";
     clearButton.style.zIndex = "10"; // Higher than the terminal popup
     clearButton.addEventListener("click", function() {
@@ -1850,99 +1984,252 @@ showLogsToggleCheckbox.addEventListener("click", function() {
     if (clearButton) {
       document.body.removeChild(clearButton);
     }
-    Socket.removeEventListener("message", handleMessage);
   }
 });
 
 
 function showESP32Info() {
-  // Send request to read ESP32 info
-  sendData("ReadESP32Info");
+  // Remove previous popup/style if it exists
+  const existingPopup = document.getElementById('popup-info');
+  if (existingPopup) {
+    existingPopup.remove();
+  }
+  const existingStyle = document.getElementById('popup-style-info');
+  if (existingStyle) {
+    existingStyle.remove();
+  }
 
-  // Create the popup container
+  // --- Create Popup Elements ---
   const popup = document.createElement("div");
-  popup.id = "popup";
+  popup.id = "popup-info"; // Use a specific ID for this popup type
   document.body.appendChild(popup);
+
+  // Create device info container (initially empty)
+  const deviceInfoElement = document.createElement("div");
+  deviceInfoElement.id = "deviceInfoContent"; // Give it an ID if needed
+  deviceInfoElement.innerHTML = "<p>Loading ESP32 Info...</p>"; // Initial placeholder
+  popup.appendChild(deviceInfoElement); // Add info container first
+
+  // Create button container
+  const buttonContainer = document.createElement("div");
+  buttonContainer.id = "buttonDiv"; // ID for layout styling
+  popup.appendChild(buttonContainer); // Add button container last
 
   // Create close button
   const closeButton = document.createElement("button");
+  closeButton.id = "closeButton"; // *** Assign the ID for red styling ***
   closeButton.innerText = "Close";
   closeButton.onclick = function() {
     // Remove the event listener when the close button is clicked
-    Socket.removeEventListener("message", handleMessage);
-    document.body.removeChild(popup);
+    // Make sure 'Socket' is accessible here or pass it if needed
+    try { // Add error handling in case Socket or listener isn't set up yet
+        Socket.removeEventListener("message", handleMessage);
+    } catch (e) {
+        console.warn("Could not remove Socket listener:", e);
+    }
+    if (popup.parentNode) { // Check if popup is still in the DOM
+       popup.parentNode.removeChild(popup);
+    }
+     // Remove the style tag too
+     const styleTag = document.getElementById('popup-style-info');
+     if (styleTag) styleTag.remove();
   };
+  buttonContainer.appendChild(closeButton); // *** Add button to the container ***
 
-  // Create device info element
-  const deviceInfoElement = document.createElement("div");
-
+  // --- WebSocket Handling ---
   // Define the function to handle messages
   function handleMessage(event) {
-    var data = JSON.parse(event.data);
+    try {
+        var data = JSON.parse(event.data);
 
-    // Populate device info element with detailed data
-    deviceInfoElement.innerHTML = `
-<p>Firmware Version: PianoLux ${data.FirmwareVersion}</p>
-<p>Firmware Build Date: ${data.FirmwareBuildDate}</p>
-<p>Chip Model: ${data.ChipModel}</p>
-<p>SSID: ${data.SSID}</p>
-<p>IP Address: ${data.IPAddress}</p>
-<p>MAC Address: ${data.MACAddress}</p>
-<p>MDNS hostname: <a href="http://pianolux.local">pianolux.local</a></p>
-<p>CPU Temperature: ${parseInt(data.Temperature).toFixed(0)} C</p>
-<p>Uptime: ${data.Uptime}</p>
-`;
-    // Append elements to the popup
-    popup.appendChild(deviceInfoElement);
-    popup.appendChild(closeButton);
+        // Check if the message is relevant (optional but good practice)
+        if (data.FirmwareVersion !== undefined) { // Or check for another unique key
+             // Populate device info element with detailed data
+            deviceInfoElement.innerHTML = `
+                <h3>Device Information</h3>
+                <p><strong>Firmware Version:</strong> PianoLux ${data.FirmwareVersion || 'N/A'}</p>
+                <p><strong>Firmware Build Date:</strong> ${data.FirmwareBuildDate || 'N/A'}</p>
+                <p><strong>Chip Model:</strong> ${data.ChipModel || 'N/A'}</p>
+                <p><strong>Connected SSID:</strong> ${data.SSID || 'N/A'}</p>
+                <p><strong>IP Address:</strong> ${data.IPAddress || 'N/A'}</p>
+                <p><strong>MAC Address:</strong> ${data.MACAddress || 'N/A'}</p>
+                <p><strong>MDNS Hostname:</strong> <a href="http://pianolux.local" target="_blank" rel="noopener noreferrer">pianolux.local</a></p>
+                <p><strong>CPU Temperature:</strong> ${data.Temperature !== undefined ? parseInt(data.Temperature).toFixed(0) + ' °C' : 'N/A'}</p>
+                <p><strong>Uptime:</strong> ${data.Uptime || 'N/A'}</p>
+            `;
+        }
+    } catch (e) {
+        console.error("Error processing WebSocket message:", e);
+        deviceInfoElement.innerHTML = "<p>Error loading device info.</p>";
+    }
   }
 
   // Event listener to handle updates from the server
-  Socket.addEventListener("message", handleMessage);
+  // Ensure 'Socket' is defined and connected in the scope where showESP32Info is called
+  try {
+      Socket.addEventListener("message", handleMessage);
+      // Send request to read ESP32 info AFTER setting up the listener
+      sendData("ReadESP32Info");
+  } catch (e) {
+      console.error("Socket not available or error adding listener:", e);
+      deviceInfoElement.innerHTML = "<p>Error connecting to device.</p>";
+  }
 
-  // Add CSS styles
+
+  // --- Add CSS Styles ---
   const style = document.createElement("style");
+  style.id = "popup-style-info"; // Specific ID for these styles
   style.innerHTML = `
-#popup {
-position: fixed;
-top: 50%;
-left: 50%;
-transform: translate(-50%, -50%);
-width: 75%; /* Set width to 80% of the screen */
-background-color: #fff;
-padding: 20px;
-border-radius: 10px;
-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-z-index: 10; /* Keep the highest index */
-}
+    /* Reuse the same dark mode variables */
+    :root {
+      --popup-bg: #2d2d2d;
+      --popup-text: #e0e0e0;
+      --popup-primary-bg: #4a4a4a;
+      --popup-primary-bg-hover: #5a5a5a;
+      --popup-close-bg: #d9534f;
+      --popup-close-bg-hover: #c9302c;
+      --popup-button-text: #ffffff;
+      --popup-shadow: rgba(0, 0, 0, 0.6);
+      --popup-border: #555555;
+      --popup-focus-ring: rgba(100, 100, 100, 0.6);
+      --popup-link: #5bc0de; /* Brighter cyan/blue for links in dark mode */
+      --popup-link-hover: #31b0d5;
+      --popup-border-radius: 8px;
+    }
 
-#popup a {
-color: #007BFF; /* Blue color for the link */
-text-decoration: none; /* Remove underline */
-transition: color 0.3s ease; /* Smooth color transition */
-}
+    /* Style the specific info popup */
+    #popup-info {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 500px; /* Can be slightly wider for info */
+      background-color: var(--popup-bg);
+      color: var(--popup-text);
+      padding: 20px 25px; /* Adjusted padding */
+      border-radius: var(--popup-border-radius);
+      box-shadow: 0 6px 20px var(--popup-shadow);
+      z-index: 1000; /* Ensure high z-index */
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.5;
+      border: 1px solid var(--popup-border);
+      max-height: 85vh; /* Prevent popup from being too tall */
+      overflow-y: auto; /* Add scrollbar if content overflows */
+    }
 
-#popup button {
-background-color: #24A0ED;
-color: #fff;
-border: none;
-border-radius: 5px;
-padding: 10px 20px;
-cursor: pointer;
-font-size: 16px;
-margin-top: 10px;
-font-weight: normal;
-}
+    /* Optional: Style for a title */
+     #popup-info h3 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        color: #ffffff;
+        text-align: center;
+        font-weight: 600;
+        border-bottom: 1px solid var(--popup-border);
+        padding-bottom: 10px;
+     }
 
-#popup p {
-font-size: 16px;
-margin-bottom: 10px;
-color: #333;
-}
-`;
+    /* Style paragraphs within the info popup */
+    #popup-info #deviceInfoContent p {
+        font-size: 15px; /* Slightly smaller for info lists */
+        margin-bottom: 8px;
+        color: var(--popup-text);
+        line-height: 1.4;
+        word-wrap: break-word; /* Prevent long strings from overflowing */
+    }
+
+    /* Style the strong tag often used for labels */
+     #popup-info #deviceInfoContent p strong {
+         color: #cccccc; /* Slightly lighter grey for labels */
+         margin-right: 5px;
+         display: inline-block; /* Ensure consistent spacing */
+         min-width: 150px; /* Align values somewhat */
+     }
+
+    /* Style links */
+    #popup-info a {
+        color: var(--popup-link);
+        text-decoration: none; /* Underline on hover instead */
+        transition: color 0.2s ease, text-decoration 0.2s ease;
+        font-weight: 500;
+    }
+
+    #popup-info a:hover,
+    #popup-info a:focus {
+        color: var(--popup-link-hover);
+        text-decoration: underline;
+    }
+
+
+    /* --- Button Styling (mostly reused) --- */
+
+    #popup-info #buttonDiv {
+       margin-top: 20px; /* Space above button area */
+       padding-top: 15px; /* Space between content and button */
+       border-top: 1px solid var(--popup-border); /* Separator line */
+       display: flex;
+       flex-direction: column; /* Mobile default */
+       gap: 12px;
+    }
+
+    /* Base styles for buttons inside this popup */
+    #popup-info button {
+      display: block;
+      width: 100%;
+      padding: 10px 15px;
+      border: none;
+      border-radius: var(--popup-border-radius);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+      box-sizing: border-box;
+      line-height: 1.5;
+      color: var(--popup-button-text);
+    }
+
+    /* Close Button Style (Red) - Target the specific ID */
+    #popup-info #closeButton {
+      background-color: var(--popup-close-bg);
+    }
+
+    #popup-info #closeButton:hover {
+       background-color: var(--popup-close-bg-hover);
+       transform: translateY(-1px);
+    }
+
+    /* Focus style */
+    #popup-info button:focus-visible {
+       outline: none;
+       box-shadow: 0 0 0 3px var(--popup-focus-ring);
+    }
+
+    /* Active style */
+    #popup-info button:active {
+        transform: translateY(0px);
+    }
+
+
+    /* --- Responsive Adjustments --- */
+    @media (min-width: 600px) {
+      #popup-info #buttonDiv {
+         flex-direction: row;
+         justify-content: flex-end; /* Align button(s) to the right */
+         gap: 15px;
+         /* flex-wrap: wrap; */ /* Not really needed for single button */
+      }
+
+      #popup-info button {
+         width: auto; /* Size button to content */
+         min-width: 90px;
+      }
+    }
+  `;
+
   document.head.appendChild(style);
 }
-
 
 const MAX_MIDI_SIZE = 1 * 1024 * 1024; // 1MB in bytes
 const uploadForm = document.getElementById('upload-form');

@@ -37,16 +37,65 @@ static void midi_transfer_cb(usb_transfer_t *transfer) {
         switch (statusByte & 0xF0) {
           case 0x80: // Note Off
             noteOff(data1);
+            if (numConnectedClients != 0 && CLIENT_LOGGER)
+            {
+              sendESP32Log("USB MIDI IN: Note OFF " + String(data1) + " Velocity: " + String(data2));
+
+            }
+            if (isConnected) {
+              if (numConnectedClients != 0 && CLIENT_LOGGER)
+              {
+                sendESP32Log("RTP MIDI Out: Note OFF " + String(data1) + " Velocity: " + String(data2));
+
+              }
+              MIDI.sendNoteOff(data1, data2, 1);
+            }
             break;
           case 0x90: // Note On
             if (data2 == 0) {
               noteOff(data1);
+              if (numConnectedClients != 0 && CLIENT_LOGGER)
+              {
+                sendESP32Log("USB MIDI IN: Note OFF " + String(data1) + " Velocity: " + String(data2));
+
+              }
+              if (isConnected) {
+                if (numConnectedClients != 0 && CLIENT_LOGGER)
+                {
+                  sendESP32Log("RTP MIDI Out: Note OFF " + String(data1) + " Velocity: " + String(data2));
+
+                }
+                MIDI.sendNoteOff(data1, data2, 1);
+              }
             } else {
               noteOn(data1, data2);
+              if (numConnectedClients != 0)
+              {
+                sendESP32Log("USB MIDI IN: Note ON " + String(data1) + " Velocity: " + String(data2));
+
+              }
+              if (isConnected) {
+                if (numConnectedClients != 0)
+                {
+                  sendESP32Log("RTP MIDI Out: Note ON " + String(data1) + " Velocity: " + String(data2));
+                }
+                MIDI.sendNoteOn(data1, data2, 1);
+              }
             }
             break;
           case 0xB0: // Control Change
-            // Handle CC if needed
+            if (numConnectedClients != 0 && CLIENT_LOGGER)
+            {
+              sendESP32Log("USB MIDI IN: CC " + String(data1) + " Value: " + String(data2));
+
+            }
+            if (isConnected) {
+              if (numConnectedClients != 0 && CLIENT_LOGGER)
+              {
+                sendESP32Log("RTP MIDI Out: CC " + String(data1) + " Value: " + String(data2));
+              }
+              MIDI.sendControlChange(data1, data2, 1);
+            }
             break;
             // Add other cases (Prog Change, Pitch Bend, etc.) if needed
         }

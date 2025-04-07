@@ -63,7 +63,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
             if (midiPlayer.load(path.c_str())) {
               currentLoadedFile = filename; // Store the name of the successfully loaded file
               midiPlayer.play();
-              //WebSerial.printf("Playing MIDI: %s\n", filename);
+              //WebSerial.pzrintf("Playing MIDI: %s\n", filename);
               notifyClients("{\"status\":\"info\", \"message\":\"Playing MIDI: " + String(filename) + "\"}");
               sendPlaybackStatus(); // Broadcast the new PLAYING state
             } else {
@@ -125,12 +125,12 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
           if (action == "ChangeLEDModeAction") {
             serverMode = doc["mode"];
             changeLEDModeAction(serverMode);
-            Serial.println("LED ID: ");
-            Serial.print(serverMode);
+            WebSerial.println("LED ID: ");
+            WebSerial.print(serverMode);
           } else if (action == "ChangeAnimationAction") {
             animationIndex = doc["animation"];
-            Serial.println("Animation ID: ");
-            Serial.print(animationIndex);
+            WebSerial.println("Animation ID: ");
+            WebSerial.print(animationIndex);
           } else if (action == "Hue") {
             uint8_t value = doc["value"];
             sliderAction(1, value);
@@ -278,7 +278,7 @@ void sendESP32Log(String logMessage) {
   serializeJson(doc, jsonStr);
 
   // Send the JSON data to all connected clients
-  Serial.println("Sending Data To Clients");
+  WebSerial.println("Sending Data To Clients");
   webSocket.broadcastTXT(jsonStr);
 }
 
@@ -309,7 +309,7 @@ void sendValues() {
   serializeJson(doc, jsonStr);
 
   // Send the JSON data to all connected clients
-  Serial.println("Sending Data To Clients");
+  WebSerial.println("Sending Data To Clients");
   webSocket.broadcastTXT(jsonStr);
 }
 
@@ -348,7 +348,7 @@ void sendESP32Info() {
   serializeJson(doc, jsonStr);
 
   // Send the JSON data to all connected clients
-  Serial.println("Sending ESP32 Info To Clients");
+  WebSerial.println("Sending ESP32 Info To Clients");
   webSocket.broadcastTXT(jsonStr);
 }
 

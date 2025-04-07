@@ -76,6 +76,11 @@ echo Installing WiFiManager library...
 powershell -command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/tzapu/WiFiManager/archive/refs/heads/master.zip', 'WiFiManager.zip')"
 powershell -command "Expand-Archive -Path WiFiManager.zip -DestinationPath '%ARDUINO_LIB_DIR%' -Force"
 
+rem Install WebSerial library
+echo Installing WebSerial library...
+powershell -command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/ayushsharma82/WebSerial/archive/refs/heads/master.zip', 'WebSerial.zip')"
+powershell -command "Expand-Archive -Path WebSerial.zip -DestinationPath '%ARDUINO_LIB_DIR%' -Force"
+
 rem Install ESP32MidiPlayer library
 echo Installing ESP32MidiPlayer library...
 powershell -command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/serifpersia/ESP32MidiPlayer/archive/refs/tags/1.0.1.zip', 'ESP32MidiPlayer.zip')"

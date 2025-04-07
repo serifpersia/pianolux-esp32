@@ -110,34 +110,41 @@ static bool queueMidiMessage(uint8_t status, uint8_t channel, uint8_t data1, uin
 
 // Send MIDI Note On message (Modified)
 void sendUSBMIDINoteOn(uint8_t channel, uint8_t note, uint8_t velocity) {
-  // Note: The "before sendusb" log is now effectively "before queueing"
-  // WebSerial.printf("MIDI Player ON Events before queueing: Note=%u, Vel=%u\n", note, velocity);
+  if (numConnectedClients != 0 && CLIENT_LOGGER)
+  {
+    sendESP32Log("USB MIDI PLAYER Out: Note ON " + String(note) + " Velocity: " + String(velocity));
+  }
   queueMidiMessage(0x90, channel, note, velocity);
-  // The "during sendusb" log will be moved to the sending task/loop
 }
 
 // Send MIDI Note Off message (Modified)
 void sendUSBMIDINoteOff(uint8_t channel, uint8_t note, uint8_t velocity) {
-  //WebSerial.printf("MIDI Player OFF Events before queueing: Note=%u, Vel=%u\n", note, velocity);
+  if (numConnectedClients != 0 && CLIENT_LOGGER)
+  {
+    sendESP32Log("USB MIDI PLAYER Out: Note OFF " + String(note) + " Velocity: " + String(velocity));
+  }
   queueMidiMessage(0x80, channel, note, velocity);
 }
 
 // Modify other sendUSBMIDI... functions similarly if you use them
 void sendUSBMIDIControlChange(uint8_t channel, uint8_t controller, uint8_t value) {
+  if (numConnectedClients != 0 && CLIENT_LOGGER)
+  {
+    sendESP32Log("USB MIDI PLAYER Out: CC " + String(controller) + " Value: " + String(value));
+  }
   queueMidiMessage(0xB0, channel, controller, value);
 }
 
-void sendUSBMIDIProgramChange(uint8_t channel, uint8_t program) {
-  queueMidiMessage(0xC0, channel, program, 0); // data2 is unused for PC
-}
-
-// Pitch bend needs slight adaptation for 14-bit value
-void sendUSBMIDIPitchBend(uint8_t channel, int bendValue) {
-  // Convert signed bendValue (-8192 to +8191) to unsigned 14-bit (0-16383)
-  uint16_t unsignedBend = (bendValue + 8192) & 0x3FFF; // Ensure 14-bit range
-  uint8_t lsb = unsignedBend & 0x7F;         // Least Significant 7 bits
-  uint8_t msb = (unsignedBend >> 7) & 0x7F;  // Most Significant 7 bits
-  queueMidiMessage(0xE0, channel, lsb, msb);
-}
-
+//void sendUSBMIDIProgramChange(uint8_t channel, uint8_t program) {
+//  queueMidiMessage(0xC0, channel, program, 0); // data2 is unused for PC
+//}
+//
+//// Pitch bend needs slight adaptation for 14-bit value
+//void sendUSBMIDIPitchBend(uint8_t channel, int bendValue) {
+//  // Convert signed bendValue (-8192 to +8191) to unsigned 14-bit (0-16383)
+//  uint16_t unsignedBend = (bendValue + 8192) & 0x3FFF; // Ensure 14-bit range
+//  uint8_t lsb = unsignedBend & 0x7F;         // Least Significant 7 bits
+//  uint8_t msb = (unsignedBend >> 7) & 0x7F;  // Most Significant 7 bits
+//  queueMidiMessage(0xE0, channel, lsb, msb);
+//}
 #endif
