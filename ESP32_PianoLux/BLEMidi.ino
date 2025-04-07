@@ -68,7 +68,7 @@ void BLE_onControlChange(uint8_t channel, uint8_t controller, uint8_t value, uin
       if (numConnectedClients != 0 && CLIENT_LOGGER) {
         sendESP32Log("BLE RTP MIDI Out: CC " + String(controller) + " Value: " + String(value));
       }
-      MIDI.sendNoteOff(note, velocity, 1);
+      MIDI.sendControlChange(controller, value, 1);
     }
   }
 }
