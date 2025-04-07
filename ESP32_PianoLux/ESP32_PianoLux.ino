@@ -47,7 +47,7 @@ String firmwareVersion = "v1.12";
 #define ESP32S3  3
 
 // Define the actual board type (change this based on your board)
-#define BOARD_TYPE  ESP32S3 // select your board: ESP32, ESP32S2, or ESP32S3
+#define BOARD_TYPE  ESP32S2 // select your board: ESP32, ESP32S2, or ESP32S3
 
 #if BOARD_TYPE == ESP32S3
 #include <BLEMidi.h>
@@ -101,6 +101,34 @@ String firmwareVersion = "v1.12";
 #include "w2812-rmt.hpp"
 
 #include "ESP32MidiPlayer.h"
+
+
+#include <freertos/FreeRTOS.h>
+#include <freertos/queue.h>
+
+// Define a structure for MIDI messages
+typedef struct {
+  uint8_t status; // e.g., 0x90 for Note On, 0x80 for Note Off
+  uint8_t channel;
+  uint8_t data1; // Note number or Controller number
+  uint8_t data2; // Velocity or Value
+} MidiMessage;
+
+// Define Queue Handle and Size
+#define MIDI_OUT_QUEUE_SIZE 16 // Adjust size as needed
+static QueueHandle_t midiOutQueue = NULL;
+
+bool isMIDI = false;
+bool isMIDIReady = false;
+
+const size_t MIDI_IN_BUFFERS = 8;
+const size_t MIDI_OUT_BUFFERS = 8;
+usb_transfer_t *MIDIOut = NULL;
+usb_transfer_t *MIDIIn[MIDI_IN_BUFFERS] = { NULL };
+
+// Flag to track if the USB OUT transfer is busy
+static volatile bool midiOutBusy = false; // Volatile: accessed by callback and main tasks
+
 
 // Initialization of webserver and websocket
 AsyncWebServer server(80);
@@ -234,51 +262,43 @@ float distance(CRGB color1, CRGB color2) {
   return sqrt(pow(color1.r - color2.r, 2) + pow(color1.g - color2.g, 2) + pow(color1.b - color2.b, 2));
 }
 
-// Function declarations
-#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
-void sendUSBMIDINoteOn(uint8_t channel, uint8_t note, uint8_t velocity);
-void sendUSBMIDINoteOff(uint8_t channel, uint8_t note, uint8_t velocity);
-void sendUSBMIDIControlChange(uint8_t channel, uint8_t controller, uint8_t value);
-#endif
-
 // Function definitions (outside midiTask())
 void handleNoteOn(uint8_t channel, uint8_t note, uint8_t velocity) {
-  WebSerial.printf("[EVT] Note On:  Ch=%u Note=%u Vel=%u (Tick: %lu)\n",
-                   channel + 1, note, velocity, midiPlayer.getCurrentTick()); // Display channel 1-16
+  // WebSerial.printf("[EVT] Note On:  Ch=%u Note=%u Vel=%u (Tick: %lu)\n",
+  //                  channel + 1, note, velocity, midiPlayer.getCurrentTick()); // Display channel 1-16
 
   noteOn(note, velocity);
-#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
+  //#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
   sendUSBMIDINoteOn(channel, note, velocity);
-#endif
-  if (isConnected) {
-    MIDI.sendNoteOn(note, velocity, channel + 1);
-  }
+  //#endif
+  // if (isConnected) {
+  //   MIDI.sendNoteOn(note, velocity, channel + 1);
+  // }
 }
 
 void handleNoteOff(uint8_t channel, uint8_t note, uint8_t velocity) {
-  WebSerial.printf("[EVT] Note Off:  Ch=%u Note=%u Vel=%u (Tick: %lu)\n",
-                   channel + 1, note, velocity, midiPlayer.getCurrentTick()); // Display channel 1-16
+  // WebSerial.printf("[EVT] Note Off:  Ch=%u Note=%u Vel=%u (Tick: %lu)\n",
+  //                channel + 1, note, velocity, midiPlayer.getCurrentTick()); // Display channel 1-16
 
   noteOff(note);
-#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
+  //#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
   sendUSBMIDINoteOff(channel, note, velocity);
-#endif
-  if (isConnected) {
-    MIDI.sendNoteOn(note, velocity, channel + 1);
-  }
+  //#endif
+  // if (isConnected) {
+  //   MIDI.sendNoteOn(note, velocity, channel + 1);
+  // }
 }
 
 void handleControlChange(uint8_t channel, uint8_t controller, uint8_t value) {
-  WebSerial.printf("[EVT] Control Change:  Ch=%u Controller=%u Value=%u (Tick: %lu)\n",
-                   channel + 1, controller, value, midiPlayer.getCurrentTick()); // Display channel 1-16
+  //WebSerial.printf("[EVT] Control Change:  Ch=%u Controller=%u Value=%u (Tick: %lu)\n",
+  //                 channel + 1, controller, value, midiPlayer.getCurrentTick()); // Display channel 1-16
 
-  noteOff(note);
-#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
+  //#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
   sendUSBMIDIControlChange(channel, controller, value);
-#endif
-  if (isConnected) {
-    MIDI.sendNoteOn(note, velocity, channel + 1);
-  }
+  //#endif
+  // if (isConnected) {
+  //  MIDI.sendNoteOn(controller, value, channel + 1);
+  //}
 }
 void handlePlaybackComplete() {
   notifyClients("{\"status\":\"info\", \"message\":\"MIDI playback finished: " + currentLoadedFile + "\"}"); // Now accessible
@@ -593,6 +613,13 @@ void setup() {
     setIPLeds();
   }
 
+  // Create the MIDI Out Queue
+  midiOutQueue = xQueueCreate(MIDI_OUT_QUEUE_SIZE, sizeof(MidiMessage));
+  if (midiOutQueue == NULL) {
+    ESP_LOGE("", "Failed to create MIDI Out Queue!");
+    // Handle error appropriately, maybe halt?
+  }
+
   MIDI.begin();
 
   AppleMIDI.setHandleConnected([](const APPLEMIDI_NAMESPACE::ssrc_t& ssrc, const char* name) {
@@ -646,8 +673,10 @@ void setup() {
   usbh_setup(show_config_desc_full);  // Init USB host for MIDI devices
 #endif
 
+  midiOutBusy = false;
+
   //midiPlayer.setLogCallback(handleLog);
-  //midiPlayer.setLogLevel(MidiLogLevel::INFO);
+  //midiPlayer.setLogLevel(MidiLogLevel::DEBUG);
 
   midiPlayer.setNoteOnCallback(handleNoteOn);
   midiPlayer.setNoteOffCallback(handleNoteOff);
@@ -657,7 +686,7 @@ void setup() {
 
 void loop() {
 
-  MIDI.read();
+  //MIDI.read();
 
   // Check MIDI player state changes
   static PlaybackState lastState = midiPlayer.getState();
@@ -670,6 +699,73 @@ void loop() {
 
     lastState = currentState;
   }
+
+
+  if (isMIDIReady && !midiOutBusy && midiOutQueue != NULL && uxQueueMessagesWaiting(midiOutQueue) > 0) {
+    MidiMessage msgToSend;
+    // Check if a message is available without blocking
+    if (xQueueReceive(midiOutQueue, &msgToSend, 0) == pdPASS) {
+
+      // Prepare USB MIDI Packet
+      uint8_t cableNumber = 0; // Typically 0
+      uint8_t cin = 0;         // Code Index Number
+
+      switch (msgToSend.status & 0xF0) {
+        case 0x80: cin = 0x08; break; // Note Off
+        case 0x90: cin = 0x09; break; // Note On
+        case 0xA0: cin = 0x0A; break; // Poly Key Pressure
+        case 0xB0: cin = 0x0B; break; // Control Change
+        case 0xC0: cin = 0x0C; break; // Program Change
+        case 0xD0: cin = 0x0D; break; // Channel Pressure
+        case 0xE0: cin = 0x0E; break; // Pitch Bend
+        // case 0xF0: // System messages might need special handling (CIN 0xF or others)
+        default:
+          ESP_LOGW("", "Unsupported MIDI status for USB OUT: 0x%02X", msgToSend.status);
+          // Skip this message or handle appropriately
+          goto skip_submit; // Use goto sparingly, or restructure
+      }
+
+      // Check if MIDIOut is valid (should be if isMIDIReady is true, but double-check)
+      if (!MIDIOut) {
+        ESP_LOGE("", "MIDIOut is NULL despite isMIDIReady being true!");
+        // Maybe try to re-queue? xQueueSendToFront(midiOutQueue, &msgToSend, 0);
+        goto skip_submit;
+      }
+
+      // Construct the 4-byte USB MIDI packet
+      MIDIOut->data_buffer[0] = (cableNumber << 4) | cin;
+      MIDIOut->data_buffer[1] = msgToSend.status | (msgToSend.channel & 0x0F);
+      MIDIOut->data_buffer[2] = msgToSend.data1 & 0x7F;
+      MIDIOut->data_buffer[3] = msgToSend.data2 & 0x7F;
+      MIDIOut->num_bytes = 4; // USB MIDI packets are always 4 bytes
+
+      // Mark busy BEFORE submitting
+      midiOutBusy = true;
+
+      // Submit the transfer
+      esp_err_t err = usb_host_transfer_submit(MIDIOut);
+
+      if (err != ESP_OK) {
+        ESP_LOGE("", "MIDI OUT transfer submit failed: %s", esp_err_to_name(err));
+        // IMPORTANT: Mark as not busy if submit failed, so we can try again later
+        midiOutBusy = false;
+        // Optional: Re-queue the message to try again later?
+        // xQueueSendToFront(midiOutQueue, &msgToSend, 0); // Put it back at the front
+      } else {
+        // **** Log SUCCESSFUL submission here ****
+        uint8_t statusNibble = msgToSend.status & 0xF0; // Get the high nibble
+
+        if (statusNibble == 0x90) { // Note On
+          WebSerial.printf("MIDI Player ON Events during sendusb: Note=%u, Vel=%u\n", msgToSend.data1, msgToSend.data2);
+        } else if (statusNibble == 0x80) { // Note Off
+          WebSerial.printf("MIDI Player OFF Events during sendusb: Note=%u, Vel=%u\n", msgToSend.data1, msgToSend.data2);
+        } else if (statusNibble == 0xB0) { // Control Change <<<--- ADD THIS
+          WebSerial.printf("MIDI Player CC Events during sendusb: Ctrl=%u, Val=%u\n", msgToSend.data1, msgToSend.data2);
+        }
+      }
+    } // end if xQueueReceive
+  } // end if !midiOutBusy && messages waiting
+skip_submit:; // Label for goto, or restructure to avoid it
 
   // Handle USB
 #if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2

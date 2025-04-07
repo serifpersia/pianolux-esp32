@@ -1,83 +1,88 @@
 #if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
 static void midi_transfer_cb(usb_transfer_t *transfer) {
-  ESP_LOGI("", "midi_transfer_cb context: %d", transfer->context);
-  if (Device_Handle == transfer->device_handle) {
-    int in_xfer = transfer->bEndpointAddress & USB_B_ENDPOINT_ADDRESS_EP_DIR_MASK;
-    if ((transfer->status == 0) && in_xfer) {
+  // Check if the callback is for our device
+  if (Device_Handle != transfer->device_handle) {
+    ESP_LOGW("", "midi_transfer_cb for wrong device handle");
+    // Optional: Handle freeing the transfer if it was allocated outside our known ones?
+    return;
+  }
+
+  // Check if it's an IN transfer (MIDI data received from USB device)
+  if (transfer->bEndpointAddress & USB_B_ENDPOINT_ADDRESS_EP_DIR_MASK) {
+    // This is an IN transfer (like MIDIIn[...])
+    if (transfer->status == USB_TRANSFER_STATUS_COMPLETED) {
       uint8_t *const p = transfer->data_buffer;
+      //ESP_LOGI("", "MIDI IN Transfer Complete (%d bytes)", transfer->actual_num_bytes);
       for (int i = 0; i < transfer->actual_num_bytes; i += 4) {
-        if ((p[i] + p[i + 1] + p[i + 2] + p[i + 3]) == 0) break; // End of valid data
-        ESP_LOGI("", "midi: %02x %02x %02x %02x", p[i], p[i + 1], p[i + 2], p[i + 3]);
+        // Basic validity check
+        if (p[i] == 0 && p[i + 1] == 0 && p[i + 2] == 0 && p[i + 3] == 0 && i > 0) {
+          //ESP_LOGD("", "Skipping padding zeros in MIDI IN");
+          break;
+        }
+        if ((p[i] & 0x0F) == 0) { // CIN 0 is reserved/invalid in USB MIDI 1.0
+          //ESP_LOGD("", "Skipping invalid CIN 0 in MIDI IN");
+          continue;
+        }
+
+        //ESP_LOGI("", "midi IN raw: %02x %02x %02x %02x", p[i], p[i + 1], p[i + 2], p[i + 3]);
 
         // Parse USB MIDI packet
-        uint8_t cin = p[i] & 0x0F;           // Code Index Number
-        uint8_t statusByte = p[i + 1];       // MIDI status byte
-        uint8_t data1 = p[i + 2];            // First data byte (note or controller)
-        uint8_t data2 = p[i + 3];            // Second data byte (velocity or value)
-        uint8_t channel = statusByte & 0x0F; // Extract channel (0-15)
+        uint8_t cin = p[i] & 0x0F;
+        uint8_t statusByte = p[i + 1];
+        uint8_t data1 = p[i + 2];
+        uint8_t data2 = p[i + 3];
+        uint8_t channel = statusByte & 0x0F;
 
-        // Format parsed MIDI data for logging
-        char midiString[50];
-        const char* eventType;
-        if ((statusByte & 0xF0) == 0x80) eventType = "Note Off";
-        else if ((statusByte & 0xF0) == 0x90) eventType = "Note On";
-        else if ((statusByte & 0xF0) == 0xB0) eventType = "Control Change";
-        else eventType = "Other";
-        snprintf(midiString, sizeof(midiString), "Ch%d %s Data1: %d Data2: %d",
-                 channel, eventType, data1, data2);
-
-        // Process MIDI messages
+        // --- Process MIDI IN messages ---
         switch (statusByte & 0xF0) {
           case 0x80: // Note Off
-            noteOff(data1); // data1 = note number
-            if (numConnectedClients != 0) {
-              sendESP32Log("USB MIDI IN: NOTE OFF Pitch: " + String(data1) + " Velocity: " + String(data2));
-            }
-            if (isConnected) {
-              //MIDI.sendNoteOff(data1, data2, channel + 1);
-              //sendESP32Log("RTP MIDI Out: Note OFF " + String(data1) + " Velocity: " + String(data2));
-            }
+            noteOff(data1);
             break;
-
           case 0x90: // Note On
-            if (data2 == 0) { // Velocity 0 treated as Note Off per MIDI spec
+            if (data2 == 0) {
               noteOff(data1);
-              if (numConnectedClients != 0) {
-                sendESP32Log("USB MIDI IN: NOTE OFF Pitch: " + String(data1) + " Velocity: 0");
-              }
-              if (isConnected) {
-                //MIDI.sendNoteOff(data1, 0, channel + 1);
-                //sendESP32Log("RTP MIDI Out: Note OFF " + String(data1) + " Velocity: 0");
-              }
             } else {
-              noteOn(data1, data2); // data1 = note, data2 = velocity
-              if (numConnectedClients != 0) {
-                sendESP32Log("USB MIDI IN: NOTE ON Pitch: " + String(data1) + " Velocity: " + String(data2));
-              }
-              if (isConnected) {
-                //MIDI.sendNoteOn(data1, data2, channel + 1);
-                //sendESP32Log("RTP MIDI Out: Note ON " + String(data1) + " Velocity: " + String(data2));
-              }
+              noteOn(data1, data2);
             }
             break;
-
-          case 0xB0: // Control Change (commented out)
-            if (numConnectedClients != 0) {
-              sendESP32Log("USB MIDI IN: CONTROL CHANGE Controller: " + String(data1) + " Value: " + String(data2));
-            }
-            if (isConnected) {
-              //MIDI.sendControlChange(data1, data2, channel + 1); // data1 = controller, data2 = value
-              //sendESP32Log("RTP MIDI Out: CC " + String(data1) + " Value: " + String(data2));
-            }
+          case 0xB0: // Control Change
+            // Handle CC if needed
             break;
+            // Add other cases (Prog Change, Pitch Bend, etc.) if needed
         }
+        // --- End MIDI IN processing ---
       }
+
+      // Re-submit the IN transfer buffer to continue listening
       esp_err_t err = usb_host_transfer_submit(transfer);
       if (err != ESP_OK) {
-        ESP_LOGI("", "usb_host_transfer_submit In fail: %x", err);
+        ESP_LOGE("", "usb_host_transfer_submit IN failed: %s", esp_err_to_name(err));
+        // Consider how to recover - maybe re-allocate and re-submit?
       }
     } else {
-      ESP_LOGI("", "transfer->status %d", transfer->status);
+      ESP_LOGW("", "MIDI IN transfer failed, status: %d", transfer->status);
+      // Handle IN transfer errors (e.g., STALL, ERROR)
+      // Maybe try re-submitting? Or log and stop?
+      // Attempt re-submission cautiously
+      vTaskDelay(pdMS_TO_TICKS(10)); // Small delay before retry
+      esp_err_t err = usb_host_transfer_submit(transfer);
+      if (err != ESP_OK) {
+        ESP_LOGE("", "Retry usb_host_transfer_submit IN failed: %s", esp_err_to_name(err));
+      }
+    }
+  } else {
+    // This is an OUT transfer (MIDIOut completion)
+    if (transfer == MIDIOut) {
+      //ESP_LOGD("", "MIDI OUT Transfer Complete, Status: %d", transfer->status);
+      if (transfer->status != USB_TRANSFER_STATUS_COMPLETED) {
+        ESP_LOGW("", "MIDI OUT transfer failed, status: %d", transfer->status);
+        // Handle potential OUT errors if necessary
+      }
+      // Mark the OUT buffer as free, regardless of status for now
+      // (the sending logic will handle retries if needed)
+      midiOutBusy = false;
+    } else {
+      ESP_LOGW("", "Callback received for unknown OUT transfer");
     }
   }
 }
