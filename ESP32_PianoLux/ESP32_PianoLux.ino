@@ -47,7 +47,6 @@ String firmwareVersion = "v1.12";
 #define ESP32S3  3
 
 // Define the actual board type (change this based on your board)
-#define BOARD_TYPE  ESP32S3 // select your board: ESP32, ESP32S2, or ESP32S3
 #define BOARD_TYPE  ESP32S2 // select your board: ESP32, ESP32S2, or ESP32S3
 
 #if BOARD_TYPE == ESP32S3
