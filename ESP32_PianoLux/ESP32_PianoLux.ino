@@ -47,7 +47,7 @@ String firmwareVersion = "v1.12";
 #define ESP32S3  3
 
 // Define the actual board type (change this based on your board)
-#define BOARD_TYPE  ESP32S3 // select your board: ESP32, ESP32S2, or ESP32S3
+#define BOARD_TYPE ESP32S3 // select your board: ESP32, ESP32S2, or ESP32S3
 
 #if BOARD_TYPE == ESP32S3
 #include <BLEMidi.h>
@@ -106,6 +106,7 @@ String firmwareVersion = "v1.12";
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
 
+#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
 // Define a structure for MIDI messages
 typedef struct {
   uint8_t status; // e.g., 0x90 for Note On, 0x80 for Note Off
@@ -128,7 +129,7 @@ usb_transfer_t *MIDIIn[MIDI_IN_BUFFERS] = { NULL };
 
 // Flag to track if the USB OUT transfer is busy
 static volatile bool midiOutBusy = false; // Volatile: accessed by callback and main tasks
-
+#endif
 
 // Initialization of webserver and websocket
 AsyncWebServer server(80);
@@ -263,6 +264,7 @@ float distance(CRGB color1, CRGB color2) {
   return sqrt(pow(color1.r - color2.r, 2) + pow(color1.g - color2.g, 2) + pow(color1.b - color2.b, 2));
 }
 
+#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
 // Function definitions (outside midiTask())
 void handleMidiPlayerNoteOn(uint8_t channel, uint8_t note, uint8_t velocity) {
   noteOn(note, velocity);
@@ -277,6 +279,8 @@ void handleMidiPlayerNoteOff(uint8_t channel, uint8_t note, uint8_t velocity) {
 void handleMidiPlayerControlChange(uint8_t channel, uint8_t controller, uint8_t value) {
   sendUSBMIDIControlChange(channel, controller, value);
 }
+#endif
+
 void handlePlaybackComplete() {
   notifyClients("{\"status\":\"info\", \"message\":\"MIDI playback finished: " + currentLoadedFile + "\"}"); // Now accessible
 }
@@ -591,12 +595,14 @@ void setup() {
     setIPLeds();
   }
 
+#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
   // Create the MIDI Out Queue
   midiOutQueue = xQueueCreate(MIDI_OUT_QUEUE_SIZE, sizeof(MidiMessage));
   if (midiOutQueue == NULL) {
     ESP_LOGE("", "Failed to create MIDI Out Queue!");
     // Handle error appropriately, maybe halt?
   }
+#endif
 
   MIDI.begin();
 
@@ -617,7 +623,9 @@ void setup() {
   MIDI.setHandleNoteOn([](byte channel, byte note, byte velocity) {
     if (isConnected) {
       noteOn(note, velocity);
+#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
       sendUSBMIDINoteOn(channel, note, velocity);
+#endif
       if (numConnectedClients != 0)
       {
         sendESP32Log("RTP MIDI IN: NOTE ON: Channel: " + String(channel) + " Pitch: " + String(note) + " Velocity: " + String(velocity));
@@ -627,7 +635,9 @@ void setup() {
   MIDI.setHandleNoteOff([](byte channel, byte note, byte velocity) {
     if (isConnected) {
       noteOff(note);
+#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
       sendUSBMIDINoteOff(channel, note, velocity);
+#endif
       if (numConnectedClients != 0 && CLIENT_LOGGER)
         sendESP32Log("RTP MIDI IN: NOTE OFF: Channel: " + String(channel) + " Pitch: " + String(note) + " Velocity: " + String(velocity));
     }
@@ -635,7 +645,9 @@ void setup() {
 
   MIDI.setHandleControlChange([](byte channel, byte controller, byte value) {
     if (isConnected) {
+#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
       sendUSBMIDIControlChange(channel, controller, value);
+#endif
       if (numConnectedClients != 0 && CLIENT_LOGGER)
       {
         sendESP32Log("RTP MIDI IN: CC "  + String(channel) + "" + String(controller) + " Value: " + String(value));
@@ -655,9 +667,9 @@ void setup() {
   // USB setup
 #if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
   usbh_setup(show_config_desc_full);  // Init USB host for MIDI devices
-#endif
 
   midiOutBusy = false;
+#endif
 
   //midiPlayer.setLogCallback(handleLog);
   //midiPlayer.setLogLevel(MidiLogLevel::DEBUG);
@@ -767,6 +779,7 @@ void loop() {
   FastLED.show();
 }
 
+#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
 void handleUSBMidiOut()
 {
   if (isMIDIReady && !midiOutBusy && midiOutQueue != NULL && uxQueueMessagesWaiting(midiOutQueue) > 0) {
@@ -836,6 +849,8 @@ void handleUSBMidiOut()
 skip_submit:; // Label for goto, or restructure to avoid it
 
 }
+#endif
+
 void controlLeds(uint8_t ledNo, uint8_t hueVal, uint8_t saturationVal, uint8_t brightnessVal) {
   if (ledNo < 0 || ledNo >= NUM_LEDS) {
     WebSerial.println("Invalid LED index");
