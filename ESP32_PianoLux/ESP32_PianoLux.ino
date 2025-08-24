@@ -70,6 +70,7 @@ String firmwareVersion = "v1.12";
 // WIFI Libs
 #include <WiFiManager.h>
 #include <ESPmDNS.h>
+#include <esp_wifi.h>
 
 #include <AsyncTCP.h>
 #include <ArduinoJson.h>
@@ -540,6 +541,10 @@ void setup() {
   } else {
     startSTA(wifiManager);
   }
+
+  // Disable WiFi power saving for low latency
+  esp_wifi_set_ps(WIFI_PS_NONE);
+  WiFi.setSleep(false);
 
   WebSerial.begin(&server);
   WebSerial.println("Booting...");
