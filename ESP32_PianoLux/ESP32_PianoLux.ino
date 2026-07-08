@@ -868,7 +868,6 @@ void controlLeds(uint8_t ledNo, uint8_t hueVal, uint8_t saturationVal, uint8_t b
   // Convert HSB values to RGB values
   CRGB color = CHSV(hueVal, saturationVal, brightnessVal);
   leds[ledNum(ledNo)] = color;  // Set the LED color
-  FastLED.show();               // Update the LEDs with the new color
 }
 
 uint8_t mapMidiNoteToLED(uint8_t midiNote, uint8_t lowestMidiNote, uint8_t highestMidiNote, uint8_t endIndex) {
