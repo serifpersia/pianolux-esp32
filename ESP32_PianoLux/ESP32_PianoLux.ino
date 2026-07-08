@@ -661,7 +661,7 @@ void setup() {
 
   });
 
-#if BOARD_TYPE == ESP3S3 || BOARD_TYPE == ESP32
+#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32
   BLEMidiClient.begin("PianoLux-BLE");
   //BLEMidiClient.enableDebugging();
   BLEMidiClient.setNoteOnCallback(BLE_onNoteOn);
