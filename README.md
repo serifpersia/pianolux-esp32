@@ -72,6 +72,8 @@ Manual Installation
 - *release bins are only to be used for updating withing the PianoLux menus. For advance users esptool can be used to flash merged bin from auto install branch at 0x0 offest or the release bins look at the offests used in creating merged firmware here [merge commands file](https://github.com/serifpersia/pianolux-esp32/blob/auto-install-page/esp32%20merge%20commands.txt) filesystem file is spiffs parition and firmware file is main app parition in commands file called PianoLux. Construct proper flash command for your board and use correct files. Or you could just use auto install page :).
 *Modify ElegantOTA.h file in this lib's src directory, change ELEGANTOTA_USE_ASYNC_WEBSERVER 0 to 1
 
+*For bluetooth midi to work edit bluetooth midi library source code file false value in BLEMidiClient.h line 97 to true like this >> pRemoteCharacteristic->writeValue(packet, packetSize, true);
+at line 78 add ',true' in between the } and ) like this },true);
 ## Setup
 After auto or manual installation. Connect to ESP32's Access Point WiFi. If your WiFi capable device didn't redirect you to WiFiManager's captive portal,
 go to it manually by typing 192.168.4.1

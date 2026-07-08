@@ -694,6 +694,8 @@ void setup() {
 
 void loop() {
 
+  scan_BLE_MIDI();
+
   MIDI.read();
 
   // Check MIDI player state changes
