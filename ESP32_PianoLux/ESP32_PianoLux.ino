@@ -39,7 +39,7 @@
 // Once this AP is no longer visible your ESP32 should show you your IP, you might need to recconect the board or press reset button to see it.
 // Connect to PianoLux web interface via ip the link should look like http://192.168.1.32/ or use pianolux.local http://pianolux.local/.
 
-String firmwareVersion = "v1.12";
+String firmwareVersion = "v1.13";
 
 // Define board types with unique values
 #define ESP32    1
