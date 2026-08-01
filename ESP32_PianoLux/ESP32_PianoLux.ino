@@ -39,7 +39,7 @@
 // Once this AP is no longer visible your ESP32 should show you your IP, you might need to recconect the board or press reset button to see it.
 // Connect to PianoLux web interface via ip the link should look like http://192.168.1.32/ or use pianolux.local http://pianolux.local/.
 
-String firmwareVersion = "v1.13";
+String firmwareVersion = "v1.12";
 
 // Define board types with unique values
 #define ESP32    1
@@ -70,7 +70,6 @@ String firmwareVersion = "v1.13";
 // WIFI Libs
 #include <WiFiManager.h>
 #include <ESPmDNS.h>
-#include <esp_wifi.h>
 
 #include <AsyncTCP.h>
 #include <ArduinoJson.h>
@@ -542,9 +541,6 @@ void setup() {
     startSTA(wifiManager);
   }
 
-  // Disable WiFi power saving for low latency
-  esp_wifi_set_ps(WIFI_PS_NONE);
-  WiFi.setSleep(false);
 
   WebSerial.begin(&server);
   WebSerial.println("Booting...");
