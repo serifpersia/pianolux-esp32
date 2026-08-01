@@ -15,8 +15,6 @@
 // PianoLux
 
 // Install ESP32 arduino core sdk to be able to compile and upload code to esp32 boards
-// paste this link under additional boards under Prefrences: https://espressif.github.io/arduino-esp32/package_esp32_index.json
-// use latest 2.0.17 version
 // Use my modified sdks for esp32 s2/s3 to have modified USB Descriptor value from 256 to 4096
 // to support all USB MIDI devices! (replace the esp32s2 or s3 sdk folders in
 // Arduino15\packages\esp32\hardware\esp32\2.0.14\tools\sdk
@@ -663,7 +661,7 @@ void setup() {
 
   });
 
-#if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32
+#if BOARD_TYPE == ESP3S3 || BOARD_TYPE == ESP32
   BLEMidiClient.begin("PianoLux-BLE");
   //BLEMidiClient.enableDebugging();
   BLEMidiClient.setNoteOnCallback(BLE_onNoteOn);
@@ -693,6 +691,7 @@ void setup() {
 }
 
 void loop() {
+
   MIDI.read();
 
   // Check MIDI player state changes
@@ -865,6 +864,7 @@ void controlLeds(uint8_t ledNo, uint8_t hueVal, uint8_t saturationVal, uint8_t b
   // Convert HSB values to RGB values
   CRGB color = CHSV(hueVal, saturationVal, brightnessVal);
   leds[ledNum(ledNo)] = color;  // Set the LED color
+  FastLED.show();               // Update the LEDs with the new color
 }
 
 uint8_t mapMidiNoteToLED(uint8_t midiNote, uint8_t lowestMidiNote, uint8_t highestMidiNote, uint8_t endIndex) {
