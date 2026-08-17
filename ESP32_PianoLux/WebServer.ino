@@ -6,7 +6,6 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
     case WStype_CONNECTED:
       numConnectedClients++;
       if (numConnectedClients == 1 && !inUse) {
-        changeLEDModeAction(0);
         inUse = true;
 
         // Send file list and current playback status to the newly connected client
@@ -125,10 +124,13 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
           if (action == "ChangeLEDModeAction") {
             serverMode = doc["mode"];
             changeLEDModeAction(serverMode);
+            updateConfigFile("LED_MODE", serverMode);
+            updateConfigFile("FADE_RATE", generalFadeRate);  // switching mode resets the fade rate to its default
             WebSerial.println("LED ID: ");
             WebSerial.print(serverMode);
           } else if (action == "ChangeAnimationAction") {
             animationIndex = doc["animation"];
+            updateConfigFile("ANIMATION", animationIndex);
             WebSerial.println("Animation ID: ");
             WebSerial.print(animationIndex);
           } else if (action == "Hue") {
@@ -169,6 +171,9 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
             hue = doc["colorPresetHue"];
             saturation = doc["colorPresetSaturation"];
             COLOR_PRESET = doc["colorPresetID"];
+            updateConfigFile("HUE", hue);
+            updateConfigFile("SATURATION", saturation);
+            updateConfigFile("COLOR_PRESET", COLOR_PRESET);
           }
           else if (action == "ChangeWifiModeAction") {
             WIFI_MODE = doc["wifiMode"];

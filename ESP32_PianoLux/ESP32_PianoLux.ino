@@ -42,9 +42,9 @@
 String firmwareVersion = "v1.12";
 
 // Define board types with unique values
-#define ESP32    1
-#define ESP32S2  2
-#define ESP32S3  3
+#define ESP32 1
+#define ESP32S2 2
+#define ESP32S3 3
 
 // Define the actual board type (change this based on your board)
 #define BOARD_TYPE ESP32S3 // select your board: ESP32, ESP32S2, or ESP32S3
@@ -65,7 +65,6 @@ String firmwareVersion = "v1.12";
 // Define flags to choose libraries
 #define USE_ARDUINO_OTA 0 // Set to 1 to use ArduinoOTA, 0 to not use
 #define USE_ELEGANT_OTA 1 // Set to 1 to use ElegantOTA, 0 to not use
-
 
 // WIFI Libs
 #include <WiFiManager.h>
@@ -91,24 +90,23 @@ String firmwareVersion = "v1.12";
 
 #include <WebSerial.h>
 
-//FastLED Library
+// FastLED Library
 #include <FastLED.h>
 #include "FadingRunEffect.h"
 #include "FadeController.h"
 
-
-//RMT LED STRIP INIT
+// RMT LED STRIP INIT
 #include "w2812-rmt.hpp"
 
 #include "ESP32MidiPlayer.h"
-
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
 
 #if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
 // Define a structure for MIDI messages
-typedef struct {
+typedef struct
+{
   uint8_t status; // e.g., 0x90 for Note On, 0x80 for Note Off
   uint8_t channel;
   uint8_t data1; // Note number or Controller number
@@ -125,7 +123,7 @@ bool isMIDIReady = false;
 const size_t MIDI_IN_BUFFERS = 8;
 const size_t MIDI_OUT_BUFFERS = 8;
 usb_transfer_t *MIDIOut = NULL;
-usb_transfer_t *MIDIIn[MIDI_IN_BUFFERS] = { NULL };
+usb_transfer_t *MIDIIn[MIDI_IN_BUFFERS] = {NULL};
 
 // Flag to track if the USB OUT transfer is busy
 static volatile bool midiOutBusy = false; // Volatile: accessed by callback and main tasks
@@ -140,40 +138,39 @@ APPLEMIDI_CREATE_DEFAULTSESSION_INSTANCE(); // Creates global MIDI object
 ESP32MidiPlayer midiPlayer(LittleFS); // Use LittleFS
 
 String currentLoadedFile = ""; // Declare currentLoadedFile globally
-uint8_t isConnected = 0; // Declare isConnected globally
-
+uint8_t isConnected = 0;       // Declare isConnected globally
 
 // Constants for LED strip
 #define UPDATES_PER_SECOND 60
-#define MAX_NUM_LEDS 176    // How many LEDs do you want to control
+#define MAX_NUM_LEDS 176 // How many LEDs do you want to control
 #define MAX_EFFECTS 128
 
+ESP32RMT_WS2812B<GRB> *wsstripGRB;
+ESP32RMT_WS2812B<RGB> *wsstripRGB;
+ESP32RMT_WS2812B<BRG> *wsstripBRG;
 
-ESP32RMT_WS2812B<GRB>* wsstripGRB;
-ESP32RMT_WS2812B<RGB>* wsstripRGB;
-ESP32RMT_WS2812B<BRG>* wsstripBRG;
-
-FadingRunEffect* effects[MAX_EFFECTS];
-FadeController* fadeCtrl = new FadeController();
-
+FadingRunEffect *effects[MAX_EFFECTS];
+FadeController *fadeCtrl = new FadeController();
 
 uint8_t DEFAULT_BRIGHTNESS = 255;
-uint8_t NUM_LEDS = 176;       // How many LEDs you want to control
-uint8_t STRIP_DIRECTION = 0;  // 0 - left-to-right
+uint8_t NUM_LEDS = 176;      // How many LEDs you want to control
+uint8_t STRIP_DIRECTION = 0; // 0 - left-to-right
 
 uint8_t generalFadeRate = 255;
 uint8_t numEffects = 0;
 
-uint8_t lowestNote = 21;    // MIDI note A0
-uint8_t highestNote = 108;  // MIDI note C8 (adjust as needed)
+uint8_t lowestNote = 21;   // MIDI note A0
+uint8_t highestNote = 108; // MIDI note C8 (adjust as needed)
 uint8_t useFix;
 uint8_t pianoScaleRatio;
 
-uint8_t  getHueForPos(uint8_t pos) {
+uint8_t getHueForPos(uint8_t pos)
+{
   return pos * 255 / NUM_LEDS;
 }
 
-uint8_t ledNum(uint8_t i) {
+uint8_t ledNum(uint8_t i)
+{
   return STRIP_DIRECTION == 0 ? i : (NUM_LEDS - 1) - i;
 }
 
@@ -184,7 +181,8 @@ CRGB guideColor = CRGB::Black;
 boolean bgOn = false;
 boolean keysOn[MAX_NUM_LEDS];
 
-boolean isOnStrip(uint8_t pos) {
+boolean isOnStrip(uint8_t pos)
+{
   return pos >= 0 && pos < NUM_LEDS;
 }
 
@@ -197,15 +195,14 @@ uint8_t bgBrightness = 128;
 
 uint8_t currentHue[MAX_NUM_LEDS] = {0}; // Array to store current hue value for each LED
 
-
 // Define split positions (percentage)
-uint8_t splitPosition = 50;  // Example: 50 means the split is in the middle
+uint8_t splitPosition = 50; // Example: 50 means the split is in the middle
 uint8_t splitLeftMinPitch = 21;
 uint8_t splitRightMaxPitch = 108;
 
 // Define split colors
-CHSV splitLeftColor = CHSV(0, 255, 255);     // Red color
-CHSV splitRightColor = CHSV(160, 255, 255);  // Blue color
+CHSV splitLeftColor = CHSV(0, 255, 255);    // Red color
+CHSV splitRightColor = CHSV(160, 255, 255); // Blue color
 
 uint8_t bgToggle;
 uint8_t fixToggle;
@@ -225,8 +222,8 @@ unsigned long currentTime = 0;
 unsigned long previousTime = 0;
 unsigned long previousFadeTime = 0;
 
-unsigned long interval = 20;      // General refresh interval in milliseconds
-unsigned long fadeInterval = 20;  // General fade interval in milliseconds
+unsigned long interval = 20;     // General refresh interval in milliseconds
+unsigned long fadeInterval = 20; // General fade interval in milliseconds
 
 const uint8_t MAX_VELOCITY = 127;
 
@@ -244,10 +241,10 @@ const uint8_t COMMAND_STRIP_DIRECTION = 245;
 const uint8_t COMMAND_SET_GUIDE = 244;
 const uint8_t COMMAND_SET_LED_VISUALIZER = 243;
 
-
 uint8_t MODE = COMMAND_SET_COLOR;
 
 uint8_t serverMode;
+uint8_t persistedFadeRate = 255; // fade rate loaded from config, applied after boot visuals
 
 uint8_t animationIndex;
 uint8_t numConnectedClients = 0;
@@ -260,34 +257,41 @@ TBlendType currentBlending;
 extern CRGBPalette16 myRedWhiteBluePalette;
 extern const TProgmemPalette16 myRedWhiteBluePalette_p PROGMEM;
 
-float distance(CRGB color1, CRGB color2) {
+float distance(CRGB color1, CRGB color2)
+{
   return sqrt(pow(color1.r - color2.r, 2) + pow(color1.g - color2.g, 2) + pow(color1.b - color2.b, 2));
 }
 
 #if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
 // Function definitions (outside midiTask())
-void handleMidiPlayerNoteOn(uint8_t channel, uint8_t note, uint8_t velocity) {
+void handleMidiPlayerNoteOn(uint8_t channel, uint8_t note, uint8_t velocity)
+{
   noteOn(note, velocity);
   sendUSBMIDINoteOn(channel, note, velocity);
 }
 
-void handleMidiPlayerNoteOff(uint8_t channel, uint8_t note, uint8_t velocity) {
+void handleMidiPlayerNoteOff(uint8_t channel, uint8_t note, uint8_t velocity)
+{
   noteOff(note);
   sendUSBMIDINoteOff(channel, note, velocity);
 }
 
-void handleMidiPlayerControlChange(uint8_t channel, uint8_t controller, uint8_t value) {
+void handleMidiPlayerControlChange(uint8_t channel, uint8_t controller, uint8_t value)
+{
   sendUSBMIDIControlChange(channel, controller, value);
 }
 #endif
 
-void handlePlaybackComplete() {
+void handlePlaybackComplete()
+{
   notifyClients("{\"status\":\"info\", \"message\":\"MIDI playback finished: " + currentLoadedFile + "\"}"); // Now accessible
 }
 
-void loadConfig() {
+void loadConfig()
+{
   File configFile = LittleFS.open("/config.cfg", "r");
-  if (configFile) {
+  if (configFile)
+  {
     size_t size = configFile.size();
     std::unique_ptr<char[]> buf(new char[size]);
     configFile.readBytes(buf.get(), size);
@@ -295,7 +299,8 @@ void loadConfig() {
     JsonDocument doc;
     DeserializationError error = deserializeJson(doc, buf.get());
 
-    if (error) {
+    if (error)
+    {
       WebSerial.println("Failed to parse config file");
       return;
     }
@@ -306,20 +311,35 @@ void loadConfig() {
     LED_CURRENT = doc["LED_CURRENT"] | LED_CURRENT;
     WIFI_MODE = doc["WIFI_MODE"] | WIFI_MODE;
     CLIENT_LOGGER = doc["CLIENT_LOGGER"] | CLIENT_LOGGER;
+
+    // LED mode and color settings (kept volatile until applyPersistedLedSettings)
+    serverMode = doc["LED_MODE"] | serverMode;
+    animationIndex = doc["ANIMATION"] | animationIndex;
+    hue = doc["HUE"] | hue;
+    saturation = doc["SATURATION"] | saturation;
+    DEFAULT_BRIGHTNESS = doc["BRIGHTNESS"] | DEFAULT_BRIGHTNESS;
+    persistedFadeRate = doc["FADE_RATE"] | generalFadeRate;
+    splashMaxLength = doc["SPLASH_LENGTH"] | splashMaxLength;
+    bgBrightness = doc["BG_BRIGHTNESS"] | bgBrightness;
+    COLOR_PRESET = doc["COLOR_PRESET"] | COLOR_PRESET;
     // Add more variables as needed
 
     configFile.close();
-  } else {
+  }
+  else
+  {
     WebSerial.println("Failed to open config file for reading");
   }
 }
 
-void updateConfigFile(const char* configKey, uint16_t newValue) {
+void updateConfigFile(const char *configKey, uint16_t newValue)
+{
   JsonDocument doc;
 
   // Read the existing config file
   File configFile = LittleFS.open("/config.cfg", "r");
-  if (configFile) {
+  if (configFile)
+  {
     size_t size = configFile.size();
     std::unique_ptr<char[]> buf(new char[size]);
     configFile.readBytes(buf.get(), size);
@@ -328,7 +348,8 @@ void updateConfigFile(const char* configKey, uint16_t newValue) {
     // Deserialize the JSON document
     DeserializationError error = deserializeJson(doc, buf.get());
 
-    if (error) {
+    if (error)
+    {
       WebSerial.println("Failed to parse config file");
       return;
     }
@@ -338,52 +359,93 @@ void updateConfigFile(const char* configKey, uint16_t newValue) {
 
     // Save the updated config file
     File updatedConfigFile = LittleFS.open("/config.cfg", "w");
-    if (updatedConfigFile) {
-      if (serializeJson(doc, updatedConfigFile) == 0) {
+    if (updatedConfigFile)
+    {
+      if (serializeJson(doc, updatedConfigFile) == 0)
+      {
         WebSerial.println("Failed to write updated config file");
       }
       updatedConfigFile.close();
       WebSerial.println("Config file updated successfully");
-    } else {
+    }
+    else
+    {
       WebSerial.println("Failed to open config file for writing");
     }
-  } else {
+  }
+  else
+  {
     WebSerial.println("Failed to open config file for reading");
   }
 }
 
-void initializeLEDStrip(uint8_t colorMode) {
-  switch (colorMode) {
-    case 0:
-      wsstripGRB = new ESP32RMT_WS2812B<GRB>(LED_PIN);
-      FastLED.addLeds(wsstripGRB, leds, NUM_LEDS);
-      break;
-    case 1:
-      wsstripRGB = new ESP32RMT_WS2812B<RGB>(LED_PIN);
-      FastLED.addLeds(wsstripRGB, leds, NUM_LEDS);
-      break;
-    case 2:
-      wsstripBRG = new ESP32RMT_WS2812B<BRG>(LED_PIN);
-      FastLED.addLeds(wsstripBRG, leds, NUM_LEDS);
-      break;
-    // Add more cases if needed
-    default:
-      // Handle default case if colorMode is not 0, 1, or 2
-      break;
+void applyPersistedLedSettings()
+{
+  generalFadeRate = persistedFadeRate;
+
+  // Map the saved LED mode to its runtime MODE (same mapping as
+  // changeLEDModeAction, without the strip blackout and fade reset)
+  switch (serverMode)
+  {
+  case 1:
+    MODE = COMMAND_SPLASH;
+    break;
+  case 3:
+    MODE = COMMAND_VELOCITY;
+    break;
+  case 4:
+    MODE = COMMAND_ANIMATION;
+    break;
+  default:
+    MODE = COMMAND_SET_COLOR;
+    break;
   }
-  FastLED.setMaxPowerInVoltsAndMilliamps(5, LED_CURRENT);  // set power limit
+}
+
+void initializeLEDStrip(uint8_t colorMode)
+{
+  switch (colorMode)
+  {
+  case 0:
+    wsstripGRB = new ESP32RMT_WS2812B<GRB>(LED_PIN);
+    FastLED.addLeds(wsstripGRB, leds, NUM_LEDS);
+    break;
+  case 1:
+    wsstripRGB = new ESP32RMT_WS2812B<RGB>(LED_PIN);
+    FastLED.addLeds(wsstripRGB, leds, NUM_LEDS);
+    break;
+  case 2:
+    wsstripBRG = new ESP32RMT_WS2812B<BRG>(LED_PIN);
+    FastLED.addLeds(wsstripBRG, leds, NUM_LEDS);
+    break;
+  // Add more cases if needed
+  default:
+    // Handle default case if colorMode is not 0, 1, or 2
+    break;
+  }
+  FastLED.setMaxPowerInVoltsAndMilliamps(5, LED_CURRENT); // set power limit
   FastLED.setBrightness(DEFAULT_BRIGHTNESS);
 }
 
 // Function to send the current status to clients (implement this)
-void sendPlaybackStatus(uint8_t num = 255) { // 255 means broadcast
+void sendPlaybackStatus(uint8_t num = 255)
+{ // 255 means broadcast
   PlaybackState state = midiPlayer.getState();
   String statusStr;
-  switch (state) {
-    case PlaybackState::STOPPED:  statusStr = "stopped"; break;
-    case PlaybackState::PLAYING:  statusStr = "playing"; break;
-    case PlaybackState::PAUSED:   statusStr = "paused";  break;
-    default: statusStr = "unknown"; break;
+  switch (state)
+  {
+  case PlaybackState::STOPPED:
+    statusStr = "stopped";
+    break;
+  case PlaybackState::PLAYING:
+    statusStr = "playing";
+    break;
+  case PlaybackState::PAUSED:
+    statusStr = "paused";
+    break;
+  default:
+    statusStr = "unknown";
+    break;
   }
 
   // Create JSON payload
@@ -391,24 +453,32 @@ void sendPlaybackStatus(uint8_t num = 255) { // 255 means broadcast
   doc["status"] = "playbackState"; // Use "status" as the identifier field
   doc["state"] = statusStr;
   // Only include filename if relevant (playing, paused, or just finished)
-  if (state == PlaybackState::PLAYING || state == PlaybackState::PAUSED) {
+  if (state == PlaybackState::PLAYING || state == PlaybackState::PAUSED)
+  {
     doc["filename"] = currentLoadedFile; // Use the renamed variable
-  } else {
+  }
+  else
+  {
     doc["filename"] = ""; // Or null? Empty string is fine.
   }
 
   String jsonOutput;
   serializeJson(doc, jsonOutput);
 
-  if (num == 255) {
+  if (num == 255)
+  {
     webSocket.broadcastTXT(jsonOutput); // Send to all clients
-  } else {
+  }
+  else
+  {
     webSocket.sendTXT(num, jsonOutput); // Send to specific client
   }
 }
 
-void StartupAnimation() {
-  for (uint8_t i = 0; i < NUM_LEDS; i++) {
+void StartupAnimation()
+{
+  for (uint8_t i = 0; i < NUM_LEDS; i++)
+  {
     leds[i] = CHSV(getHueForPos(i), 255, 255);
     FastLED.show();
     leds[i] = CHSV(0, 0, 0);
@@ -416,37 +486,42 @@ void StartupAnimation() {
   FastLED.show();
 }
 
-bool startPortal = true;  // Start WiFi Manager Captive Portal
+bool startPortal = true; // Start WiFi Manager Captive Portal
 
-const uint8_t wmJumperPin = 15;  // Jumper pin for WiFi Manager Captive Portal
-const uint8_t apJumperPin = 16;      // Jumper pin for AP mode
+const uint8_t wmJumperPin = 15; // Jumper pin for WiFi Manager Captive Portal
+const uint8_t apJumperPin = 16; // Jumper pin for AP mode
 
-void startWmPortal(WiFiManager& wifiManager) {
-  if (!wifiManager.startConfigPortal("PianoLux Portal")) {
+void startWmPortal(WiFiManager &wifiManager)
+{
+  if (!wifiManager.startConfigPortal("PianoLux Portal"))
+  {
     ESP.restart();
   }
 }
 
-void startAP() {
+void startAP()
+{
   // Start ESP32 in AP mode
   WiFi.softAP("PianoLux AP");
 }
 
-void startSTA(WiFiManager& wifiManager) {
+void startSTA(WiFiManager &wifiManager)
+{
 
   startPortal = false;
 
   // Start WiFi Manager for configuring STA mode
 
-  //Try to connect within 5 seconds
+  // Try to connect within 5 seconds
   wifiManager.setConnectTimeout(5);
   // Set callback to be invoked when configuration is updated
-  wifiManager.setSaveConfigCallback([]() {
+  wifiManager.setSaveConfigCallback([]()
+                                    {
     WebSerial.println("Configurations updated");
-    ESP.restart();
-  });
+    ESP.restart(); });
 
-  if (!wifiManager.autoConnect("PianoLux Portal")) {
+  if (!wifiManager.autoConnect("PianoLux Portal"))
+  {
     wifiManager.resetSettings();
     ESP.restart();
   }
@@ -458,7 +533,8 @@ void setupArduinoOTA()
   ArduinoOTA.setHostname("PianoLux-ESP32-OTA");
 
   ArduinoOTA
-  .onStart([]() {
+      .onStart([]()
+               {
     String type;
     if (ArduinoOTA.getCommand() == U_FLASH)
       type = "sketch";
@@ -466,102 +542,105 @@ void setupArduinoOTA()
       type = "filesystem";
 
     // NOTE: if updating LittleFS this would be the place to unmount LittleFS using LittleFS.end()
-    WebSerial.println("Start updating " + type);
-  })
-  .onEnd([]() {
-    WebSerial.println("\nEnd");
-  })
-  .onProgress([](unsigned int progress, unsigned int total) {
-    WebSerial.printf("Progress: %u%%\r", (progress / (total / 100)));
-  })
-  .onError([](ota_error_t error) {
+    WebSerial.println("Start updating " + type); })
+      .onEnd([]()
+             { WebSerial.println("\nEnd"); })
+      .onProgress([](unsigned int progress, unsigned int total)
+                  { WebSerial.printf("Progress: %u%%\r", (progress / (total / 100))); })
+      .onError([](ota_error_t error)
+               {
     WebSerial.printf("Error[%u]: ", error);
     if (error == OTA_AUTH_ERROR) WebSerial.println("Auth Failed");
     else if (error == OTA_BEGIN_ERROR) WebSerial.println("Begin Failed");
     else if (error == OTA_CONNECT_ERROR) WebSerial.println("Connect Failed");
     else if (error == OTA_RECEIVE_ERROR) WebSerial.println("Receive Failed");
-    else if (error == OTA_END_ERROR) WebSerial.println("End Failed");
-  });
+    else if (error == OTA_END_ERROR) WebSerial.println("End Failed"); });
 
   ArduinoOTA.begin();
 }
 #endif
 
-
-void handleLog(MidiLogLevel level, const char* message) {
-  const char* levelStr = "";
-  switch (level) {
-    case MidiLogLevel::ERROR:
-      levelStr = "[ERR] "; // Errors that might halt playback or indicate corruption
-      break;
-    case MidiLogLevel::WARN:
-      levelStr = "[WRN] "; // Warnings about unexpected data or potential issues
-      break;
-    case MidiLogLevel::INFO:
-      levelStr = "[INF] "; // General information (playback start/stop, file loaded)
-      break;
-    case MidiLogLevel::DEBUG:
-      levelStr = "[DBG] "; // Detailed debugging steps (event parsing, byte reads)
-      break;
-    case MidiLogLevel::VERBOSE:
-      levelStr = "[VER] "; // Extremely detailed info (often too noisy)
-      break;
-    // case MidiLogLevel::NONE: // No need to handle NONE, the library checks this
-    default:
-      levelStr = "[???] "; // Unknown level? Should not happen.
-      break;
+void handleLog(MidiLogLevel level, const char *message)
+{
+  const char *levelStr = "";
+  switch (level)
+  {
+  case MidiLogLevel::ERROR:
+    levelStr = "[ERR] "; // Errors that might halt playback or indicate corruption
+    break;
+  case MidiLogLevel::WARN:
+    levelStr = "[WRN] "; // Warnings about unexpected data or potential issues
+    break;
+  case MidiLogLevel::INFO:
+    levelStr = "[INF] "; // General information (playback start/stop, file loaded)
+    break;
+  case MidiLogLevel::DEBUG:
+    levelStr = "[DBG] "; // Detailed debugging steps (event parsing, byte reads)
+    break;
+  case MidiLogLevel::VERBOSE:
+    levelStr = "[VER] "; // Extremely detailed info (often too noisy)
+    break;
+  // case MidiLogLevel::NONE: // No need to handle NONE, the library checks this
+  default:
+    levelStr = "[???] "; // Unknown level? Should not happen.
+    break;
   }
   // Print the prefix and the message, followed by a newline
   WebSerial.printf("%s%s\n", levelStr, message);
 }
 
-void setup() {
+void setup()
+{
 
   pinMode(wmJumperPin, INPUT_PULLUP);
   pinMode(apJumperPin, INPUT_PULLUP);
 
   WiFiManager wifiManager;
 
-  if (!LittleFS.begin()) {
+  if (!LittleFS.begin())
+  {
     return;
   }
 
   loadConfig();
 
-  if (digitalRead(wmJumperPin) == LOW || WIFI_MODE == 1) {
+  if (digitalRead(wmJumperPin) == LOW || WIFI_MODE == 1)
+  {
     if (WIFI_MODE == 1)
     {
       WIFI_MODE = 0;
       updateConfigFile("WIFI_MODE", WIFI_MODE);
     }
     startWmPortal(wifiManager);
-  } else if (digitalRead(apJumperPin) == LOW || WIFI_MODE == 2) {
+  }
+  else if (digitalRead(apJumperPin) == LOW || WIFI_MODE == 2)
+  {
     startAP();
-  } else {
+  }
+  else
+  {
     startSTA(wifiManager);
   }
-
 
   WebSerial.begin(&server);
   WebSerial.println("Booting...");
 
-
   WebSerial.println("IP address: ");
   WebSerial.println(WiFi.localIP());
 
-
   // Initialize and start mDNS
-  if (MDNS.begin("pianolux")) {
+  if (MDNS.begin("pianolux"))
+  {
     WebSerial.println("MDNS Responder Started!");
   }
 
   server.on("/api/storage", HTTP_GET, handleStorageInfo);
   server.on("/api/files", HTTP_GET, handleFileList);
-  server.on("/api/upload", HTTP_POST, [](AsyncWebServerRequest * request) {
-    request->send(200, "text/plain", "Upload Received");
-  }, handleUpload);
+  server.on("/api/upload", HTTP_POST, [](AsyncWebServerRequest *request)
+            { request->send(200, "text/plain", "Upload Received"); }, handleUpload);
 
-  server.onNotFound([](AsyncWebServerRequest * request) {
+  server.onNotFound([](AsyncWebServerRequest *request)
+                    {
     if (!handleFileRead(request)) {
       if (request->url() == "/" && LittleFS.exists("/index.html")) {
         request->send(LittleFS, "/index.html", "text/html");
@@ -569,8 +648,7 @@ void setup() {
         WebSerial.printf("Not Found: %s\n", request->url().c_str());
         request->send(404, "text/plain", "Not Found");
       }
-    }
-  });
+    } });
 
 #if USE_ARDUINO_OTA
   setupArduinoOTA();
@@ -592,14 +670,17 @@ void setup() {
   webSocket.onEvent(webSocketEvent);
 
   StartupAnimation();
-  if (!startPortal) {
+  if (!startPortal)
+  {
     setIPLeds();
   }
+  applyPersistedLedSettings(); // after setIPLeds, which overrides the fade rate
 
 #if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
   // Create the MIDI Out Queue
   midiOutQueue = xQueueCreate(MIDI_OUT_QUEUE_SIZE, sizeof(MidiMessage));
-  if (midiOutQueue == NULL) {
+  if (midiOutQueue == NULL)
+  {
     ESP_LOGE("", "Failed to create MIDI Out Queue!");
     // Handle error appropriately, maybe halt?
   }
@@ -607,21 +688,22 @@ void setup() {
 
   MIDI.begin();
 
-  AppleMIDI.setHandleConnected([](const APPLEMIDI_NAMESPACE::ssrc_t& ssrc, const char* name) {
+  AppleMIDI.setHandleConnected([](const APPLEMIDI_NAMESPACE::ssrc_t &ssrc, const char *name)
+                               {
     isConnected++;
     WebSerial.print("Connected to session ");
     WebSerial.print(ssrc);
     WebSerial.print(" Name ");
-    WebSerial.println(name);
-  });
+    WebSerial.println(name); });
 
-  AppleMIDI.setHandleDisconnected([](const APPLEMIDI_NAMESPACE::ssrc_t& ssrc) {
+  AppleMIDI.setHandleDisconnected([](const APPLEMIDI_NAMESPACE::ssrc_t &ssrc)
+                                  {
     isConnected--;
     WebSerial.print("Disconnected ");
-    WebSerial.println(ssrc);
-  });
+    WebSerial.println(ssrc); });
 
-  MIDI.setHandleNoteOn([](byte channel, byte note, byte velocity) {
+  MIDI.setHandleNoteOn([](byte channel, byte note, byte velocity)
+                       {
     if (isConnected) {
       noteOn(note, velocity);
 #if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
@@ -631,9 +713,9 @@ void setup() {
       {
         sendESP32Log("RTP MIDI IN: NOTE ON: Channel: " + String(channel) + " Pitch: " + String(note) + " Velocity: " + String(velocity));
       }
-    }
-  });
-  MIDI.setHandleNoteOff([](byte channel, byte note, byte velocity) {
+    } });
+  MIDI.setHandleNoteOff([](byte channel, byte note, byte velocity)
+                        {
     if (isConnected) {
       noteOff(note);
 #if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
@@ -641,25 +723,24 @@ void setup() {
 #endif
       if (numConnectedClients != 0 && CLIENT_LOGGER)
         sendESP32Log("RTP MIDI IN: NOTE OFF: Channel: " + String(channel) + " Pitch: " + String(note) + " Velocity: " + String(velocity));
-    }
-  });
+    } });
 
-  MIDI.setHandleControlChange([](byte channel, byte controller, byte value) {
-    if (isConnected) {
+  MIDI.setHandleControlChange([](byte channel, byte controller, byte value)
+                              {
+                                if (isConnected)
+                                {
 #if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
-      sendUSBMIDIControlChange(channel, controller, value);
+                                  sendUSBMIDIControlChange(channel, controller, value);
 #endif
-      if (numConnectedClients != 0 && CLIENT_LOGGER)
-      {
-        sendESP32Log("RTP MIDI IN: CC "  + String(channel) + "" + String(controller) + " Value: " + String(value));
-      }
-    }
-
-  });
+                                  if (numConnectedClients != 0 && CLIENT_LOGGER)
+                                  {
+                                    sendESP32Log("RTP MIDI IN: CC " + String(channel) + "" + String(controller) + " Value: " + String(value));
+                                  }
+                                } });
 
 #if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32
   BLEMidiClient.begin("PianoLux-BLE");
-  //BLEMidiClient.enableDebugging();
+  // BLEMidiClient.enableDebugging();
   BLEMidiClient.setNoteOnCallback(BLE_onNoteOn);
   BLEMidiClient.setNoteOffCallback(BLE_onNoteOff);
   BLEMidiClient.setControlChangeCallback(BLE_onControlChange);
@@ -667,14 +748,13 @@ void setup() {
 
   // USB setup
 #if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
-  usbh_setup(show_config_desc_full);  // Init USB host for MIDI devices
+  usbh_setup(show_config_desc_full); // Init USB host for MIDI devices
 
   midiOutBusy = false;
 #endif
 
-  //midiPlayer.setLogCallback(handleLog);
-  //midiPlayer.setLogLevel(MidiLogLevel::DEBUG);
-
+  // midiPlayer.setLogCallback(handleLog);
+  // midiPlayer.setLogLevel(MidiLogLevel::DEBUG);
 
   // MIDI Playback Callbacks
 #if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
@@ -683,17 +763,18 @@ void setup() {
   midiPlayer.setControlChangeCallback(handleMidiPlayerControlChange);
   midiPlayer.setPlaybackCompleteCallback(handlePlaybackComplete);
 #endif
-
 }
 
-void loop() {
+void loop()
+{
 
   MIDI.read();
 
   // Check MIDI player state changes
   static PlaybackState lastState = midiPlayer.getState();
   PlaybackState currentState = midiPlayer.getState();
-  if (currentState != lastState) {
+  if (currentState != lastState)
+  {
     sendPlaybackStatus();
 
     // reset leds
@@ -701,7 +782,6 @@ void loop() {
 
     lastState = currentState;
   }
-
 
   // USB MIDI OUT
 #if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
@@ -713,9 +793,7 @@ void loop() {
   usbh_task();
 #endif
 
-
   midiPlayer.tick();
-
 
 #if USE_ARDUINO_OTA
   ArduinoOTA.handle();
@@ -725,12 +803,15 @@ void loop() {
   ElegantOTA.loop();
 #endif
 
-  webSocket.loop();  // Update function for the webSockets
+  webSocket.loop(); // Update function for the webSockets
 
-  if (serverMode == 2) {
+  if (serverMode == 2)
+  {
     // Update hue for LEDs that are currently on
-    for (uint8_t i = 0; i < NUM_LEDS; i++) {
-      if (keysOn[i]) {
+    for (uint8_t i = 0; i < NUM_LEDS; i++)
+    {
+      if (keysOn[i])
+      {
         currentHue[i] = (currentHue[i] + HUE_CHANGE_SPEED) % 256;
         controlLeds(i, currentHue[i], saturation, brightness);
       }
@@ -739,43 +820,58 @@ void loop() {
 
   currentTime = millis();
 
-  //slowing it down with interval
-  if (currentTime - previousTime >= interval) {
-    for (uint8_t i = 0; i < numEffects; i++) {
-      if (effects[i]->finished()) {
+  // slowing it down with interval
+  if (currentTime - previousTime >= interval)
+  {
+    for (uint8_t i = 0; i < numEffects; i++)
+    {
+      if (effects[i]->finished())
+      {
         delete effects[i];
         removeEffect(effects[i]);
-      } else {
+      }
+      else
+      {
         effects[i]->nextStep();
       }
     }
     previousTime = currentTime;
   }
-  if (currentTime - previousFadeTime >= fadeInterval) {
-    if (numEffects > 0 || generalFadeRate > 0) {
+  if (currentTime - previousFadeTime >= fadeInterval)
+  {
+    if (numEffects > 0 || generalFadeRate > 0)
+    {
       fadeCtrl->fade(generalFadeRate);
     }
     previousFadeTime = currentTime;
   }
-  switch (MODE) {
-    case COMMAND_ANIMATION:
-      if (animationIndex == 7) {
-        // If the selected animation is 7, run the sineWave() animation
-        sineWave();
-      } else if (animationIndex == 8) {
-        // If the selected animation is 7, run the sineWave() animation
-        sparkleDots();
-      } else if (animationIndex == 9) {
-        // If the selected animation is 7, run the sineWave() animation
-        Snake();
-      } else {
-        // For other animations (0 to 6), use the palette-based approach
-        Animatons(animationIndex);
-        static uint8_t startIndex = 0;
-        startIndex = startIndex + 1; /* motion speed */
-        FillLEDsFromPaletteColors(startIndex);
-      }
-      break;
+  switch (MODE)
+  {
+  case COMMAND_ANIMATION:
+    if (animationIndex == 7)
+    {
+      // If the selected animation is 7, run the sineWave() animation
+      sineWave();
+    }
+    else if (animationIndex == 8)
+    {
+      // If the selected animation is 7, run the sineWave() animation
+      sparkleDots();
+    }
+    else if (animationIndex == 9)
+    {
+      // If the selected animation is 7, run the sineWave() animation
+      Snake();
+    }
+    else
+    {
+      // For other animations (0 to 6), use the palette-based approach
+      Animatons(animationIndex);
+      static uint8_t startIndex = 0;
+      startIndex = startIndex + 1; /* motion speed */
+      FillLEDsFromPaletteColors(startIndex);
+    }
+    break;
   }
   FastLED.show();
 }
@@ -783,32 +879,50 @@ void loop() {
 #if BOARD_TYPE == ESP32S3 || BOARD_TYPE == ESP32S2
 void handleUSBMidiOut()
 {
-  if (isMIDIReady && !midiOutBusy && midiOutQueue != NULL && uxQueueMessagesWaiting(midiOutQueue) > 0) {
+  if (isMIDIReady && !midiOutBusy && midiOutQueue != NULL && uxQueueMessagesWaiting(midiOutQueue) > 0)
+  {
     MidiMessage msgToSend;
     // Check if a message is available without blocking
-    if (xQueueReceive(midiOutQueue, &msgToSend, 0) == pdPASS) {
+    if (xQueueReceive(midiOutQueue, &msgToSend, 0) == pdPASS)
+    {
 
       // Prepare USB MIDI Packet
       uint8_t cableNumber = 0; // Typically 0
       uint8_t cin = 0;         // Code Index Number
 
-      switch (msgToSend.status & 0xF0) {
-        case 0x80: cin = 0x08; break; // Note Off
-        case 0x90: cin = 0x09; break; // Note On
-        case 0xA0: cin = 0x0A; break; // Poly Key Pressure
-        case 0xB0: cin = 0x0B; break; // Control Change
-        case 0xC0: cin = 0x0C; break; // Program Change
-        case 0xD0: cin = 0x0D; break; // Channel Pressure
-        case 0xE0: cin = 0x0E; break; // Pitch Bend
-        // case 0xF0: // System messages might need special handling (CIN 0xF or others)
-        default:
-          ESP_LOGW("", "Unsupported MIDI status for USB OUT: 0x%02X", msgToSend.status);
-          // Skip this message or handle appropriately
-          goto skip_submit; // Use goto sparingly, or restructure
+      switch (msgToSend.status & 0xF0)
+      {
+      case 0x80:
+        cin = 0x08;
+        break; // Note Off
+      case 0x90:
+        cin = 0x09;
+        break; // Note On
+      case 0xA0:
+        cin = 0x0A;
+        break; // Poly Key Pressure
+      case 0xB0:
+        cin = 0x0B;
+        break; // Control Change
+      case 0xC0:
+        cin = 0x0C;
+        break; // Program Change
+      case 0xD0:
+        cin = 0x0D;
+        break; // Channel Pressure
+      case 0xE0:
+        cin = 0x0E;
+        break; // Pitch Bend
+      // case 0xF0: // System messages might need special handling (CIN 0xF or others)
+      default:
+        ESP_LOGW("", "Unsupported MIDI status for USB OUT: 0x%02X", msgToSend.status);
+        // Skip this message or handle appropriately
+        goto skip_submit; // Use goto sparingly, or restructure
       }
 
       // Check if MIDIOut is valid (should be if isMIDIReady is true, but double-check)
-      if (!MIDIOut) {
+      if (!MIDIOut)
+      {
         ESP_LOGE("", "MIDIOut is NULL despite isMIDIReady being true!");
         // Maybe try to re-queue? xQueueSendToFront(midiOutQueue, &msgToSend, 0);
         goto skip_submit;
@@ -827,72 +941,88 @@ void handleUSBMidiOut()
       // Submit the transfer
       esp_err_t err = usb_host_transfer_submit(MIDIOut);
 
-      if (err != ESP_OK) {
+      if (err != ESP_OK)
+      {
         ESP_LOGE("", "MIDI OUT transfer submit failed: %s", esp_err_to_name(err));
         // IMPORTANT: Mark as not busy if submit failed, so we can try again later
         midiOutBusy = false;
         // Optional: Re-queue the message to try again later?
         // xQueueSendToFront(midiOutQueue, &msgToSend, 0); // Put it back at the front
-      } else {
+      }
+      else
+      {
         // **** Log SUCCESSFUL submission here ****
         uint8_t statusNibble = msgToSend.status & 0xF0; // Get the high nibble
 
-        if (statusNibble == 0x90) { // Note On
-          //WebSerial.printf("MIDI Player ON Events during sendusb: Note=%u, Vel=%u\n", msgToSend.data1, msgToSend.data2);
-        } else if (statusNibble == 0x80) { // Note Off
-          //WebSerial.printf("MIDI Player OFF Events during sendusb: Note=%u, Vel=%u\n", msgToSend.data1, msgToSend.data2);
-        } else if (statusNibble == 0xB0) { // Control Change <<<--- ADD THIS
-          //WebSerial.printf("MIDI Player CC Events during sendusb: Ctrl=%u, Val=%u\n", msgToSend.data1, msgToSend.data2);
+        if (statusNibble == 0x90)
+        { // Note On
+          // WebSerial.printf("MIDI Player ON Events during sendusb: Note=%u, Vel=%u\n", msgToSend.data1, msgToSend.data2);
+        }
+        else if (statusNibble == 0x80)
+        { // Note Off
+          // WebSerial.printf("MIDI Player OFF Events during sendusb: Note=%u, Vel=%u\n", msgToSend.data1, msgToSend.data2);
+        }
+        else if (statusNibble == 0xB0)
+        { // Control Change <<<--- ADD THIS
+          // WebSerial.printf("MIDI Player CC Events during sendusb: Ctrl=%u, Val=%u\n", msgToSend.data1, msgToSend.data2);
         }
       }
     } // end if xQueueReceive
   } // end if !midiOutBusy && messages waiting
 skip_submit:; // Label for goto, or restructure to avoid it
-
 }
 #endif
 
-void controlLeds(uint8_t ledNo, uint8_t hueVal, uint8_t saturationVal, uint8_t brightnessVal) {
-  if (ledNo < 0 || ledNo >= NUM_LEDS) {
+void controlLeds(uint8_t ledNo, uint8_t hueVal, uint8_t saturationVal, uint8_t brightnessVal)
+{
+  if (ledNo < 0 || ledNo >= NUM_LEDS)
+  {
     WebSerial.println("Invalid LED index");
     return;
   }
   // Convert HSB values to RGB values
   CRGB color = CHSV(hueVal, saturationVal, brightnessVal);
-  leds[ledNum(ledNo)] = color;  // Set the LED color
-  FastLED.show();               // Update the LEDs with the new color
+  leds[ledNum(ledNo)] = color; // Set the LED color
+  FastLED.show();              // Update the LEDs with the new color
 }
 
-uint8_t mapMidiNoteToLED(uint8_t midiNote, uint8_t lowestMidiNote, uint8_t highestMidiNote, uint8_t endIndex) {
+uint8_t mapMidiNoteToLED(uint8_t midiNote, uint8_t lowestMidiNote, uint8_t highestMidiNote, uint8_t endIndex)
+{
 
   // Calculate the LED index using linear mapping
   uint8_t startIndex = 0;
 
   // Define the threshold notes where the shifts will occur
-  uint8_t shiftThreshold1 = 57;  // MIDI note for A3
-  uint8_t shiftThreshold2 = 93;  // MIDI note for C7
+  uint8_t shiftThreshold1 = 57; // MIDI note for A3
+  uint8_t shiftThreshold2 = 93; // MIDI note for C7
 
   // Calculate the LED index using linear mapping
   uint8_t ledIndex = map(midiNote, lowestMidiNote, highestMidiNote, startIndex, endIndex - 1);
 
   // Check if the useFix is equal to 1
-  if (useFix == 1) {
+  if (useFix == 1)
+  {
     // Check if the MIDI note is beyond the first threshold for shifting
-    if (midiNote >= shiftThreshold1) {
+    if (midiNote >= shiftThreshold1)
+    {
       // Shift all LEDs, including the A3 LED, to the left by 1 LED
       ledIndex -= 1;
     }
 
     // Check if the MIDI note is beyond the second threshold for shifting
-    if (midiNote >= shiftThreshold2) {
+    if (midiNote >= shiftThreshold2)
+    {
       // Shift all LEDs, including the 93 MIDI note LED, to the left by 1 LED
       ledIndex -= 1;
     }
   }
 
-  if (pianoScaleRatio == 1) {
+  if (pianoScaleRatio == 1)
+  {
     return startIndex + (midiNote - lowestNote);
-  } else {
+  }
+  else
+  {
     return ledIndex;
   }
 }
@@ -901,27 +1031,38 @@ unsigned long previousNoteOnTime = 0;
 uint8_t previousRandomHue = 0;
 uint8_t firstNoteHue = 0;
 
-void noteOn(uint8_t note, uint8_t velocity) {
-  uint8_t ledIndex = mapMidiNoteToLED(note, lowestNote, highestNote, NUM_LEDS);  // Map MIDI note to LED index
+void noteOn(uint8_t note, uint8_t velocity)
+{
+  uint8_t ledIndex = mapMidiNoteToLED(note, lowestNote, highestNote, NUM_LEDS); // Map MIDI note to LED index
   keysOn[ledIndex] = true;
 
-  if (serverMode == 0) {
-    controlLeds(ledIndex, hue, saturation, brightness);  // Both use the same index
-  } else if (serverMode == 1) {
+  if (serverMode == 0)
+  {
+    controlLeds(ledIndex, hue, saturation, brightness); // Both use the same index
+  }
+  else if (serverMode == 1)
+  {
     CHSV hsv(hue, saturation, brightness);
     addEffect(new FadingRunEffect(splashMaxLength, ledIndex, hsv, SPLASH_HEAD_FADE_RATE, velocity));
-  } else   if (serverMode == 2) {
+  }
+  else if (serverMode == 2)
+  {
     // Check time difference between the current note-on and the previous one
     unsigned long currentTime = millis();
     unsigned long timeDifference = currentTime - previousNoteOnTime;
 
     // Assign the same hue as the first note within the chord time window
-    if (timeDifference <= 600) {  // Adjust this chord threshold as needed
+    if (timeDifference <= 600)
+    { // Adjust this chord threshold as needed
       currentHue[ledIndex] = firstNoteHue;
-    } else if (timeDifference <= 50) {  // Adjust this second threshold as needed
+    }
+    else if (timeDifference <= 50)
+    { // Adjust this second threshold as needed
       // Use a slightly different hue for notes close to the first note within the chord time window
       currentHue[ledIndex] = firstNoteHue + 10; // Adjust the increment value as needed
-    } else {
+    }
+    else
+    {
       // Generate a new random hue for this note-on event
       uint8_t newRandomHue = random(256);
       currentHue[ledIndex] = newRandomHue;
@@ -931,47 +1072,72 @@ void noteOn(uint8_t note, uint8_t velocity) {
       firstNoteHue = newRandomHue;
     }
     controlLeds(ledIndex, currentHue[ledIndex], saturation, brightness);
-  } else if (serverMode == 3) {
+  }
+  else if (serverMode == 3)
+  {
     uint8_t hue, saturation, brightness;
     setColorFromVelocity(velocity, hue, saturation, brightness);
     controlLeds(ledIndex, hue, saturation, brightness);
   }
-  //Split Mode
-  else if (serverMode == 5) {
+  // Split Mode
+  else if (serverMode == 5)
+  {
     // Split Mode
     uint8_t splitIndex = map(note, splitLeftMinPitch, splitRightMaxPitch, 0, 100);
 
-    if (splitIndex <= splitPosition) {
+    if (splitIndex <= splitPosition)
+    {
       // Use left color
       controlLeds(ledIndex, splitLeftColor.h, splitLeftColor.s, splitLeftColor.v);
-    } else {
+    }
+    else
+    {
       // Use right color
       controlLeds(ledIndex, splitRightColor.h, splitRightColor.s, splitRightColor.v);
     }
   }
-  //WebSerial.println("Note On: " + String(note) + " mapped to LED: " + String(ledIndex));  // Debug print
+  // WebSerial.println("Note On: " + String(note) + " mapped to LED: " + String(ledIndex));  // Debug print
 }
 
-void noteOff(uint8_t note) {
-  uint8_t ledIndex = mapMidiNoteToLED(note, lowestNote, highestNote, NUM_LEDS);  // Map MIDI note to LED index
+void noteOff(uint8_t note)
+{
+  uint8_t ledIndex = mapMidiNoteToLED(note, lowestNote, highestNote, NUM_LEDS); // Map MIDI note to LED index
   keysOn[ledIndex] = false;
-  //WebSerial.println("Note Off: " + String(note) + " mapped to LED: " + String(ledIndex));  // Debug print
+  // WebSerial.println("Note Off: " + String(note) + " mapped to LED: " + String(ledIndex));  // Debug print
 }
 
-void sliderAction(uint8_t sliderNumber, uint8_t value) {
-  if (sliderNumber == 1) {
+void sliderAction(uint8_t sliderNumber, uint8_t value)
+{
+  if (sliderNumber == 1)
+  {
     hue = value;
-  } else if (sliderNumber == 2) {
+    updateConfigFile("HUE", hue);
+  }
+  else if (sliderNumber == 2)
+  {
     DEFAULT_BRIGHTNESS = value;
     FastLED.setBrightness(DEFAULT_BRIGHTNESS);
-  } else if (sliderNumber == 3) {
+    updateConfigFile("BRIGHTNESS", DEFAULT_BRIGHTNESS);
+  }
+  else if (sliderNumber == 3)
+  {
     generalFadeRate = value;
-  } else if (sliderNumber == 4) {
+    updateConfigFile("FADE_RATE", generalFadeRate);
+  }
+  else if (sliderNumber == 4)
+  {
     splashMaxLength = value;
-  } else if (sliderNumber == 5) {
+    updateConfigFile("SPLASH_LENGTH", splashMaxLength);
+  }
+  else if (sliderNumber == 5)
+  {
     bgBrightness = value;
-  } else if (sliderNumber == 6) {
+    updateConfigFile("BG_BRIGHTNESS", bgBrightness);
+  }
+  else if (sliderNumber == 6)
+  {
     saturation = value;
+    updateConfigFile("SATURATION", saturation);
   }
   WebSerial.print("Slider ");
   WebSerial.print(sliderNumber);
@@ -979,38 +1145,44 @@ void sliderAction(uint8_t sliderNumber, uint8_t value) {
   WebSerial.println(value);
 }
 
-//Change LED Mode
-void changeLEDModeAction(uint8_t serverMode) {
+// Change LED Mode
+void changeLEDModeAction(uint8_t serverMode)
+{
   blackout();
   generalFadeRate = 255;
 
-  //Default Mode
-  if (serverMode == 0) {
+  // Default Mode
+  if (serverMode == 0)
+  {
     MODE = COMMAND_SET_COLOR;
   }
-  //Splash Mode
-  else if (serverMode == 1) {
+  // Splash Mode
+  else if (serverMode == 1)
+  {
     generalFadeRate = 50;
     MODE = COMMAND_SPLASH;
-
   }
 
-  //Velocity Mode
-  else if (serverMode == 3) {
+  // Velocity Mode
+  else if (serverMode == 3)
+  {
     MODE = COMMAND_VELOCITY;
   }
-  //Animation Mode
-  else if (serverMode == 4) {
+  // Animation Mode
+  else if (serverMode == 4)
+  {
     MODE = COMMAND_ANIMATION;
     generalFadeRate = 0;
   }
 }
-void blackout() {
+void blackout()
+{
   fill_solid(leds, NUM_LEDS, bgColor);
   MODE = COMMAND_BLACKOUT;
 }
 
-void setColorFromVelocity(uint8_t velocity, uint8_t& hue, uint8_t& saturation, uint8_t& brightness) {
+void setColorFromVelocity(uint8_t velocity, uint8_t &hue, uint8_t &saturation, uint8_t &brightness)
+{
   static uint8_t previousVelocity = 0;
 
   // Calculate the smoothed velocity as a weighted average
@@ -1034,19 +1206,25 @@ void setColorFromVelocity(uint8_t velocity, uint8_t& hue, uint8_t& saturation, u
 }
 
 // Add a new effect
-void addEffect(FadingRunEffect * effect) {
-  if (numEffects < MAX_EFFECTS) {
+void addEffect(FadingRunEffect *effect)
+{
+  if (numEffects < MAX_EFFECTS)
+  {
     effects[numEffects] = effect;
     numEffects++;
   }
 }
 
 // Remove an effect
-void removeEffect(FadingRunEffect * effect) {
-  for (uint8_t i = 0; i < numEffects; i++) {
-    if (effects[i] == effect) {
+void removeEffect(FadingRunEffect *effect)
+{
+  for (uint8_t i = 0; i < numEffects; i++)
+  {
+    if (effects[i] == effect)
+    {
       // Shift the remaining effects down
-      for (uint8_t j = i; j < numEffects - 1; j++) {
+      for (uint8_t j = i; j < numEffects - 1; j++)
+      {
         effects[j] = effects[j + 1];
       }
       numEffects--;
@@ -1055,44 +1233,53 @@ void removeEffect(FadingRunEffect * effect) {
   }
 }
 
-void setBG(CRGB colorToSet) {
+void setBG(CRGB colorToSet)
+{
   fill_solid(leds, NUM_LEDS, colorToSet);
   bgColor = colorToSet;
   FastLED.show();
 }
 
-void setIPLeds() {
+void setIPLeds()
+{
   IPAddress localIP = WiFi.localIP();
   String ipStr = localIP.toString();
 
   // Define colors
-  CRGB redColor = CRGB(255, 0, 0);        // Red
-  CRGB blueColor = CRGB(0, 0, 255);       // Blue
-  CRGB blackColor = CRGB(0, 0, 0);        // Black (off)
-  CRGB whiteColor = CRGB(255, 255, 255);  // White
+  CRGB redColor = CRGB(255, 0, 0);       // Red
+  CRGB blueColor = CRGB(0, 0, 255);      // Blue
+  CRGB blackColor = CRGB(0, 0, 0);       // Black (off)
+  CRGB whiteColor = CRGB(255, 255, 255); // White
 
   // Define LED index and spacing
   uint8_t ledIndex = 0;
   uint8_t spacing = 1;
 
   // Loop through each character in the IP address
-  for (uint8_t i = 0; i < ipStr.length(); i++) {
+  for (uint8_t i = 0; i < ipStr.length(); i++)
+  {
     char c = ipStr.charAt(i);
 
-    if (c == '.') {
+    if (c == '.')
+    {
       // Display a blue LED for the dot
       leds[ledIndex] = blueColor;
       ledIndex++;
-    } else if (c == '0') {
+    }
+    else if (c == '0')
+    {
       // Display white LED for 0
       leds[ledIndex] = whiteColor;
       ledIndex++;
-    } else if (c >= '1' && c <= '9') {
+    }
+    else if (c >= '1' && c <= '9')
+    {
       // Convert character to an integer
       uint8_t number = c - '0';
 
       // Display red LEDs for other numbers
-      for (uint8_t j = 0; j < number; j++) {
+      for (uint8_t j = 0; j < number; j++)
+      {
         leds[ledIndex] = redColor;
         ledIndex++;
       }
