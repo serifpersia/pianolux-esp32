@@ -6,7 +6,6 @@
 
 [![Release](https://img.shields.io/github/release/serifpersia/pianolux-esp32.svg?style=flat-square)](https://github.com/serifpersia/pianolux-esp32/releases)
 [![License](https://img.shields.io/github/license/serifpersia/pianolux-esp32?color=blue&style=flat-square)](https://raw.githubusercontent.com/serifpersia/pianolux-esp32/master/LICENSE)
-[![Discord](https://img.shields.io/discord/1077195120950120458.svg?colorB=blue&label=discord&style=flat-square)](https://discord.gg/MAypyD7k86)
 </div>
 
 ## Demo
@@ -16,12 +15,6 @@
 </div>
 
 **PianoLux ESP32** is a straightforward web-based interface for controlling a WS2812 5V LED Strip with a USB MIDI Piano.Supports USB,Bluetooth & Wifi MIDI source. You can easily configure effects, colors, and parameters through a locally hosted web server on the ESP32 board.
-
-## Join Our Community
-
-Be part of the PianoLux Discord Server Community where you can connect with fellow users, ask questions, and share your experiences:
-
-[![Discord Server](https://discordapp.com/api/guilds/1077195120950120458/widget.png?style=banner2)](https://discord.gg/MAypyD7k86)
 
 ## Supported Boards
 - ESP32-S2 dev board
@@ -65,7 +58,7 @@ Use Auto install page to automatically install PianoLux firmware on your board w
 [![Auto Install](https://img.shields.io/badge/Auto-%20Install-blue?style=flat-square)](https://serifpersia.github.io/pianolux-esp32/)
 
 Manual Installation
-- Install Arduino IDE 1.8.x and esp32 arduino core sdk(join discord server to get gdrive links for custom modified sdk's for esp32 s2/s3 if usb midi device doesn't work out of the box)
+- Install Arduino IDE 1.8.x and esp32 arduino core sdk
 - Install needed libraries and plugins and use barebones or main ino code. You can use install_libs.bat/.sh for installing all libraries and esp32partitiontool needed on windows or linux PC
 - *before uploading select port, select board type in board manager in Arduino IDE, if main ino code is used change partition scheme Huge APP and use ESP32 Partition Tool provided from install libs.bat script or find it on my github page.Use LittleFS for spiffs filesystem before uploading!
 - Use barebones sketch to get to Elegant OTA page to use firmware and filesystem files
